@@ -1,3 +1,8 @@
+import { useState } from 'react';
+import DNAViewer from '../views/DNAViewer';
+import WaterCycleViewer from '../views/WaterCycleViewer';
+import TectonicViewer from '../views/TectonicViewer'; // ✅
+
 const visualisationsData = [
   {
     id: 1,
@@ -13,28 +18,65 @@ const visualisationsData = [
   },
   {
     id: 3,
-    title: 'Écosystèmes et biodiversité',
-    description: 'Explore les interactions entre espèces dans différents écosystèmes.',
-    icon: '🌳',
+    title: 'Collision de plaques tectoniques', // 🔁 Titre mis à jour
+    description: 'Visualise le mouvement des plaques terrestres et leurs collisions.', // 🔁 Description mise à jour
+    icon: '🌍',
+  },
+  {
+    id: 4,
+    title: 'Molécule d\'ADN',
+    description: 'Visualise la structure 3D d\'une molécule d\'ADN.',
+    icon: '🧬',
   },
 ];
 
 const Visualisations = () => {
+  const [activeViewer, setActiveViewer] = useState<string | null>(null);
+
+  const renderViewer = () => {
+    switch (activeViewer) {
+      case 'Molécule d\'ADN':
+        return <DNAViewer />;
+      case 'Cycle de l\'eau':
+        return <WaterCycleViewer />;
+      case 'Collision de plaques tectoniques':
+        return <TectonicViewer />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <section className="py-20 px-6 bg-white text-center max-w-7xl mx-auto">
       <h2 className="text-3xl font-semibold mb-12">Visualisations</h2>
-      <div className="grid gap-8 md:grid-cols-3">
-        {visualisationsData.map(({ id, title, description, icon }) => (
-          <div
-            key={id}
-            className="bg-gray-50 p-6 rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer"
+
+      {!activeViewer && (
+        <div className="grid gap-8 md:grid-cols-3">
+          {visualisationsData.map(({ id, title, description, icon }) => (
+            <div
+              key={id}
+              onClick={() => setActiveViewer(title)}
+              className="bg-gray-50 p-6 rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer"
+            >
+              <div className="text-5xl mb-4">{icon}</div>
+              <h3 className="text-xl font-semibold mb-2">{title}</h3>
+              <p className="text-gray-600">{description}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {activeViewer && (
+        <>
+          <button
+            onClick={() => setActiveViewer(null)}
+            className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            <div className="text-5xl mb-4">{icon}</div>
-            <h3 className="text-xl font-semibold mb-2">{title}</h3>
-            <p className="text-gray-600">{description}</p>
-          </div>
-        ))}
-      </div>
+            ← Retour aux visualisations
+          </button>
+          {renderViewer()}
+        </>
+      )}
     </section>
   );
 };
