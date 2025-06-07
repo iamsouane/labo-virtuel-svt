@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import DNAViewer from '../views/DNAViewer';
-import WaterCycleViewer from '../views/WaterCycleViewer';
-import TectonicViewer from '../views/TectonicViewer'; // ✅
+import DNAViewer from '../views/visualisations/DNAViewer';
+import WaterCycleViewer from '../views/visualisations/WaterCycleViewer';
+import TectonicViewer from '../views/visualisations/TectonicViewer';
 
 const visualisationsData = [
   {
@@ -18,8 +18,8 @@ const visualisationsData = [
   },
   {
     id: 3,
-    title: 'Collision de plaques tectoniques', // 🔁 Titre mis à jour
-    description: 'Visualise le mouvement des plaques terrestres et leurs collisions.', // 🔁 Description mise à jour
+    title: 'Collision de plaques tectoniques',
+    description: 'Visualise le mouvement des plaques terrestres et leurs collisions.',
     icon: '🌍',
   },
   {

@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import SimulationSelectionNaturelle from '../views/simulations/SimulationSelectionNaturelle';
+import SimulationPhotosynthese from '../views/simulations/SimulationPhotosynthese';
+import SimulationEnergie from '../views/simulations/SimulationEnergie';
 
 const simulationsData = [
   {
@@ -25,35 +28,13 @@ const simulationsData = [
     description: "Explore l'évolution des populations avec cette simulation interactive PhET.",
     icon: '🦎',
   },
+  {
+    id: 5,
+    title: "Formes et transformations de l'énergie",
+    description: "Observe comment l'énergie circule et change dans différents systèmes avec cette simulation interactive PhET.",
+    icon: '⚡',
+  },
 ];
-
-const SimulationSelectionNaturelle = () => (
-  <section className="py-10">
-    <h3 className="text-2xl font-semibold mb-4">Simulation : Sélection naturelle</h3>
-    <div className="aspect-w-16 aspect-h-9 mb-4 rounded-lg border border-gray-300 overflow-hidden">
-      <iframe
-        src="https://phet.colorado.edu/sims/html/natural-selection/latest/natural-selection_fr.html"
-        allowFullScreen
-        title="Simulation Sélection Naturelle"
-        className="w-full h-full"
-      />
-    </div>
-  </section>
-);
-
-const SimulationPhotosynthese = () => (
-  <section className="py-10">
-    <h3 className="text-2xl font-semibold mb-4">Expérience sur la photosynthèse</h3>
-    <div className="aspect-w-16 aspect-h-9 mb-4 rounded-lg border border-gray-300 overflow-hidden">
-      <iframe
-        src="https://leosiiman.neocities.org/lab-rate-of-photosynthesis/photolab-individual"
-        allowFullScreen
-        title="Simulation Photosynthèse"
-        className="w-full h-full"
-      />
-    </div>
-  </section>
-);
 
 const Simulations = () => {
   const [activeSim, setActiveSim] = useState<string | null>(null);
@@ -64,6 +45,8 @@ const Simulations = () => {
         return <SimulationSelectionNaturelle />;
       case 'Expérience sur la photosynthèse':
         return <SimulationPhotosynthese />;
+      case "Formes et transformations de l'énergie":
+        return <SimulationEnergie />;
       default:
         return null;
     }
@@ -79,7 +62,11 @@ const Simulations = () => {
             <div
               key={id}
               onClick={() => {
-                if (title === 'Sélection naturelle' || title === 'Expérience sur la photosynthèse') {
+                if (
+                  title === 'Sélection naturelle' ||
+                  title === 'Expérience sur la photosynthèse' ||
+                  title === "Formes et transformations de l'énergie"
+                ) {
                   setActiveSim(title);
                 }
               }}
@@ -101,7 +88,6 @@ const Simulations = () => {
           >
             ← Retour aux simulations
           </button>
-
           {renderActiveSimulation()}
         </>
       )}
