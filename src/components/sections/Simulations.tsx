@@ -2,6 +2,7 @@ import { useState } from 'react';
 import SimulationSelectionNaturelle from '../views/simulations/SimulationSelectionNaturelle';
 import SimulationPhotosynthese from '../views/simulations/SimulationPhotosynthese';
 import SimulationEnergie from '../views/simulations/SimulationEnergie';
+import SimulationPollution from '../views/simulations/SimulationPollution';
 
 const simulationsData = [
   {
@@ -34,6 +35,12 @@ const simulationsData = [
     description: "Observe comment l'énergie circule et change dans différents systèmes avec cette simulation interactive PhET.",
     icon: '⚡',
   },
+  {
+    id: 6,
+    title: "Pollution de l'air",
+    description: "Analyse les effets des activités humaines sur la qualité de l'air avec cette simulation interactive Go-Lab.",
+    icon: '🌫️',
+  },
 ];
 
 const Simulations = () => {
@@ -47,6 +54,8 @@ const Simulations = () => {
         return <SimulationPhotosynthese />;
       case "Formes et transformations de l'énergie":
         return <SimulationEnergie />;
+      case "Pollution de l'air":
+        return <SimulationPollution />;
       default:
         return null;
     }
@@ -65,7 +74,8 @@ const Simulations = () => {
                 if (
                   title === 'Sélection naturelle' ||
                   title === 'Expérience sur la photosynthèse' ||
-                  title === "Formes et transformations de l'énergie"
+                  title === "Formes et transformations de l'énergie" ||
+                  title === "Pollution de l'air"
                 ) {
                   setActiveSim(title);
                 }
