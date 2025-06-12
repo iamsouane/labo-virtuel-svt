@@ -7,7 +7,7 @@ const SimulationPollution = () => {
       <h2 className="text-3xl font-semibold mb-6">Simulation : Pollution de l'air</h2>
       <div className="aspect-w-16 aspect-h-9">
         <iframe
-          src="https://gateway.golabz.eu/os/pub/concord/interactives%2525252Fair-pollution%2525252Fair-pollution-master.json/w_lab.html"
+          src="https://lab.concord.org/embeddable.html#interactives/air-pollution/air-pollution-master.json"
           allowFullScreen
           className="w-full h-full rounded-lg border border-gray-300"
           title="Simulation Pollution de l'air"

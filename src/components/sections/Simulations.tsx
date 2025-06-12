@@ -7,36 +7,24 @@ import SimulationPollution from '../views/simulations/SimulationPollution';
 const simulationsData = [
   {
     id: 1,
-    title: 'Simulation de la cellule',
-    description: "Explore la structure et le fonctionnement d'une cellule en 3D interactive.",
-    icon: '🧬',
-  },
-  {
-    id: 2,
-    title: 'Visualisation du système digestif',
-    description: "Découvre le trajet des aliments dans le corps humain grâce à une animation fluide.",
-    icon: '🦠',
-  },
-  {
-    id: 3,
     title: 'Expérience sur la photosynthèse',
     description: "Simule la photosynthèse et observe l'impact de la lumière sur les plantes.",
     icon: '🌿',
   },
   {
-    id: 4,
+    id: 2,
     title: 'Sélection naturelle',
     description: "Explore l'évolution des populations avec cette simulation interactive PhET.",
     icon: '🦎',
   },
   {
-    id: 5,
+    id: 3,
     title: "Formes et transformations de l'énergie",
     description: "Observe comment l'énergie circule et change dans différents systèmes avec cette simulation interactive PhET.",
     icon: '⚡',
   },
   {
-    id: 6,
+    id: 4,
     title: "Pollution de l'air",
     description: "Analyse les effets des activités humaines sur la qualité de l'air avec cette simulation interactive Go-Lab.",
     icon: '🌫️',
@@ -70,16 +58,7 @@ const Simulations = () => {
           {simulationsData.map(({ id, title, description, icon }) => (
             <div
               key={id}
-              onClick={() => {
-                if (
-                  title === 'Sélection naturelle' ||
-                  title === 'Expérience sur la photosynthèse' ||
-                  title === "Formes et transformations de l'énergie" ||
-                  title === "Pollution de l'air"
-                ) {
-                  setActiveSim(title);
-                }
-              }}
+              onClick={() => setActiveSim(title)}
               className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer select-none"
             >
               <div className="text-5xl mb-4">{icon}</div>
