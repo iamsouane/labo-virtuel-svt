@@ -1,5 +1,4 @@
 const ControlButtons = ({
-  control,
   setControl,
 }: {
   control: 'play' | 'pause' | 'reset';
