@@ -1472,4 +1472,4 @@ const SimulationPhotosynthese = () => {
   )
 }
 
-export default SimulationPhotosynthese;
+export default SimulationPhotosynthese
