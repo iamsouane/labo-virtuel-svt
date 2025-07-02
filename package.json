@@ -14,10 +14,14 @@
     "@react-three/fiber": "^9.1.2",
     "@react-three/gltfjsx": "^4.3.4",
     "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/recharts": "^1.8.29",
+    "framer-motion": "^12.23.0",
     "gltf-pipeline": "^1.0.5",
+    "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
+    "recharts": "^3.0.2",
     "three": "^0.177.0"
   },
   "devDependencies": {
