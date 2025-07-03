@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, Text, Html } from "@react-three/drei"
 import * as THREE from "three"
-import QuizOverlay from "../../QuizOverlay"
+import QuizOverlay from "../../QuizPhotosynthese"
 
 // Types pour la simulation
 interface PlantState {
@@ -640,7 +640,7 @@ function SimplePhotosynthesisScene({ environment }: { environment: LabEnvironmen
 }
 
 // Composant de graphique simple
-function SimpleChart({ data, title, color }: { data: DataPoint[]; title: string; color: string }) {
+function SimpleChart({ data, title, /*color*/ }: { data: DataPoint[]; title: string; color: string }) {
   const maxValue = Math.max(...data.map((d) => Math.max(d.oxygen, d.glucose, d.health * 100)))
 
   return (
@@ -716,7 +716,7 @@ function TutorialOverlay({
   onSkip: () => void
   onComplete: () => void
 }) {
-  const [actionCompleted, setActionCompleted] = useState(true)
+  const [/*actionCompleted*/, setActionCompleted] = useState(true)
 
   // Force re-render when step changes
   useEffect(() => {

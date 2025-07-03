@@ -6,6 +6,9 @@ import { Button } from "../../ui/button"
 import { Checkbox } from "../../ui/checkbox"
 import { LineChart, Line, XAxis, YAxis } from "recharts"
 import { motion } from "framer-motion"
+import GuideTutorielSelection from "../../GuideTutorielSelection"
+import QuizzSelection from "../../QuizzSelection"
+import { HelpCircle, BookOpenCheck } from "lucide-react"
 
 // Types avec génétique mendélienne
 export type RabbitGenetics = {
@@ -607,9 +610,22 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
     return { parent1, parent2 }
   }
 
+  const uniqueAncestorsByIdAcrossGenerations = (generations: RabbitGenetics[][]): RabbitGenetics[][] => {
+    const seen = new Set<string>()
+    return generations.map((generation) => {
+      const unique = generation.filter((rabbit) => {
+        if (seen.has(rabbit.id)) return false
+        seen.add(rabbit.id)
+        return true
+      })
+      return unique
+    })
+  }
+
   const parents = findParents()
   const descendants = findDescendants(rabbit.id, allRabbits)
   const ancestors = findAncestors(rabbit, allRabbits, 3)
+  const filteredAncestors = uniqueAncestorsByIdAcrossGenerations(ancestors)
 
   const RabbitMiniCard = ({ rabbit: miniRabbit, relationship }: { rabbit: RabbitGenetics; relationship: string }) => (
     <div className="bg-gray-50 p-2 rounded text-xs">
@@ -703,7 +719,7 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
   )
 
   return (
-    <Card className="absolute top-4 right-4 w-96 bg-white shadow-lg z-10 max-h-[80vh] flex flex-col">
+    <Card className="fixed top-4 right-4 w-[min(100%,32rem)] bg-white shadow-lg z-50 flex flex-col max-h-[90vh] overflow-y-auto">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Pedigree Complet</CardTitle>
@@ -712,7 +728,7 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 overflow-y-auto flex-1 p-4">
+      <CardContent className="space-y-4 p-4">
         {/* Lapin sélectionné */}
         <div className="text-center border-2 border-blue-300 rounded-lg p-3 bg-blue-50">
           <div className="w-16 h-16 mx-auto mb-2">
@@ -803,10 +819,10 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
           </div>
         )}
 
-        {/* Ancêtres plus lointains */}
-        {ancestors.length > 1 && (
+        {/* Ancêtres sans doublons */}
+        {filteredAncestors.length > 1 && (
           <div className="space-y-3 max-h-48 overflow-y-auto">
-            {ancestors.slice(1).map((generation, genIndex) => (
+            {filteredAncestors.slice(1).map((generation, genIndex) => (
               <div key={genIndex}>
                 <p className="text-xs font-medium text-purple-600 mb-2 sticky top-0 bg-white">
                   {genIndex === 0 ? "Grands-parents" : `Arrière-grands-parents (${genIndex + 2})`}
@@ -817,7 +833,7 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
                       <RabbitMiniCard key={ancestor.id} rabbit={ancestor} relationship="Ancêtre" />
                     ) : (
                       <DeadParentCard key={ancestor.id} relationship="Ancêtre" />
-                    ),
+                    )
                   )}
                 </div>
               </div>
@@ -845,14 +861,14 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
                       </div>
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           </div>
         )}
 
         {/* Message si pas de famille */}
-        {ancestors.length === 0 && descendants.length === 0 && (
+        {filteredAncestors.length === 0 && descendants.length === 0 && (
           <div className="text-center text-gray-500 text-sm py-4">
             <p>🌱 {rabbit.name} est un lapin fondateur</p>
             <p>Pas encore de famille connue</p>
@@ -1429,18 +1445,25 @@ const SimulationSelectionNaturelle = () => {
     setGenerationHistory((prev) => [...prev, { generation: nextGeneration, population: newLivingRabbits.length }])
   }
 
-  const getButtonText = () => {
+  /*const getButtonText = () => {
     if (allLivingRabbits.length === 0) return "Commencer avec un lapin"
     if (allLivingRabbits.length === 1) return "Ajouter un compagnon"
     return "Population complète"
-  }
+  }*/
 
   const handleRabbitSelect = (rabbit: RabbitGenetics) => {
     setSelectedRabbit(rabbit)
   }
 
+  const [showQuiz, setShowQuiz] = useState(false)
+  const [showGuide, setShowGuide] = useState(true)
+
+
   return (
-    <Card className="w-full max-w-6xl mx-auto">
+    <>
+      {showGuide && <GuideTutorielSelection onClose={() => setShowGuide(false)} />}
+      {showQuiz && <QuizzSelection onClose={() => setShowQuiz(false)} />}
+      <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">Sélection Naturelle - Laboratoire Virtuel</CardTitle>
         <p className="text-center text-sm text-gray-600">
@@ -1453,6 +1476,24 @@ const SimulationSelectionNaturelle = () => {
       <CardContent className="space-y-6">
         {/* Zone de simulation */}
         <div className="relative w-full h-[400px] bg-gradient-to-b from-blue-200 to-green-200 rounded-lg overflow-hidden border-2 border-gray-300">
+          {/* Icônes Quiz & Guide */}
+          <div className="absolute top-4 right-4 flex gap-3 z-10">
+            <button
+              onClick={() => setShowGuide(true)}
+              className="p-2 bg-white rounded-full shadow hover:bg-gray-100"
+              title="Voir le guide"
+            >
+              <HelpCircle className="w-5 h-5 text-blue-600" />
+            </button>
+            <button
+              onClick={() => setShowQuiz(true)}
+              className="p-2 bg-white rounded-full shadow hover:bg-gray-100"
+              title="Lancer le quiz"
+            >
+              <BookOpenCheck className="w-5 h-5 text-green-600" />
+            </button>
+          </div>
+
           <Food environment={environment} />
           {allLivingRabbits
             .filter((r) => r.isAlive)
@@ -1679,6 +1720,7 @@ const SimulationSelectionNaturelle = () => {
         )}
       </CardContent>
     </Card>
+    </>
   )
 }
 

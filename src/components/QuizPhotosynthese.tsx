@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-interface QuizQuestion {
+export interface QuizQuestion {
   id: number
   question: string
   options: string[]
@@ -12,7 +12,7 @@ interface QuizQuestion {
   category: "equation" | "facteurs" | "processus" | "application"
 }
 
-interface QuizResult {
+export interface QuizResult {
   score: number
   totalQuestions: number
   timeSpent: number

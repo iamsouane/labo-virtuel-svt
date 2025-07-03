@@ -9,7 +9,7 @@ interface QuizQuestion {
   correctAnswer: number
   explanation: string
   difficulty: "facile" | "moyen" | "difficile"
-  category: "transformation" | "efficacite" | "sources" | "application"
+  category: "transformation" | "efficacite" | "sources" | "application" | "processus" | "facteurs"
 }
 
 interface QuizResult {

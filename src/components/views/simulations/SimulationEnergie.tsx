@@ -83,6 +83,7 @@ const SimulationEnergie = () => {
   const [quizResult, setQuizResult] = useState<any>(null)
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [quizStartTime, setQuizStartTime] = useState(0)
+  const [quizAnswers, setQuizAnswers] = useState<QuizAnswer[]>([])
 
   const quizQuestions = [
     {
@@ -148,29 +149,55 @@ const SimulationEnergie = () => {
     setQuizSelectedAnswer(answerIndex)
   }
 
-  const handleQuizNext = () => {
-    if (quizSelectedAnswer === null) return
+ interface QuizAnswer {
+  questionId: number
+  userAnswer: number
+  correct: boolean
+}
 
-    const isCorrect = quizSelectedAnswer === quizQuestions[quizCurrentQuestion].correctAnswer
+const handleQuizNext = () => {
+  if (quizSelectedAnswer === null) return
 
-    if (quizCurrentQuestion < quizQuestions.length - 1) {
-      setQuizCurrentQuestion(quizCurrentQuestion + 1)
-      setQuizSelectedAnswer(null)
-    } else {
-      // Quiz terminé
-      const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
-      const answers = [] // Vous devriez stocker les réponses pendant le quiz
-      const score = answers.filter((a) => a.correct).length
+  const currentQuestionData = quizQuestions[quizCurrentQuestion]
+  const isCorrect = quizSelectedAnswer === currentQuestionData.correctAnswer
 
-      setQuizResult({
-        score,
-        totalQuestions: quizQuestions.length,
-        timeSpent,
-        answers,
-      })
-      setQuizCompleted(true)
-    }
+  // Enregistrer cette réponse dans le state
+  setQuizAnswers((prev) => [
+    ...prev,
+    {
+      questionId: currentQuestionData.id,
+      userAnswer: quizSelectedAnswer,
+      correct: isCorrect,
+    },
+  ])
+
+  if (quizCurrentQuestion < quizQuestions.length - 1) {
+    setQuizCurrentQuestion(quizCurrentQuestion + 1)
+    setQuizSelectedAnswer(null)
+  } else {
+    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+
+    const finalAnswers = [
+      ...quizAnswers,
+      {
+        questionId: currentQuestionData.id,
+        userAnswer: quizSelectedAnswer,
+        correct: isCorrect,
+      },
+    ]
+
+    const score = finalAnswers.filter((a) => a.correct).length
+
+    setQuizResult({
+      score,
+      totalQuestions: quizQuestions.length,
+      timeSpent,
+      answers: finalAnswers,
+    })
+
+    setQuizCompleted(true)
   }
+}
 
   const handleQuizRestart = () => {
     setQuizCurrentQuestion(0)
@@ -557,7 +584,7 @@ const SimulationEnergie = () => {
   }
 
   const renderOutputDevice = () => {
-    const device = DEVICES[selectedDevice]
+    //const device = DEVICES[selectedDevice]
     const intensity = energyData.outputPower
 
     switch (selectedDevice) {
