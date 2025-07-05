@@ -149,55 +149,55 @@ const SimulationEnergie = () => {
     setQuizSelectedAnswer(answerIndex)
   }
 
- interface QuizAnswer {
-  questionId: number
-  userAnswer: number
-  correct: boolean
-}
+  interface QuizAnswer {
+    questionId: number
+    userAnswer: number
+    correct: boolean
+  }
 
-const handleQuizNext = () => {
-  if (quizSelectedAnswer === null) return
+  const handleQuizNext = () => {
+    if (quizSelectedAnswer === null) return
 
-  const currentQuestionData = quizQuestions[quizCurrentQuestion]
-  const isCorrect = quizSelectedAnswer === currentQuestionData.correctAnswer
+    const currentQuestionData = quizQuestions[quizCurrentQuestion]
+    const isCorrect = quizSelectedAnswer === currentQuestionData.correctAnswer
 
-  // Enregistrer cette réponse dans le state
-  setQuizAnswers((prev) => [
-    ...prev,
-    {
-      questionId: currentQuestionData.id,
-      userAnswer: quizSelectedAnswer,
-      correct: isCorrect,
-    },
-  ])
-
-  if (quizCurrentQuestion < quizQuestions.length - 1) {
-    setQuizCurrentQuestion(quizCurrentQuestion + 1)
-    setQuizSelectedAnswer(null)
-  } else {
-    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
-
-    const finalAnswers = [
-      ...quizAnswers,
+    // Enregistrer cette réponse dans le state
+    setQuizAnswers((prev) => [
+      ...prev,
       {
         questionId: currentQuestionData.id,
         userAnswer: quizSelectedAnswer,
         correct: isCorrect,
       },
-    ]
+    ])
 
-    const score = finalAnswers.filter((a) => a.correct).length
+    if (quizCurrentQuestion < quizQuestions.length - 1) {
+      setQuizCurrentQuestion(quizCurrentQuestion + 1)
+      setQuizSelectedAnswer(null)
+    } else {
+      const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
 
-    setQuizResult({
-      score,
-      totalQuestions: quizQuestions.length,
-      timeSpent,
-      answers: finalAnswers,
-    })
+      const finalAnswers = [
+        ...quizAnswers,
+        {
+          questionId: currentQuestionData.id,
+          userAnswer: quizSelectedAnswer,
+          correct: isCorrect,
+        },
+      ]
 
-    setQuizCompleted(true)
+      const score = finalAnswers.filter((a) => a.correct).length
+
+      setQuizResult({
+        score,
+        totalQuestions: quizQuestions.length,
+        timeSpent,
+        answers: finalAnswers,
+      })
+
+      setQuizCompleted(true)
+    }
   }
-}
 
   const handleQuizRestart = () => {
     setQuizCurrentQuestion(0)
@@ -789,13 +789,12 @@ const handleQuizNext = () => {
           </div>
           <div className="flex items-center gap-2">
             <span
-              className={`font-bold ${
-                selectedDevice === "ampoule"
+              className={`font-bold ${selectedDevice === "ampoule"
                   ? "text-yellow-500"
                   : selectedDevice === "ventilateur"
                     ? "text-cyan-500"
                     : "text-red-500"
-              }`}
+                }`}
             >
               E
             </span>
@@ -1011,11 +1010,10 @@ const handleQuizNext = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     onClick={toggleActivity}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
-                      energyData.isActive
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${energyData.isActive
                         ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
                         : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-                    }`}
+                      }`}
                   >
                     {energyData.isActive
                       ? energySource === "velo"
@@ -1028,11 +1026,10 @@ const handleQuizNext = () => {
 
                   <button
                     onClick={() => setShowEnergySymbols(!showEnergySymbols)}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
-                      showEnergySymbols
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${showEnergySymbols
                         ? "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
                         : "bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white"
-                    }`}
+                      }`}
                   >
                     {showEnergySymbols ? "🔤 Masquer les symboles E" : "🔤 Afficher les symboles E"}
                   </button>

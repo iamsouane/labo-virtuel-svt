@@ -1,8 +1,7 @@
-"use client"
-
+//src/components/ui/QuizzSelection
 import { useState } from "react"
-import QuizOverlay from "../components/QuizPhotosynthese"
-import type { QuizResult, QuizQuestion } from "../components/QuizPhotosynthese"
+import QuizOverlay from "./QuizPhotosyntheseOverlay"
+import type { QuizResult, QuizQuestion } from "../../types/simulationPhotosyntheseTypes"
 
 const selectionQuestions: QuizQuestion[] = [
   {

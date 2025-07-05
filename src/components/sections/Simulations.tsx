@@ -1,33 +1,35 @@
+//src/components/sections/Simulation
 import { useState } from 'react';
 import SimulationSelectionNaturelle from '../views/simulations/SimulationSelectionNaturelle';
-import SimulationPhotosynthese from '../views/simulations/SimulationPhotosynthese';
+import SimulationPhotosynthese from '../views/SimulationPhotosynthese';
 import SimulationEnergie from '../views/simulations/SimulationEnergie';
 import SimulationPollution from '../views/simulations/SimulationPollution';
+import { Leaf, Rabbit, Zap, Factory } from "lucide-react"
 
 const simulationsData = [
   {
     id: 1,
     title: 'Expérience sur la photosynthèse',
     description: "Simule la photosynthèse et observe l'impact de la lumière sur les plantes.",
-    icon: '🌿',
+    icon: <Leaf className="w-6 h-6 text-green-600" />,
   },
   {
     id: 2,
     title: 'Sélection naturelle',
     description: "Explore l'évolution des populations avec cette simulation interactive PhET.",
-    icon: '🦎',
+    icon: <Rabbit className="w-6 h-6 text-amber-600" />,
   },
   {
     id: 3,
     title: "Formes et transformations de l'énergie",
     description: "Observe comment l'énergie circule et change dans différents systèmes avec cette simulation interactive PhET.",
-    icon: '⚡',
+    icon: <Zap className="w-6 h-6 text-yellow-500" />,
   },
   {
     id: 4,
     title: "Pollution de l'air",
     description: "Analyse les effets des activités humaines sur la qualité de l'air avec cette simulation interactive Go-Lab.",
-    icon: '🌫️',
+    icon: <Factory className="w-6 h-6 text-gray-500" />,
   },
 ];
 
@@ -61,11 +63,14 @@ const Simulations = () => {
               onClick={() => setActiveSim(title)}
               className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer select-none"
             >
-              <div className="text-5xl mb-4">{icon}</div>
+              <div className="flex items-center justify-center text-5xl mb-4">
+                {icon}
+              </div>
               <h3 className="text-xl font-semibold mb-2">{title}</h3>
               <p className="text-gray-600">{description}</p>
             </div>
           ))}
+
         </div>
       )}
 

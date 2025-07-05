@@ -7,7 +7,7 @@ import { Checkbox } from "../../ui/checkbox"
 import { LineChart, Line, XAxis, YAxis } from "recharts"
 import { motion } from "framer-motion"
 import GuideTutorielSelection from "../../GuideTutorielSelection"
-import QuizzSelection from "../../QuizzSelection"
+import QuizzSelection from "../../ui/QuizzSelection"
 import { HelpCircle, BookOpenCheck } from "lucide-react"
 
 // Types avec génétique mendélienne
