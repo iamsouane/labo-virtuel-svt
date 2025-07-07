@@ -11,7 +11,7 @@ import { QuizEnergieOverlay } from "../ui/QuizEnergieOverlay";
 import { FullscreenContainer } from "../../components/ui/FullscreenContainer";
 import { FullscreenButton } from "../../components/ui/FullscreenButton";
 import { useFullscreen } from "../../hooks/useFullscreen";
-import { GraduationCap, Brain, HelpCircle, Play, Pause, Clock, CheckCircle, Zap, Sun, Bike, BatteryCharging, Lightbulb } from "lucide-react";
+import { GraduationCap, Brain, HelpCircle, Play, Pause, Clock, CheckCircle, Zap, Sun, Bike, BatteryCharging, Lightbulb, Info } from "lucide-react";
 import type {
   EnergyData,
   OutputDevice,
@@ -28,6 +28,7 @@ import RenderGenerator from "../energie/RenderGenerator";
 import RenderOutputDevice from "../energie/RenderOutputDevice";
 import RenderEnergyParticles from "../energie/RenderEnergyParticles";
 import RenderEnergySymbolsLegend from "../energie/RenderEnergySymbolsLegend";
+import Tooltip from "../ui/Tooltip";
 
 const SimulationEnergie = () => {
   // États principaux
@@ -575,26 +576,48 @@ const SimulationEnergie = () => {
 
               {/* Indicateurs de puissance */}
               <div className="grid grid-cols-3 gap-4 text-center">
+
+                {/* Énergie mécanique ou solaire */}
                 <div
                   className={`p-3 rounded-lg border ${energySource === "velo" ? "bg-blue-50 border-blue-200" : "bg-yellow-50 border-yellow-200"}`}
                 >
-                  <div
-                    className={`text-2xl font-bold ${energySource === "velo" ? "text-blue-600" : "text-yellow-600"}`}
-                  >
+                  <div className={`flex items-center justify-center gap-1 text-2xl font-bold ${energySource === "velo" ? "text-blue-600" : "text-yellow-600"}`}>
                     {currentIntensity}%
+                    <Tooltip content={
+                      energySource === "velo"
+                        ? "Pourcentage d’énergie mécanique disponible issue du pédalage (force exercée)."
+                        : "Pourcentage d’énergie lumineuse captée par le panneau solaire."
+                    }>
+                      <Info className="w-4 h-4 cursor-pointer text-bleu-400 hover:text-gray-600" />
+                    </Tooltip>
                   </div>
                   <div className={`text-xs ${energySource === "velo" ? "text-blue-700" : "text-yellow-700"}`}>
                     {energySource === "velo" ? "Énergie Mécanique" : "Énergie Solaire"}
                   </div>
                 </div>
+
+                {/* Énergie électrique */}
                 <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                  <div className="text-2xl font-bold text-green-600">{energyData.electricalPower.toFixed(1)}%</div>
+                  <div className="flex items-center justify-center gap-1 text-2xl font-bold text-green-600">
+                    {energyData.electricalPower.toFixed(1)}%
+                    <Tooltip content="Pourcentage d’énergie électrique produite après conversion de l’énergie mécanique ou lumineuse, tenant compte des pertes (rendement du générateur).">
+                      <Info className="w-4 h-4 cursor-pointer text-green-400 hover:text-gray-600" />
+                    </Tooltip>
+                  </div>
                   <div className="text-xs text-green-700">Énergie Électrique</div>
                 </div>
+
+                {/* Énergie utile en sortie */}
                 <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <div className="text-2xl font-bold text-purple-600">{energyData.outputPower.toFixed(1)}%</div>
+                  <div className="flex items-center justify-center gap-1 text-2xl font-bold text-purple-600">
+                    {energyData.outputPower.toFixed(1)}%
+                    <Tooltip content={`Énergie réellement utilisée par l'appareil (${DEVICES[selectedDevice].energyType}), après pertes liées au stockage, transport ou conversion finale.`}>
+                      <Info className="w-4 h-4 cursor-pointer text-purple-400 hover:text-gray-600" />
+                    </Tooltip>
+                  </div>
                   <div className="text-xs text-purple-700">Énergie {DEVICES[selectedDevice].energyType}</div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -632,7 +655,7 @@ const SimulationEnergie = () => {
                 },
                 {
                   step: 3,
-                  icon: <Sun className="w-5 h-5 text-green-500" />,
+                  icon: <Sun className="w-5 h-5 text-purple-500" />,
                   title: `Énergie ${DEVICES[selectedDevice].energyType}`,
                   description: DEVICES[selectedDevice].description,
                   color: "purple"
