@@ -4,7 +4,7 @@ import SimulationSelectionNaturelle from '../views/SimulationSelectionNaturelle'
 import SimulationPhotosynthese from '../views/SimulationPhotosynthese';
 import SimulationEnergie from '../views/SimulationEnergie';
 import SimulationPollution from '../views/simulations/SimulationPollution';
-import { Leaf, Rabbit, Zap, Factory } from "lucide-react"
+import { Leaf, Rabbit, Zap, Factory, ArrowLeft } from "lucide-react"
 
 const simulationsData = [
   {
@@ -16,19 +16,19 @@ const simulationsData = [
   {
     id: 2,
     title: 'Sélection naturelle',
-    description: "Explore l'évolution des populations avec cette simulation interactive PhET.",
+    description: "Explore l'évolution des populations avec cette simulation interactive.",
     icon: <Rabbit className="w-6 h-6 text-amber-600" />,
   },
   {
     id: 3,
     title: "Formes et transformations de l'énergie",
-    description: "Observe comment l'énergie circule et change dans différents systèmes avec cette simulation interactive PhET.",
+    description: "Observe comment l'énergie circule et change dans différents systèmes avec cette simulation interactive.",
     icon: <Zap className="w-6 h-6 text-yellow-500" />,
   },
   {
     id: 4,
     title: "Pollution de l'air",
-    description: "Analyse les effets des activités humaines sur la qualité de l'air avec cette simulation interactive Go-Lab.",
+    description: "Analyse les effets des activités humaines sur la qualité de l'air avec cette simulation interactive.",
     icon: <Factory className="w-6 h-6 text-gray-500" />,
   },
 ];
@@ -77,11 +77,14 @@ const Simulations = () => {
       {activeSim && (
         <>
           <button
-            onClick={() => setActiveSim(null)}
-            className="mb-6 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-          >
-            ← Retour aux simulations
-          </button>
+  onClick={() => setActiveSim(null)}
+  className="mb-6 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 mx-auto"
+>
+  <ArrowLeft className="w-5 h-5" />
+  Retour aux simulations
+</button>
+
+
           {renderActiveSimulation()}
         </>
       )}
