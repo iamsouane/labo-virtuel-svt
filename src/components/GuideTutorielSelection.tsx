@@ -1,5 +1,4 @@
-"use client"
-
+//src/components/GuideTutorielSelection
 import { useState } from "react"
 
 interface TutorialStep {

@@ -1,26 +1,28 @@
-// src/components/ui/QuizPhotosyntheseOverlay.tsx
+// src/components/ui/QuizSelectionOverlay.tsx
 import { useState } from "react"
-import type { QuizQuestion, QuizResult } from "../../types/simulationPhotosyntheseTypes"
+import type { QuizQuestion, QuizResult } from "../../types/selectionNaturelleTypes"
 import {
   Trophy,
   Star,
   ThumbsUp,
   BookOpen,
   RotateCcw,
-  Leaf,
+  Rabbit,
   Search,
   Check,
-  FlaskConical,
+  Dna,
+  Thermometer,
+  RefreshCw,
+  Book,
   Globe,
   HelpCircle,
-  Scale,
   ChevronUp,
   ChevronDown,
   Info,
   ArrowRight,
 } from "lucide-react"
 
-interface QuizOverlayProps {
+interface QuizSelectionOverlayProps {
   questions: QuizQuestion[]
   currentQuestion: number
   selectedAnswer: number | null
@@ -58,7 +60,7 @@ function QuizResults({
       return (
         <span className="flex items-center gap-2 text-yellow-600">
           <Trophy className="w-5 h-5" />
-          Excellent ! Vous maîtrisez parfaitement la photosynthèse !
+          Bravo ! Vous êtes un expert en sélection naturelle !
         </span>
       )
     }
@@ -66,7 +68,7 @@ function QuizResults({
       return (
         <span className="flex items-center gap-2 text-green-600">
           <Star className="w-5 h-5" />
-          Très bien ! Vous avez de bonnes connaissances.
+          Excellent ! Vous comprenez bien les mécanismes évolutifs.
         </span>
       )
     }
@@ -74,7 +76,7 @@ function QuizResults({
       return (
         <span className="flex items-center gap-2 text-blue-600">
           <ThumbsUp className="w-5 h-5" />
-          Pas mal ! Quelques révisions seraient utiles.
+          Pas mal ! Quelques notions à revoir pour perfectionner vos connaissances.
         </span>
       )
     }
@@ -82,14 +84,14 @@ function QuizResults({
       return (
         <span className="flex items-center gap-2 text-orange-600">
           <BookOpen className="w-5 h-5" />
-          Il faut réviser les bases de la photosynthèse.
+          À étudier : révisez les principes de base de l'évolution.
         </span>
       )
     }
     return (
       <span className="flex items-center gap-2 text-red-600">
         <RotateCcw className="w-5 h-5" />
-        Recommencez après avoir revu le cours !
+        Recommencez après avoir revu les concepts clés.
       </span>
     )
   }
@@ -100,8 +102,8 @@ function QuizResults({
         {/* Header avec résultats */}
         <div className="p-6 border-b border-gray-200 text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-2 flex justify-center items-center gap-2">
-            <Leaf className="w-7 h-7 text-green-600" />
-            Résultats du Quiz Photosynthèse
+            <Rabbit className="w-7 h-7 text-green-600" />
+            Résultats du Quiz Sélection Naturelle
           </h2>
           <div className={`text-4xl font-bold mb-2 ${getScoreColor(percentage)}`}>
             {result.score}/{result.totalQuestions}
@@ -153,7 +155,8 @@ function QuizResults({
             <span className="flex items-center gap-2">
               <Search className="w-5 h-5 text-gray-700" />
               Détail des réponses
-            </span>          </h3>
+            </span>
+          </h3>
           <div className="space-y-4 max-h-60 overflow-y-auto">
             {result.answers.map((answer, index) => {
               const question = questions[index]
@@ -217,7 +220,7 @@ function QuizResults({
   )
 }
 
-export default function QuizOverlay({
+export default function QuizSelectionOverlay({
   questions,
   currentQuestion,
   selectedAnswer,
@@ -227,7 +230,7 @@ export default function QuizOverlay({
   result,
   completed,
   onRestart,
-}: QuizOverlayProps) {
+}: QuizSelectionOverlayProps) {
   const [showExplanation, setShowExplanation] = useState(false)
 
   if (completed && result) {
@@ -248,14 +251,16 @@ export default function QuizOverlay({
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "equation":
-        return <FlaskConical className="w-5 h-5 text-blue-500" />
-      case "facteurs":
-        return <Scale className="w-5 h-5 text-green-500" />
+      case "genetique":
+        return <Dna className="w-5 h-5 text-blue-500" />
+      case "adaptation":
+        return <Thermometer className="w-5 h-5 text-green-500" />
       case "processus":
-        return <RotateCcw className="w-5 h-5 text-yellow-500" />
+        return <RefreshCw className="w-5 h-5 text-yellow-500" />
+      case "concepts":
+        return <Book className="w-5 h-5 text-teal-500" />
       case "application":
-        return <Globe className="w-5 h-5 text-teal-500" />
+        return <Globe className="w-5 h-5 text-purple-500" />
       default:
         return <HelpCircle className="w-5 h-5 text-gray-400" />
     }
@@ -267,8 +272,8 @@ export default function QuizOverlay({
         {/* En-tête */}
         <div className="p-6 border-b border-gray-200 relative">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
-            <Leaf className="w-6 h-6 text-green-600" />
-            Quiz Photosynthèse
+            <Rabbit className="w-6 h-6 text-green-600" />
+            Quiz Sélection Naturelle
           </h2>
 
           <button
@@ -304,7 +309,6 @@ export default function QuizOverlay({
               {getCategoryIcon(question.category)} <span className="ml-1">{question.category}</span>
             </span>
           </div>
-
         </div>
 
         {/* Question */}
@@ -392,7 +396,8 @@ export default function QuizOverlay({
                   <span className="flex items-center gap-1">
                     Suivant
                     <ArrowRight className="w-4 h-4" />
-                  </span>                </>
+                  </span>
+                </>
               ) : (
                 <>
                   Terminer

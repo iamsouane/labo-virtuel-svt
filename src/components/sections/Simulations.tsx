@@ -1,6 +1,6 @@
 //src/components/sections/Simulation
 import { useState } from 'react';
-import SimulationSelectionNaturelle from '../views/simulations/SimulationSelectionNaturelle';
+import SimulationSelectionNaturelle from '../views/SimulationSelectionNaturelle';
 import SimulationPhotosynthese from '../views/SimulationPhotosynthese';
 import SimulationEnergie from '../views/simulations/SimulationEnergie';
 import SimulationPollution from '../views/simulations/SimulationPollution';

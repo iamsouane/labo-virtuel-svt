@@ -1,4 +1,4 @@
-// src/components/ui/GuideOverlayPhotosynthese.tsx
+// src/components/ui/GuideOverlaySelection.tsx
 import React from "react"
 import { Gamepad2, Keyboard, Lightbulb, MousePointerClick } from "lucide-react"
 
@@ -6,10 +6,10 @@ interface GuideOverlayProps {
   onClose: () => void
 }
 
-const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => {
+const GuideOverlaySelection: React.FC<GuideOverlayProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-blue-500 p-6">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-green-500 p-6">
 
         {/* Bouton fermer */}
         <button
@@ -23,7 +23,7 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
 
         {/* Titre principal */}
         <h3 className="text-xl font-bold mb-8 text-gray-800 flex items-center justify-center gap-2">
-          <Gamepad2 className="w-6 h-6 text-blue-600" />
+          <Gamepad2 className="w-6 h-6 text-green-600" />
           Guide d'utilisation rapide
         </h3>
 
@@ -77,16 +77,26 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
               Conseils
             </h4>
             <ul className="list-disc list-outside pl-4 space-y-1 text-gray-700 text-sm">
-              <li><span className="ml-[-6px]">Utilisez les presets pour gagner du temps</span></li>
-              <li><span className="ml-[-50px]">Visez la zone optimale d'efficacité</span></li>
-              <li><span className="ml-[-35px]">Observez l’évolution des indicateurs</span></li>
+              <li><span className="ml-[-50px]">Testez différents environnements</span></li>
+              <li><span className="ml-[-35px]">Observez sur plusieurs générations</span></li>
+              <li><span className="ml-[-60px]">Comparez les traits avantageux</span></li>
             </ul>
           </div>
 
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
+          >
+            Fermer
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-export default GuideOverlayPhotosynthese
+export default GuideOverlaySelection

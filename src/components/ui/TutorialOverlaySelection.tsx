@@ -1,25 +1,16 @@
-// src/components/ui/TutorialOverlayPhotosynthese.tsx
+// src/components/ui/TutorialOverlaySelection.tsx
 import React, { useEffect, useState } from "react"
-import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
-import type { TutorialStep } from "../../types/simulationPhotosyntheseTypes"
+import type { TutorialStep } from "../../types/tutorialSelection"
+import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react"
 
-type TutorialOverlayPhotosyntheseProps = {
-    currentStep: TutorialStep
+const TutorialOverlaySelection: React.FC<{
+    currentStep: Omit<TutorialStep, "totalSteps">
     totalSteps: number
     onNext: () => void
     onPrevious: () => void
     onSkip: () => void
     onComplete: () => void
-}
-
-export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosyntheseProps> = ({
-    currentStep,
-    totalSteps,
-    onNext,
-    onPrevious,
-    onSkip,
-    onComplete,
-}) => {
+}> = ({ currentStep, totalSteps, onNext, onPrevious, onSkip, onComplete }) => {
     const [, setActionCompleted] = useState(true)
 
     // Gestion de l'auto-avancement
@@ -38,13 +29,13 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
     }, [currentStep.id, currentStep.autoAdvance])
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 pointer-events-auto">
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border-2 border-blue-500 animate-fade-in pointer-events-auto">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border-2 border-green-500 animate-fade-in">
                 {/* En-tête avec numéro d'étape */}
                 <div className="p-6 pb-0">
                     <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                            <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
                                 {currentStep.id}
                             </div>
                             <span className="text-sm text-gray-500 font-medium">
@@ -63,7 +54,7 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
                     {/* Barre de progression */}
                     <div className="w-full h-2 bg-gray-100 rounded-full mt-4 mb-6 overflow-hidden">
                         <div
-                            className="h-full bg-blue-500 transition-all duration-500 ease-out"
+                            className="h-full bg-green-500 transition-all duration-500 ease-out"
                             style={{ width: `${(currentStep.id / totalSteps) * 100}%` }}
                         />
                     </div>
@@ -71,10 +62,13 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
 
                 {/* Contenu principal */}
                 <div className="p-6 pt-0">
-                    <h3 className="text-xl font-bold mb-4 text-gray-800 flex items-center justify-center text-center gap-2">
-                        {currentStep.icon && <span className="text-2xl">{currentStep.icon}</span>}
+                    <h3 className="text-xl font-bold mb-4 text-gray-800 flex items-center justify-center gap-2">
+                        {currentStep.icon && (
+                            <span className="text-2xl">{currentStep.icon}</span>
+                        )}
                         <span>{currentStep.title}</span>
                     </h3>
+
 
                     {/* Contenu avec gestion des sauts de ligne */}
                     <div className="text-gray-600 mb-6 space-y-3">
@@ -91,15 +85,17 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
 
                     {/* Section conseils (si présente) */}
                     {currentStep.tips && (
-                        <div className="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200 animate-pulse">
-                            <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                                <Lightbulb className="w-5 h-5 text-blue-600" />
+                        <div className="bg-green-50 rounded-lg p-4 mb-6 border border-green-200 animate-pulse">
+                            <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                                <span className="text-green-600 text-lg flex items-center">
+                                    <Lightbulb className="w-5 h-5" />
+                                </span>
                                 <span>Conseils pratiques</span>
                             </h4>
                             <ul className="space-y-2 pl-1">
                                 {currentStep.tips.map((tip, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-blue-700">
-                                        <span className="text-blue-500 mt-1">•</span>
+                                    <li key={i} className="flex items-start gap-2 text-green-700">
+                                        <span className="text-green-500 mt-1">•</span>
                                         <span>{tip}</span>
                                     </li>
                                 ))}
@@ -127,6 +123,7 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
                             >
                                 <span>Passer</span>
                             </button>
+
                         )}
                     </div>
 
@@ -143,7 +140,7 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
                                 )}
                                 <button
                                     onClick={onNext}
-                                    className="px-5 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600 shadow-sm flex items-center gap-1"
+                                    className="px-5 py-2 rounded-lg font-medium transition-all duration-200 bg-green-500 text-white hover:bg-green-600 shadow-sm flex items-center gap-1"
                                 >
                                     <span>Suivant</span>
                                     <ArrowRight className="w-4 h-4" />
@@ -152,7 +149,7 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
                         ) : (
                             <button
                                 onClick={onComplete}
-                                className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium flex items-center gap-1 shadow-sm"
+                                className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium flex items-center gap-1 shadow-sm"
                             >
                                 <span>Commencer</span>
                             </button>
@@ -163,3 +160,5 @@ export const TutorialOverlayPhotosynthese: React.FC<TutorialOverlayPhotosynthese
         </div>
     )
 }
+
+export default TutorialOverlaySelection

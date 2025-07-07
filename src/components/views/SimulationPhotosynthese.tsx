@@ -227,6 +227,7 @@ const SimulationPhotosynthese = () => {
       questionId: QUIZ_QUESTIONS[index].id,
       userAnswer: answer,
       correct: answer === QUIZ_QUESTIONS[index].correctAnswer,
+      timeSpent,
     }))
 
     const score = results.filter((r) => r.correct).length
@@ -422,8 +423,8 @@ const SimulationPhotosynthese = () => {
               key={preset.name}
               onClick={() => applyPreset(preset)}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${selectedPreset === preset.name
-                  ? `bg-${preset.color}-500 text-white shadow-lg`
-                  : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
+                ? `bg-${preset.color}-500 text-white shadow-lg`
+                : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
                 }`}
               title={preset.description}
               data-tutorial={preset.name === "Conditions Optimales" ? "preset-optimal" : undefined}
@@ -594,21 +595,21 @@ const SimulationPhotosynthese = () => {
       </div>
 
       <p className="mt-8 text-gray-700 max-w-3xl mx-auto leading-relaxed text-center" data-tutorial="completion">
-  Cette simulation interactive vous permet d'expérimenter avec les facteurs qui influencent la photosynthèse.
-  {!tutorialCompleted && (
-    <>
-      {" "}Cliquez sur le bouton
-      <button
-        onClick={startTutorial}
-        className="inline-flex items-center gap-1 px-2 py-1 ml-2 mr-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition"
-        title="Lancer le tutoriel (T)"
-      >
-        <GraduationCap className="w-4 h-4" />
-      </button>
-      pour commencer le tutoriel !
-    </>
-  )}
-</p>
+        Cette simulation interactive vous permet d'expérimenter avec les facteurs qui influencent la photosynthèse.
+        {!tutorialCompleted && (
+          <>
+            {" "}Cliquez sur le bouton
+            <button
+              onClick={startTutorial}
+              className="inline-flex items-center gap-1 px-2 py-1 ml-2 mr-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition"
+              title="Lancer le tutoriel (T)"
+            >
+              <GraduationCap className="w-4 h-4" />
+            </button>
+            pour commencer le tutoriel !
+          </>
+        )}
+      </p>
 
 
 

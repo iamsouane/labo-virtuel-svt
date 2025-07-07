@@ -4,5 +4,8 @@ export interface TutorialStep {
     title: string
     content: string
     skippable?: boolean
-    totalSteps: number
+    autoAdvance?: number
+    tips?: string[]
+    icon?: string
+    totalSteps?: number 
 }
