@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import SimulationSelectionNaturelle from '../views/SimulationSelectionNaturelle';
 import SimulationPhotosynthese from '../views/SimulationPhotosynthese';
-import SimulationEnergie from '../views/simulations/SimulationEnergie';
+import SimulationEnergie from '../views/SimulationEnergie';
 import SimulationPollution from '../views/simulations/SimulationPollution';
 import { Leaf, Rabbit, Zap, Factory } from "lucide-react"
 

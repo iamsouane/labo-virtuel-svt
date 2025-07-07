@@ -47,7 +47,7 @@ const SimulationSelectionNaturelle = () => {
   const [allRabbitsHistory, setAllRabbitsHistory] = useState<RabbitGenetics[]>([]);
   const [selectedRabbit, setSelectedRabbit] = useState<RabbitGenetics | null>(null);
   const [lastExplanation, setLastExplanation] = useState<GenerationExplanation | null>(null);
-  const [explanationByGeneration, setExplanationByGeneration] = useState<Map<number, GenerationExplanation>>(new Map());
+  const [, setExplanationByGeneration] = useState<Map<number, GenerationExplanation>>(new Map());
   const [currentGeneration, setCurrentGeneration] = useState(0);
   const [environment, setEnvironment] = useState<EnvironmentalFactors>(DEFAULT_ENVIRONMENT);
   const [stats, setStats] = useState<GenerationStats>({
@@ -95,18 +95,13 @@ const SimulationSelectionNaturelle = () => {
     const effects: string[] = [];
     
     if (environment.wolvesPresent) {
-      effects.push("Prédateurs actifs - favorise les lapins rapides");
+      effects.push("Présence de loups : cela exerce une pression de sélection en faveur des lapins rapides, qui échappent plus facilement aux prédateurs.");
     }
     if (environment.foodHardness) {
-      effects.push("Nourriture dure - favorise les dents longues");
+      effects.push("Aliments durs disponibles : sélection naturelle en faveur des lapins aux dents longues, mieux adaptés à la mastication.");
     }
     if (environment.foodScarcity) {
-      effects.push("Nourriture rare - compétition accrue");
-    }
-    if (environment.temperature === "cold") {
-      effects.push("Température froide - favorise la fourrure épaisse");
-    } else if (environment.temperature === "hot") {
-      effects.push("Température chaude - défavorise la fourrure épaisse");
+      effects.push("Rareté des ressources alimentaires : pression sélective accrue, seuls les individus les plus compétitifs survivent.");
     }
 
     return effects;

@@ -1,4 +1,4 @@
-//src/components/ui/QuizzPhotosynthese
+//src/components/ui/QuizPhotosynthese
 import { useEffect, useState } from "react"
 import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese"
 import type { QuizResult } from "../../types/simulationPhotosyntheseTypes"
