@@ -1,13 +1,13 @@
-// src/components/ui/GuideOverlayPhotosynthese.tsx
+// src/components/ui/GuideOverlayPollution.tsx
 import React, { useState } from "react"
 import {
   Gamepad2,
   Keyboard,
   Lightbulb,
   MousePointerClick,
-  Sun,
-  LeafyGreen,
-  Droplets,
+  Factory,
+  Car,
+  FlaskConical,
   BarChart,
 } from "lucide-react"
 
@@ -15,12 +15,12 @@ interface GuideOverlayProps {
   onClose: () => void
 }
 
-const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => {
+const GuideOverlayPollution: React.FC<GuideOverlayProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<'guide' | 'faq'>('guide')
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-blue-500 p-6">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-red-500 p-6">
 
         {/* Close button */}
         <button
@@ -36,7 +36,7 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
         <div className="flex border-b border-gray-200 mb-6">
           <button
             onClick={() => setActiveTab('guide')}
-            className={`px-4 py-2 font-medium ${activeTab === 'guide' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 font-medium ${activeTab === 'guide' ? 'text-red-600 border-b-2 border-red-500' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <span className="flex items-center gap-2">
               <Gamepad2 className="w-4 h-4" />
@@ -45,7 +45,7 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
           </button>
           <button
             onClick={() => setActiveTab('faq')}
-            className={`px-4 py-2 font-medium ${activeTab === 'faq' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 font-medium ${activeTab === 'faq' ? 'text-red-600 border-b-2 border-red-500' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <span className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4" />
@@ -58,8 +58,8 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
           <>
             {/* Main title */}
             <h3 className="text-xl font-bold mb-8 text-gray-800 flex items-center justify-center gap-2">
-              <LeafyGreen className="w-6 h-6 text-blue-600" />
-              Guide d'utilisation rapide - Photosynthèse
+              <Factory className="w-6 h-6 text-red-600" />
+              Guide d'utilisation rapide - Pollution Atmosphérique
             </h3>
 
             {/* Content grid */}
@@ -112,9 +112,9 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
                   Conseils
                 </h4>
                 <ul className="list-disc list-outside pl-4 space-y-1 text-gray-700 text-sm">
-                  <li><span className="ml-[-6px]">Utilisez les presets pour gagner du temps</span></li>
-                  <li><span className="ml-[-50px]">Visez la zone optimale d'efficacité</span></li>
-                  <li><span className="ml-[-35px]">Observez l'évolution des indicateurs</span></li>
+                  <li><span className="ml-[-50px]">Comparez les sources de pollution</span></li>
+                  <li><span className="ml-[-10px]">Analysez l'impact des différents polluants</span></li>
+                  <li><span className="ml-[-20px]">Observez les effets sur la qualité de l'air</span></li>
                 </ul>
               </div>
             </div>
@@ -124,51 +124,51 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
             {/* FAQ Sections */}
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Sun className="w-5 h-5 text-blue-600" />
+                <Car className="w-5 h-5 text-red-600" />
                 Utilisation Générale
               </h4>
               <ul className="space-y-3">
                 <li>
                   <p className="font-medium text-gray-700">Comment utiliser la simulation ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Ajustez l'intensité lumineuse, la concentration en CO₂ et la température pour observer leur impact sur le taux de photosynthèse.</p>
+                  <p className="text-sm text-gray-600 mt-1 pl-4">Choisissez une source de pollution, ajustez les paramètres et observez l'impact sur l'atmosphère.</p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Comment utiliser les presets ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Sélectionnez un environnement prédéfini (forêt, désert, serre) pour voir les conditions optimales pour chaque cas.</p>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <LeafyGreen className="w-5 h-5 text-blue-600" />
-                Facteurs Clés
-              </h4>
-              <ul className="space-y-3">
-                <li>
-                  <p className="font-medium text-gray-700">Qu'est-ce que le point de compensation ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Niveau de lumière où photosynthèse = respiration (environ 20-100 µmol/m²/s).</p>
-                </li>
-                <li>
-                  <p className="font-medium text-gray-700">Quel est l'impact de la température ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Optimum généralement entre 20-30°C pour les plantes C3, plus élevé pour les C4.</p>
+                  <p className="font-medium text-gray-700">Comment changer de source de pollution ?</p>
+                  <p className="text-sm text-gray-600 mt-1 pl-4">Utilisez le menu déroulant pour basculer entre Transport et Industrie.</p>
                 </li>
               </ul>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Droplets className="w-5 h-5 text-blue-600" />
-                Plantes et Environnements
+                <FlaskConical className="w-5 h-5 text-red-600" />
+                Polluants Atmosphériques
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Différence C3/C4/CAM ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">C3: climat tempéré, C4: chaud/ensoleillé, CAM: désertique (efficacité différente).</p>
+                  <p className="font-medium text-gray-700">Qu'est-ce que le CO₂ ?</p>
+                  <p className="text-sm text-gray-600 mt-1 pl-4">Principal gaz à effet de serre. Concentration normale : 350-420 ppm.</p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Impact de l'eau ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Le stress hydrique ferme les stomates, limitant le CO₂ disponible.</p>
+                  <p className="font-medium text-gray-700">Que sont les NOx ?</p>
+                  <p className="text-sm text-gray-600 mt-1 pl-4">Oxydes d'azote émis par la combustion. Seuil OMS : 40 µg/m³.</p>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Factory className="w-5 h-5 text-red-600" />
+                Sources de Pollution
+              </h4>
+              <ul className="space-y-3">
+                <li>
+                  <p className="font-medium text-gray-700">Impact d'une voiture ?</p>
+                  <p className="text-sm text-gray-600 mt-1 pl-4">Émet ~120g CO₂/km, +32 ppm par jour dans la simulation.</p>
+                </li>
+                <li>
+                  <p className="font-medium text-gray-700">Impact d'une industrie ?</p>
+                  <p className="text-sm text-gray-600 mt-1 pl-4">Émet ~50 000 tonnes CO₂/an, impact 3x supérieur aux voitures.</p>
                 </li>
               </ul>
             </div>
@@ -177,12 +177,10 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
               <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
                 <BarChart className="w-5 h-5" />
                 Données Scientifiques
-              </h4>
-              <div className="text-sm text-blue-700 space-y-1">
-                <p>• Sources : Recherches en physiologie végétale</p>
-                <p>• Intensité lumineuse optimale : 500-1000 µmol/m²/s</p>
-                <p>• CO₂ atmosphérique : 400-1000 ppm optimal</p>
-                <p>• Rendement quantique maximum : ~8-9 photons/CO₂ fixé</p>
+              </h4>              <div className="text-sm text-blue-700 space-y-1">
+                <p>• Sources : OMS, EPA, ADEME</p>
+                <p>• Émissions voiture : 120g CO₂/km (moyenne européenne)</p>
+                <p>• Seuils OMS : PM2.5 ≤ 15 µg/m³, NO₂ ≤ 40 µg/m³</p>
               </div>
             </div>
           </div>
@@ -192,4 +190,4 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
   )
 }
 
-export default GuideOverlayPhotosynthese
+export default GuideOverlayPollution

@@ -1,5 +1,5 @@
 //src/components/energie/RenderEnergySource
-import { Bike } from "lucide-react"
+import { Bike, Smile, Sun } from "lucide-react"
 import React from "react"
 
 interface EnergyData {
@@ -77,8 +77,10 @@ const RenderEnergySource: React.FC<Props> = ({ energySource, energyData, pedalRo
           }}
         >
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-2xl">😊</div>
-          </div>
+            <div className="text-2xl text-yellow-500">
+              <Smile className="w-6 h-6" />
+            </div>          
+            </div>
         </div>
 
         {[...Array(12)].map((_, i) => (
@@ -119,8 +121,10 @@ const RenderEnergySource: React.FC<Props> = ({ energySource, energyData, pedalRo
       </div>
 
       <div className="mt-4 text-sm font-medium text-gray-700 text-center">
-        ☀️ Soleil
-        <br />
+        <div className="flex items-center justify-center gap-1 text-yellow-600 mb-1">
+          <Sun className="w-4 h-4" />
+          Soleil
+        </div>
         <span className="text-yellow-600">{energyData.solarIntensity}% d'intensité</span>
       </div>
     </div>

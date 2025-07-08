@@ -244,7 +244,7 @@ const SimulationPhotosynthese = () => {
 
     // Notification de fin
     const percentage = Math.round((score / QUIZ_QUESTIONS.length) * 100)
-    notifySuccess(`🎯 Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS.length} (${percentage}%)`)
+    notifySuccess(`Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS.length} (${percentage}%)`)
   }
 
   const restartQuiz = () => {

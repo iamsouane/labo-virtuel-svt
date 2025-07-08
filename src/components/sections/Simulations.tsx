@@ -3,15 +3,15 @@ import { useState } from 'react';
 import SimulationSelectionNaturelle from '../views/SimulationSelectionNaturelle';
 import SimulationPhotosynthese from '../views/SimulationPhotosynthese';
 import SimulationEnergie from '../views/SimulationEnergie';
-import SimulationPollution from '../views/simulations/SimulationPollution';
-import { Leaf, Rabbit, Zap, Factory, ArrowLeft } from "lucide-react"
+import SimulationPollution from '../views/SimulationPollution';
+import { Rabbit, Zap, Factory, ArrowLeft, Trees } from "lucide-react"
 
 const simulationsData = [
   {
     id: 1,
     title: 'Expérience sur la photosynthèse',
     description: "Simule la photosynthèse et observe l'impact de la lumière sur les plantes.",
-    icon: <Leaf className="w-6 h-6 text-green-600" />,
+    icon: <Trees className="w-6 h-6 text-green-600" />,
   },
   {
     id: 2,
@@ -77,12 +77,12 @@ const Simulations = () => {
       {activeSim && (
         <>
           <button
-  onClick={() => setActiveSim(null)}
-  className="mb-6 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 mx-auto"
->
-  <ArrowLeft className="w-5 h-5" />
-  Retour aux simulations
-</button>
+            onClick={() => setActiveSim(null)}
+            className="mb-6 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 mx-auto"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Retour aux simulations
+          </button>
 
 
           {renderActiveSimulation()}
