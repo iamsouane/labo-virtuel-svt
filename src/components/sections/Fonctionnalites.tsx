@@ -5,7 +5,7 @@ const Fonctionnalites = () => (
       {[
         {
           title: 'Simulations interactives',
-          desc: 'Utilisation de Unity, HTML5 ou ThreeJS pour simuler des expériences scientifiques.',
+          desc: 'Utilisation de HTML5 et ThreeJS pour simuler des expériences scientifiques.',
         },
         {
           title: 'Gestion des classes',

@@ -9,7 +9,7 @@ interface FoodProps {
 const Food = ({ environment }: FoodProps) => {
   const getFoodItems = () => {
     const items = []
-    const baseCount = environment.foodScarcity ? 4 : 12
+    const baseCount = environment.foodScarcity ? 30 : 100
 
     for (let i = 0; i < baseCount; i++) {
       items.push({

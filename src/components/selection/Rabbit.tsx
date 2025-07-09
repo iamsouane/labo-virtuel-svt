@@ -70,7 +70,7 @@ const Rabbit = ({ genetics, initialPosition, index, isSelected, onSelect }: Rabb
       top: `${position.y}%`,
     }}
     transition={{
-      duration: 4,
+      duration: 10,
       repeat: Infinity,
       repeatType: "reverse",
       ease: "easeInOut",
