@@ -12,12 +12,12 @@ import { usePollutionVehicles } from "../../hooks/usePollutionVehicles";
 import { getAQIStatus } from "../utils/aqiUtils";
 import { POLLUTION_TUTORIAL_STEPS } from "../../data/pollutionTutorial";
 import {
-  CheckCircle, GraduationCap, Brain, HelpCircle,
+   GraduationCap, Brain, HelpCircle,
   Factory, Car, RotateCw, Play, Pause,
   Clock, FlaskConical,
   BarChart3, Target,
 } from "lucide-react";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { notifySuccess, notifyInfo } from "../../lib/notifications";
 import PollutionScene from "../pollution/PollutionScene";
@@ -160,11 +160,8 @@ export default function SimulationPollution() {
     setShowTutorial(false);
     setTutorialCompleted(true);
     localStorage.setItem("pollution-tutorial-completed", "true");
-    toast.success(
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-6 h-6 text-green-500" />
-        <span>Tutoriel terminé ! Vous êtes prêt à explorer la pollution !</span>
-      </div>
+    notifySuccess(
+      "Tutoriel Pollution terminé ! Vous êtes prêt à expérimenter !"
     );
   };
 

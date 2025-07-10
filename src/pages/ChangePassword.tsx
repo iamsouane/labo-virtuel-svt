@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import { notifyError } from "../lib/notifications";
 
 interface ChangePasswordFormProps {
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
@@ -58,7 +58,7 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
     }
 
     setLoading(false);
-    onSuccess(); // Appelé une seule fois, aucune notification ici
+    onSuccess?.(); // Appelé une seule fois, aucune notification ici
   };
 
   return (

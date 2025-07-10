@@ -1,6 +1,6 @@
 //src/components/views/SimulationEnergie.tsx
 import { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEnergyShortcuts } from "../../hooks/useEnergyShortcuts";
 import GuideOverlayEnergie from "../ui/GuideOverlayEnergie";
@@ -11,7 +11,7 @@ import { QuizEnergieOverlay } from "../ui/QuizEnergieOverlay";
 import { FullscreenContainer } from "../../components/ui/FullscreenContainer";
 import { FullscreenButton } from "../../components/ui/FullscreenButton";
 import { useFullscreen } from "../../hooks/useFullscreen";
-import { GraduationCap, Brain, HelpCircle, Play, Pause, Clock, CheckCircle, Zap, Sun, Bike, BatteryCharging, Lightbulb, Info } from "lucide-react";
+import { GraduationCap, Brain, HelpCircle, Play, Pause, Clock, Zap, Sun, Bike, BatteryCharging, Lightbulb, Info } from "lucide-react";
 import type {
   EnergyData,
   OutputDevice,
@@ -29,6 +29,7 @@ import RenderOutputDevice from "../energie/RenderOutputDevice";
 import RenderEnergyParticles from "../energie/RenderEnergyParticles";
 import RenderEnergySymbolsLegend from "../energie/RenderEnergySymbolsLegend";
 import Tooltip from "../ui/Tooltip";
+import { notifySuccess } from "../../lib/notifications";
 
 const SimulationEnergie = () => {
   // États principaux
@@ -84,11 +85,8 @@ const SimulationEnergie = () => {
     setShowTutorial(false);
     setTutorialCompleted(true);
     localStorage.setItem("energy-tutorial-completed", "true");
-    toast.success(
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-6 h-6 text-green-500" />
-        <span>Tutoriel terminé ! Vous êtes prêt à expérimenter !</span>
-      </div>
+    notifySuccess(
+      "Tutoriel Energie terminé ! Vous êtes prêt à expérimenter !"
     );
   };
 
@@ -151,13 +149,8 @@ const SimulationEnergie = () => {
 
     setQuizCompleted(true);
 
-    toast.success(
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-5 h-5 text-green-500" />
-        <span>
-          Quiz terminé ! Score : {score}/{QUIZ_QUESTIONS_ENERGIE.length} ({percentage}%)
-        </span>
-      </div>
+    notifySuccess(
+      `Quiz terminé ! Vous avez obtenu ${score} sur ${QUIZ_QUESTIONS_ENERGIE.length} questions (${percentage}%).`
     );
   };
 

@@ -12,6 +12,7 @@ export interface Profil {
   role: Role;
   must_change_password: boolean;
   created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }
 
 // NewUser (pour insérer un nouvel utilisateur dans la base de données)

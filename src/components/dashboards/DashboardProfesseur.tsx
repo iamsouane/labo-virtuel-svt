@@ -37,7 +37,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
       </button>
 
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Tableau de bord Administrateur</h2>
+        <h2 className="text-xl font-semibold mb-4">Tableau de bord Professeur</h2>
         <p>Ici, vous pouvez gérer les utilisateurs, surveiller l'activité, etc.</p>
       </div>
     </div>

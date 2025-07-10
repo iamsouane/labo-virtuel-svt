@@ -1,7 +1,7 @@
 // src/components/sections/AuthForm.tsx
 import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import type { NewUser, Profil } from "../../types";
+import type { Profil } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../lib/notifications";
 
@@ -13,6 +13,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ email: "", password: "", name: "" });
   const [isPendingConfirmation, setIsPendingConfirmation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,93 +24,106 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    // Validation
-    if (!formData.email || !formData.password || (!isLogin && !formData.name)) {
-      return notifyError("Tous les champs sont obligatoires.");
-    }
-
-    if (!isValidEmail(formData.email)) {
-      return notifyError("Veuillez entrer une adresse e-mail valide.");
-    }
-
-    if (!isLogin && formData.name.trim().split(" ").length < 2) {
-      return notifyError("Veuillez entrer votre prénom et votre nom.");
-    }
-
-    if (formData.password.length < 6) {
-      return notifyError("Le mot de passe doit contenir au moins 6 caractères.");
-    }
-
-    if (isLogin) {
-      // Connexion
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (signInError) return notifyError("Échec de la connexion : " + signInError.message);
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) return notifyError("Utilisateur introuvable.");
-
-      const { data: profil, error: profilError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single<Profil>();
-
-      if (profilError || !profil) return notifyError("Impossible de récupérer votre profil.");
-
-      if (profil.must_change_password) {
-        notifySuccess("Connexion réussie. Veuillez changer votre mot de passe.");
-        navigate("/changer-mot-de-passe");
-      } else {
-        notifySuccess("Connexion réussie !");
-        navigate("/dashboard");
-      }
-
-      onAuthSuccess?.();
-    } else {
-      // Inscription
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (signUpError) return notifyError("Échec de l'inscription : " + signUpError.message);
-
-      const user = data.user;
-
-      if (!user) {
-        // Email non confirmé
-        setIsPendingConfirmation(true);
-        notifySuccess("Inscription réussie ! Veuillez confirmer votre e-mail avant de vous connecter.");
+    try {
+      // Validation
+      if (!formData.email || !formData.password || (!isLogin && !formData.name)) {
+        notifyError("Tous les champs sont obligatoires.");
         return;
       }
 
-      // Création du profil dans la table users
-      const newUser: NewUser = {
-        nom: formData.name.split(" ").slice(-1)[0] || "",
-        prenom: formData.name.split(" ").slice(0, -1).join(" ") || "",
-        email: formData.email,
-        photo_profil: undefined,
-        role: "ELEVE",
-        must_change_password: true,
-      };
+      if (!isValidEmail(formData.email)) {
+        notifyError("Veuillez entrer une adresse e-mail valide.");
+        return;
+      }
 
-      const { error: insertError } = await supabase
-        .from("users")
-        .insert([{ id: user.id, ...newUser }]);
+      if (!isLogin && formData.name.trim().split(" ").length < 2) {
+        notifyError("Veuillez entrer votre prénom et votre nom.");
+        return;
+      }
 
-      if (insertError) return notifyError("Erreur lors de la création du profil.");
+      if (formData.password.length < 6) {
+        notifyError("Le mot de passe doit contenir au moins 6 caractères.");
+        return;
+      }
 
-      notifySuccess("Inscription réussie ! Vérifiez votre e-mail pour confirmer.");
-      setIsPendingConfirmation(true);
+      if (isLogin) {
+        // Connexion
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (signInError) {
+          notifyError("Échec de la connexion : " + signInError.message);
+          return;
+        }
+
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+          notifyError("Session utilisateur introuvable.");
+          return;
+        }
+
+        // Attendre un petit délai pour s'assurer que le profil est créé
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Récupérer le profil
+        const { data: profil, error: profilError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .single<Profil>();
+
+        if (profilError || !profil) {
+          notifyError("Impossible de récupérer votre profil.");
+          return;
+        }
+
+        if (profil.must_change_password) {
+          notifySuccess("Connexion réussie. Veuillez changer votre mot de passe.");
+          navigate("/changer-mot-de-passe");
+        } else {
+          notifySuccess("Connexion réussie !");
+          navigate("/dashboard");
+        }
+
+        onAuthSuccess?.();
+      } else {
+        // Inscription
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.name,
+            },
+          },
+        });
+
+        if (signUpError) {
+          notifyError("Échec de l'inscription : " + signUpError.message);
+          return;
+        }
+
+        const user = data.user;
+
+        if (!user) {
+          setIsPendingConfirmation(true);
+          notifySuccess("Inscription réussie ! Veuillez confirmer votre e-mail avant de vous connecter.");
+          return;
+        }
+
+        notifySuccess("Inscription réussie ! Vérifiez votre e-mail pour confirmer.");
+        setIsPendingConfirmation(true);
+      }
+    } catch (error) {
+      console.error("Erreur inattendue:", error);
+      notifyError("Une erreur inattendue s'est produite. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,7 +178,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Votre nom complet"
-              disabled={isPendingConfirmation}
+              disabled={isPendingConfirmation || isLoading}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -181,7 +195,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             value={formData.email}
             onChange={handleChange}
             placeholder="exemple@domaine.com"
-            disabled={isPendingConfirmation}
+            disabled={isPendingConfirmation || isLoading}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
@@ -197,18 +211,18 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             value={formData.password}
             onChange={handleChange}
             placeholder="******"
-            disabled={isPendingConfirmation}
+            disabled={isPendingConfirmation || isLoading}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
         <button
           type="submit"
-          disabled={isPendingConfirmation}
-          className={`w-full ${isPendingConfirmation ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+          disabled={isPendingConfirmation || isLoading}
+          className={`w-full ${(isPendingConfirmation || isLoading) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
             } text-white font-semibold py-3 rounded-xl shadow transition`}
         >
-          {isLogin ? "Se connecter" : "S'inscrire"}
+          {isLoading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}
         </button>
       </form>
     </section>

@@ -1,9 +1,9 @@
 // src/components/views/SimulationSelectionNaturelle.tsx
 import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { notifyInfo, notifyError } from "../../lib/notifications";
+import { notifyInfo, notifyError, notifySuccess } from "../../lib/notifications";
 import { useSelectionNaturelleShortcuts } from "../../hooks/useSelectionNaturelleShortcuts";
 import GuideOverlaySelection from "../ui/GuideOverlaySelection";
 import TutorialOverlaySelection from "../ui/TutorialOverlaySelection";
@@ -13,7 +13,7 @@ import QuizOverlay from "../ui/QuizSelectionOverlay";
 import { FullscreenContainer } from "../../components/ui/FullscreenContainer";
 import { FullscreenButton } from "../../components/ui/FullscreenButton";
 import { useFullscreen } from "../../hooks/useFullscreen";
-import { GraduationCap, Brain, HelpCircle, RotateCw, Play, Pause, Clock, CheckCircle, Cat, Bone, Leaf, WandSparkles, Dna, AlertTriangle, Paintbrush, Ear, Star, ThumbsUp, AlertCircle } from "lucide-react";
+import { GraduationCap, Brain, HelpCircle, RotateCw, Play, Pause, Clock, Cat, Bone, Leaf, WandSparkles, Dna, AlertTriangle, Paintbrush, Ear, Star, ThumbsUp, AlertCircle } from "lucide-react";
 import type {
   RabbitGenetics,
   EnvironmentalFactors,
@@ -228,11 +228,8 @@ const SimulationSelectionNaturelle = () => {
     setShowTutorial(false);
     setTutorialCompleted(true);
     localStorage.setItem("selection-tutorial-completed", "true");
-    toast.success(
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-6 h-6 text-green-500" />
-        <span>Tutoriel terminé ! Vous êtes prêt à expérimenter !</span>
-      </div>
+    notifySuccess(
+      "Tutoriel terminé ! Vous êtes prêt à expérimenter !"
     );
   };
 
@@ -295,13 +292,8 @@ const SimulationSelectionNaturelle = () => {
 
     setQuizCompleted(true);
 
-    toast.success(
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-5 h-5 text-green-500" />
-        <span>
-          Quiz terminé ! Score : {score}/{QUIZ_QUESTIONS_SELECTION.length} ({percentage}%)
-        </span>
-      </div>
+    notifySuccess(
+      `Quiz terminé ! Vous avez obtenu ${score} sur ${QUIZ_QUESTIONS_SELECTION.length} (${percentage}%).`
     );
   };
 

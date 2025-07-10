@@ -6,7 +6,7 @@ import { PHOTOSYNTHESE_TUTORIAL_STEPS } from "../../data/photosyntheseTutorial"
 import { TutorialOverlayPhotosynthese } from "../ui/TutorialOverlayPhotosynthese"
 import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese"
 import QuizOverlay from "../ui/QuizPhotosyntheseOverlay"
-import { toast, ToastContainer } from "react-toastify"
+import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { notifySuccess, notifyInfo } from "../../lib/notifications"
 import { usePhotosyntheseShortcuts } from "../../hooks/usePhotosyntheseShortcuts"
@@ -17,7 +17,7 @@ import { useFullscreen } from "../../hooks/useFullscreen"
 import { PRESETS } from "../../data/presetsPhotosynthese"
 import { SimplePhotosynthesisScene } from "../photosynthese/SimplePhotosynthesisScene"
 import EnvironmentControlCard from "../ui/EnvironmentControlCard"
-import { GraduationCap, Brain, HelpCircle, Star, ThumbsUp, AlertCircle, Settings, RotateCw, CheckCircle, Leaf, Play, Pause, Clock, Target, SunMedium, CloudDrizzle, ThermometerSun, Droplets, FlaskConical, BarChart3, Thermometer } from "lucide-react"
+import { GraduationCap, Brain, HelpCircle, Star, ThumbsUp, AlertCircle, Settings, RotateCw, Leaf, Play, Pause, Clock, Target, SunMedium, CloudDrizzle, ThermometerSun, Droplets, FlaskConical, BarChart3, Thermometer } from "lucide-react"
 
 // Composant principal avec tutoriel intégré
 const SimulationPhotosynthese = () => {
@@ -164,11 +164,8 @@ const SimulationPhotosynthese = () => {
     setShowTutorial(false)
     setTutorialCompleted(true)
     localStorage.setItem("photosynthesis-tutorial-completed", "true")
-    toast.success(
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-6 h-6 text-green-500" />
-        <span> Tutoriel terminé ! Vous êtes prêt à expérimenter !</span>
-      </div>
+    notifySuccess(
+      "Tutoriel Photosynthèse terminé ! Vous êtes prêt à expérimenter !"
     )
   }
 
