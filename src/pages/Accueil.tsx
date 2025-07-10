@@ -1,17 +1,29 @@
-import Hero from '../components/sections/Hero';
-import APropos from '../components/sections/APropos';
-import Fonctionnalites from '../components/sections/Fonctionnalites';
-import Simulations from '../components/sections/Simulations';
-import Visualisations from '../components/sections/Visualisations';
-import Technologies from '../components/sections/Technologies';
-import CTA from '../components/sections/CTA';
-import MainLayout from '../components/layout/MainLayout';
-import AuthForm from '../components/sections/AuthForm';
-import Footer from '../components/sections/Footer';
+// src/pages/Accueil.tsx
+import Hero from "../components/sections/Hero";
+import APropos from "../components/sections/APropos";
+import Fonctionnalites from "../components/sections/Fonctionnalites";
+import Simulations from "../components/sections/Simulations";
+import Visualisations from "../components/sections/Visualisations";
+import Technologies from "../components/sections/Technologies";
+import CTA from "../components/sections/CTA";
+import AuthForm from "../components/sections/AuthForm";
+import Footer from "../components/sections/Footer";
+import AccueilUtilisateur from "../components/views/AccueilUtilisateur";
+import type { Profil } from "../types";
 
-const Accueil = () => {
+interface AccueilProps {
+  user: Profil | null;
+}
+
+const Accueil = ({ user }: AccueilProps) => {
+  // Si connecté, afficher uniquement le dashboard
+  if (user) {
+    return <AccueilUtilisateur user={user} onLogout={() => window.location.reload()} />;
+  }
+
+  // Sinon afficher toutes les sections de la page d’accueil
   return (
-    <MainLayout>
+    <>
       <Hero />
       <APropos />
       <Fonctionnalites />
@@ -19,9 +31,9 @@ const Accueil = () => {
       <Visualisations />
       <Technologies />
       <CTA />
-      <AuthForm />
+      <AuthForm onAuthSuccess={() => window.location.reload()} />
       <Footer />
-    </MainLayout>
+    </>
   );
 };
 
