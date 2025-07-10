@@ -1,90 +1,91 @@
 // src/pages/ChangePassword.tsx
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { notifyError } from "../lib/notifications";
 
-const ChangePassword = () => {
+interface ChangePasswordFormProps {
+  onSuccess: () => void;
+}
+
+const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
   const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handlePasswordUpdate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
+    setLoading(true);
 
-    // Mise à jour du mot de passe dans Supabase Auth
+    // 1. Vérification basique
+    if (newPassword.trim().length < 6) {
+      notifyError("Le mot de passe doit contenir au moins 6 caractères.");
+      setLoading(false);
+      return;
+    }
+
+    // 2. Mise à jour dans Supabase Auth
     const { error: authError } = await supabase.auth.updateUser({
       password: newPassword,
     });
 
     if (authError) {
-      setMessage("Erreur : " + authError.message);
+      notifyError("Erreur : " + authError.message);
+      setLoading(false);
       return;
     }
 
-    // Récupérer l'utilisateur courant
+    // 3. Récupérer l'utilisateur
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      setMessage("Erreur lors de la récupération de l'utilisateur.");
+      notifyError("Erreur lors de la récupération de l'utilisateur.");
+      setLoading(false);
       return;
     }
 
-    // Mise à jour du champ must_change_password dans la table users
+    // 4. Mise à jour du champ `must_change_password`
     const { error: dbError } = await supabase
       .from("users")
       .update({ must_change_password: false })
       .eq("id", user.id);
 
     if (dbError) {
-      setMessage("Erreur lors de la mise à jour du statut : " + dbError.message);
+      notifyError("Erreur de mise à jour : " + dbError.message);
+      setLoading(false);
       return;
     }
 
-    // Redirection vers le dashboard après succès
-    navigate("/dashboard");
+    setLoading(false);
+    onSuccess(); // Appelé une seule fois, aucune notification ici
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <form
-        onSubmit={handlePasswordUpdate}
-        className="space-y-6 bg-white p-8 rounded-xl shadow-md w-full max-w-md"
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <label className="block text-left font-medium text-sm text-gray-700">
+        Nouveau mot de passe
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="mt-1 block w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+          minLength={6}
+        />
+      </label>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full py-2 px-4 rounded-md text-white transition ${
+          loading ? "bg-green-400" : "bg-green-600 hover:bg-green-700"
+        }`}
       >
-        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
-          Changer votre mot de passe
-        </h2>
-
-        <label className="block">
-          <span className="text-gray-700 font-medium">Nouveau mot de passe</span>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="mt-1 block w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-            minLength={6}
-          />
-        </label>
-
-        <button
-          type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition"
-        >
-          Mettre à jour
-        </button>
-
-        {message && (
-          <p className={`text-sm text-center mt-2 ${message.startsWith("Erreur") ? "text-red-500" : "text-green-600"}`}>
-            {message}
-          </p>
-        )}
-      </form>
-    </div>
+        {loading ? "Mise à jour..." : "Mettre à jour"}
+      </button>
+    </form>
   );
 };
 
-export default ChangePassword;
+export default ChangePasswordForm;
