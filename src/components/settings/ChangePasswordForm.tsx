@@ -3,56 +3,39 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
 interface ChangePasswordFormProps {
-  onSuccess: () => void; // Appelé après succès
+  onSuccess: () => void;
 }
 
 const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
   const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
 
-  const handlePasswordUpdate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
 
-    // Mise à jour du mot de passe dans Supabase Auth
-    const { error: authError } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    // 🔐 Mise à jour du mot de passe dans Supabase Auth
+    const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
+    if (authError) return;
 
-    if (authError) {
-      setMessage("Erreur : " + authError.message);
-      return;
-    }
-
-    // Récupérer l'utilisateur courant
+    // 👤 Récupération de l'utilisateur courant
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
+    if (userError || !user) return;
 
-    if (userError || !user) {
-      setMessage("Erreur lors de la récupération de l'utilisateur.");
-      return;
-    }
-
-    // Mise à jour du champ must_change_password
+    // ✅ Mise à jour de must_change_password
     const { error: dbError } = await supabase
       .from("users")
       .update({ must_change_password: false })
       .eq("id", user.id);
+    if (dbError) return;
 
-    if (dbError) {
-      setMessage("Erreur lors de la mise à jour du statut : " + dbError.message);
-      return;
-    }
-
-    setMessage("Mot de passe mis à jour avec succès !");
     setNewPassword("");
-    onSuccess(); // ✅ Notifie le parent
+    onSuccess(); // 👌 notify le parent
   };
 
   return (
-    <form onSubmit={handlePasswordUpdate} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <label className="block">
         Nouveau mot de passe :
         <input
@@ -63,13 +46,9 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
           required
         />
       </label>
-      <button
-        type="submit"
-        className="bg-green-600 text-white py-2 px-4 rounded"
-      >
+      <button type="submit" className="bg-green-600 text-white py-2 px-4 rounded">
         Mettre à jour
       </button>
-      {message && <p className="text-sm mt-2">{message}</p>}
     </form>
   );
 };

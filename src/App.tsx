@@ -1,76 +1,83 @@
-// src/App.tsx
-import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import type { Profil } from "./types";
-import MainLayout from "./components/layout/MainLayout";
-import AccueilUtilisateur from "./components/views/AccueilUtilisateur";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Accueil from "./pages/Accueil";
+import Dashboard from "./pages/Dashboard";
+import ChangePassword from "./pages/ChangePassword";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-function App() {
+const App = () => {
   const [user, setUser] = useState<Profil | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchUserDetails = async () => {
-    const { data: authData } = await supabase.auth.getSession();
-    if (!authData?.session?.user) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-    const userId = authData.session.user.id;
-
-    const { data: userDetails, error: userError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single<Profil>();
-
-
-    if (userError || !userDetails) {
-      setUser(null);
-    } else {
-      setUser(userDetails);
-    }
-    setLoading(false);
-  };
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserDetails();
+    const fetchUser = async () => {
+      setIsLoading(true);
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+
+      if (!authUser) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: profil, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .single<Profil>();
+
+      if (error) {
+        console.error("Erreur profil:", error.message);
         setUser(null);
       } else {
-        fetchUserDetails();
+        setUser(profil);
       }
-    });
 
-    return () => {
-      listener?.subscription.unsubscribe();
+      setIsLoading(false);
     };
+
+    fetchUser();
   }, []);
 
-  if (loading) return <p>Chargement...</p>;
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl font-semibold">
+        Chargement...
+      </div>
+    );
+  }
 
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Accueil user={user} />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
-            <MainLayout>
-              {user ? (
-                <AccueilUtilisateur user={user} onLogout={() => setUser(null)} />
-              ) : (
-                <Accueil user={null} />
-              )}
-            </MainLayout>
+            user ? (
+              <Dashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <Accueil user={null} />
+            )
           }
         />
+        <Route path="/changer-mot-de-passe" element={<ChangePassword />} />
       </Routes>
-    </Router>
+
+      {/* ✅ Activation globale des notifications */}
+      <ToastContainer />
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

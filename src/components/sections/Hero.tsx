@@ -7,12 +7,12 @@ const Hero = () => (
       <p className="text-lg md:text-xl mb-6">
         Une plateforme interactive pour les classes de Seconde
       </p>
-      <Link
-        to="/login"
+       <a
+        href="#auth-form"
         className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition"
       >
         Accéder au labo
-      </Link>
+      </a>
     </div>
   </section>
 );

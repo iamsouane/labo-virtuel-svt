@@ -31,7 +31,10 @@ const Accueil = ({ user }: AccueilProps) => {
       <Visualisations />
       <Technologies />
       <CTA />
-      <AuthForm onAuthSuccess={() => window.location.reload()} />
+      <section id="auth-form">
+  <AuthForm onAuthSuccess={() => window.location.reload()} />
+</section>
+      
       <Footer />
     </>
   );
