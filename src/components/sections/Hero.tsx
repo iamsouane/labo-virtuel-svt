@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-
+//src/components/sections/Hero.tsx
 const Hero = () => (
   <section id="hero" className="min-h-screen bg-gradient-to-br from-green-100 to-blue-200 flex items-center justify-center text-center px-4">
     <div>

@@ -27,14 +27,13 @@ const Accueil = ({ user }: AccueilProps) => {
       <Hero />
       <APropos />
       <Fonctionnalites />
-      <Simulations />
+      <Simulations user={user} />
       <Visualisations />
       <Technologies />
       <CTA />
       <section id="auth-form">
-  <AuthForm onAuthSuccess={() => window.location.reload()} />
-</section>
-      
+        <AuthForm onAuthSuccess={() => window.location.reload()} />
+      </section>
       <Footer />
     </>
   );

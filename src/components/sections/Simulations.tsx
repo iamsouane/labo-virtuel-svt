@@ -4,7 +4,12 @@ import SimulationSelectionNaturelle from '../views/SimulationSelectionNaturelle'
 import SimulationPhotosynthese from '../views/SimulationPhotosynthese';
 import SimulationEnergie from '../views/SimulationEnergie';
 import SimulationPollution from '../views/SimulationPollution';
-import { Rabbit, Zap, Factory, ArrowLeft, Trees } from "lucide-react"
+import { Rabbit, Zap, Factory, ArrowLeft, Trees, Lock } from "lucide-react";
+import type { Profil } from "../../types";
+
+interface SimulationsProps {
+  user: Profil | null;
+}
 
 const simulationsData = [
   {
@@ -33,7 +38,7 @@ const simulationsData = [
   },
 ];
 
-const Simulations = () => {
+const Simulations = ({ user }: SimulationsProps) => {
   const [activeSim, setActiveSim] = useState<string | null>(null);
 
   const renderActiveSimulation = () => {
@@ -60,17 +65,29 @@ const Simulations = () => {
           {simulationsData.map(({ id, title, description, icon }) => (
             <div
               key={id}
-              onClick={() => setActiveSim(title)}
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer select-none"
+              className={`relative bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition select-none ${
+                !user ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+              }`}
+              onClick={() => {
+                if (user) setActiveSim(title);
+              }}
             >
               <div className="flex items-center justify-center text-5xl mb-4">
                 {icon}
               </div>
               <h3 className="text-xl font-semibold mb-2">{title}</h3>
               <p className="text-gray-600">{description}</p>
+
+              {!user && (
+  <div className="absolute inset-0 bg-white/20 flex flex-col items-center justify-center rounded-2xl backdrop-blur-sm text-center px-4">
+    <Lock className="w-8 h-8 text-gray-800 mb-2" />
+    <p className="text-gray-800 font-semibold">
+      Connectez-vous pour accéder aux simulations
+    </p>
+  </div>
+)}
             </div>
           ))}
-
         </div>
       )}
 
@@ -83,7 +100,6 @@ const Simulations = () => {
             <ArrowLeft className="w-5 h-5" />
             Retour aux simulations
           </button>
-
 
           {renderActiveSimulation()}
         </>
