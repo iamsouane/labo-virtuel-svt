@@ -8,7 +8,7 @@ import Visualisations from "../sections/Visualisations";
 import UserList from "../admin/UserList";
 import { Users, Cpu, MonitorPlay, LogOut, Mail, UserCircle } from "lucide-react";
 import SimulationForm from "../admin/SimulationForm";
-import ListeDemandesAcces from "../admin/ListeDemandesAcces";
+import ListeDemandesAcces from "../views/ListeDemandesAcces";
 
 interface DashboardAdminProps {
   user: Profil;
@@ -60,7 +60,7 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
         return (
           <div className="mt-4">
             <h2 className="text-2xl font-semibold mb-4">Demandes d'accès</h2>
-            <ListeDemandesAcces /> {/* Un composant à créer */}
+            <ListeDemandesAcces user={user}/>
           </div>
         );
       default:

@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber"
 import type { LabEnvironment, DataPoint, Preset, QuizResult, } from "../../types/simulationPhotosyntheseTypes"
 import { PHOTOSYNTHESE_TUTORIAL_STEPS } from "../../data/photosyntheseTutorial"
 import { TutorialOverlayPhotosynthese } from "../ui/TutorialOverlayPhotosynthese"
-import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese"
+import type { QuizQuestion } from "../../types/simulationPhotosyntheseTypes"
 import QuizOverlay from "../ui/QuizPhotosyntheseOverlay"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -18,6 +18,7 @@ import { PRESETS } from "../../data/presetsPhotosynthese"
 import { SimplePhotosynthesisScene } from "../photosynthese/SimplePhotosynthesisScene"
 import EnvironmentControlCard from "../ui/EnvironmentControlCard"
 import { GraduationCap, Brain, HelpCircle, Star, ThumbsUp, AlertCircle, Settings, RotateCw, Leaf, Play, Pause, Clock, Target, SunMedium, CloudDrizzle, ThermometerSun, Droplets, FlaskConical, BarChart3, Thermometer } from "lucide-react"
+import { supabase } from "../../lib/supabaseClient"
 
 // Composant principal avec tutoriel intégré
 const SimulationPhotosynthese = () => {
@@ -51,7 +52,9 @@ const SimulationPhotosynthese = () => {
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const QUIZ_QUESTIONS = QUIZ_QUESTIONS_PHOTOSYNTHESE
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([])
+  const [quizLoading, setQuizLoading] = useState(true)
+  const QUIZ_QUESTIONS = quizQuestions
 
 
 
@@ -160,6 +163,43 @@ const SimulationPhotosynthese = () => {
     localStorage.setItem("photosynthesis-tutorial-completed", "true")
   }
 
+  //quiz
+useEffect(() => {
+  const fetchQuiz = async () => {
+    setQuizLoading(true)
+
+    // Recherche par code (ex: "photosynthese") au lieu de par id
+    const { data: sim, error: simError } = await supabase
+      .from('simulation')
+      .select('quiz_id')
+      .eq('code', 'photosynthese') // code dynamique à remplacer si besoin
+      .single()
+
+    if (simError || !sim?.quiz_id) {
+      console.error("Erreur récupération quiz_id", simError)
+      setQuizLoading(false)
+      return
+    }
+
+    const { data: questions, error: questionsError } = await supabase
+      .from('question')
+      .select('*')
+      .eq('quiz_id', sim.quiz_id)
+      .order('created_at', { ascending: true })
+
+    if (questionsError) {
+      console.error("Erreur récupération questions", questionsError)
+    } else {
+      setQuizQuestions(questions)
+    }
+
+    setQuizLoading(false)
+  }
+
+  fetchQuiz()
+}, [])
+
+
   const completeTutorial = () => {
     setShowTutorial(false)
     setTutorialCompleted(true)
@@ -218,31 +258,37 @@ const SimulationPhotosynthese = () => {
     }
   }
 
-  const completeQuiz = (answers: number[]) => {
-    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
-    const results = answers.map((answer, index) => ({
-      questionId: QUIZ_QUESTIONS[index].id,
+const completeQuiz = (answers: number[]) => {
+  const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+  const results = answers.map((answer, index) => {
+    const question = QUIZ_QUESTIONS[index]
+    const userAnswerText = question.options[answer]
+    const isCorrect = userAnswerText === question.reponse_correcte
+    return {
+      questionId: question.id,
       userAnswer: answer,
-      correct: answer === QUIZ_QUESTIONS[index].correctAnswer,
+      correct: isCorrect,
       timeSpent,
-    }))
-
-    const score = results.filter((r) => r.correct).length
-
-    const result: QuizResult = {
-      score,
-      totalQuestions: QUIZ_QUESTIONS.length,
-      timeSpent,
-      answers: results,
     }
+  })
 
-    setQuizResult(result)
-    setQuizCompleted(true)
+  const score = results.filter((r) => r.correct).length
 
-    // Notification de fin
-    const percentage = Math.round((score / QUIZ_QUESTIONS.length) * 100)
-    notifySuccess(`Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS.length} (${percentage}%)`)
+  const result: QuizResult = {
+    score,
+    totalQuestions: QUIZ_QUESTIONS.length,
+    timeSpent,
+    answers: results,
   }
+
+  setQuizResult(result)
+  setQuizCompleted(true)
+
+  // Notification de fin
+  const percentage = Math.round((score / QUIZ_QUESTIONS.length) * 100)
+  notifySuccess(`Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS.length} (${percentage}%)`)
+}
+
 
   const restartQuiz = () => {
     startQuiz()
@@ -303,17 +349,23 @@ const SimulationPhotosynthese = () => {
 
       {/* Quiz interactif */}
       {showQuiz && (
-        <QuizOverlay
-          questions={QUIZ_QUESTIONS}
-          currentQuestion={currentQuizQuestion}
-          selectedAnswer={selectedAnswer}
-          onAnswerSelect={answerQuestion}
-          onNext={nextQuestion}
-          onClose={closeQuiz}
-          result={quizResult}
-          completed={quizCompleted}
-          onRestart={restartQuiz}
-        />
+        quizLoading ? (
+          <div className="fixed inset-0 flex items-center justify-center bg-white/70 z-50">
+            <p className="text-lg font-semibold">Chargement du quiz...</p>
+          </div>
+        ) : (
+          <QuizOverlay
+            questions={quizQuestions}
+            currentQuestion={currentQuizQuestion}
+            selectedAnswer={selectedAnswer}
+            onAnswerSelect={answerQuestion}
+            onNext={nextQuestion}
+            onClose={closeQuiz}
+            result={quizResult}
+            completed={quizCompleted}
+            onRestart={restartQuiz}
+          />
+        )
       )}
 
       {/* Aide contextuelle */}

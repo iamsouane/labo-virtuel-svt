@@ -1,4 +1,4 @@
-// src/components/admin/CreateClasseForm.tsx
+// src/components/users/CreateClasseForm.tsx
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
@@ -46,6 +46,7 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
 
       setLoading(true);
 
+      // 1. Création de la classe
       const { data: classeData, error } = await supabase
         .from("classe")
         .insert({
@@ -61,7 +62,18 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
         return;
       }
 
-      // Ajout élèves...
+      // 2. Ajout du professeur dans users_classe
+      const { error: profInsertError } = await supabase
+        .from("users_classe")
+        .insert([{ users_id: user.id, classe_id: classeData.id }]);
+
+      if (profInsertError) {
+        notifyError("Erreur lors de l'ajout du professeur à la classe.");
+        setLoading(false);
+        return;
+      }
+
+      // 3. Ajout des élèves sélectionnés dans users_classe
       if (selectedEleves.length > 0) {
         const insertions = selectedEleves.map((eleveId) => ({
           users_id: eleveId,
@@ -132,6 +144,7 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          disabled={loading}
         >
           {loading ? "Création en cours..." : "Créer la classe"}
         </button>

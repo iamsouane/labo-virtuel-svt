@@ -1,4 +1,4 @@
-//src/components/admin/MesClasses.tsx
+//src/components/users/MesClasses.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";

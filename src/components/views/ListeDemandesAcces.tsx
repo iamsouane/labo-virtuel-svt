@@ -1,8 +1,15 @@
+//src/components/admin/ListeDemandesAcces.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Loader2, CheckCircle, XCircle, Clock, MessagesSquare } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Clock,
+  MessagesSquare,
+} from "lucide-react";
 import { notifySuccess, notifyError, notifyInfo } from "../../lib/notifications";
-import "react-toastify/dist/ReactToastify.css";
+import type { Profil } from "../../types";
 
 interface Demande {
   id: string;
@@ -16,21 +23,34 @@ interface Demande {
   statut: "EN_ATTENTE" | "APPROUVE" | "REJETE";
 }
 
-const ListeDemandesAcces = () => {
+const ListeDemandesAcces = ({ user }: { user: Profil }) => {
   const [demandes, setDemandes] = useState<Demande[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = user.role === "ADMIN";
+  const isProf = user.role === "PROFESSEUR";
 
   const loadDemandes = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("simulation_access_requests")
-      .select(
-        `id, simulation_id, demandeur_id, role_demandeur, message, created_at, statut,
-         simulation:simulation_id (titre),
-         demandeur:demandeur_id (nom, prenom)`
-      )
-      .order("created_at", { ascending: false });
+      .select(`
+        id, simulation_id, demandeur_id, role_demandeur, message, created_at, statut,
+        simulation:simulation_id (titre),
+        demandeur:demandeur_id (prenom, nom),
+        destinataire_id
+      `);
+
+    if (isProf) {
+      query = query.eq("destinataire_id", user.id);
+    } else if (isAdmin) {
+      query = query.eq("role_demandeur", "PROFESSEUR");
+    }
+
+    query = query.order("created_at", { ascending: false });
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Erreur chargement demandes:", error);
@@ -43,7 +63,7 @@ const ListeDemandesAcces = () => {
         id: d.id,
         simulation_id: d.simulation_id,
         demandeur_id: d.demandeur_id,
-        simulation_titre: d.simulation?.titre ?? "Inconnu",
+        simulation_titre: d.simulation?.titre ?? "Inconnue",
         nom_demandeur: `${d.demandeur?.prenom ?? ""} ${d.demandeur?.nom ?? ""}`.trim(),
         role_demandeur: d.role_demandeur,
         message: d.message,
@@ -60,18 +80,22 @@ const ListeDemandesAcces = () => {
     loadDemandes();
   }, []);
 
-  const handleDecision = async (demande: Demande, decision: "APPROUVE" | "REJETE") => {
-    const { error: updateError } = await supabase
-      .from("simulation_access_requests")
-      .update({ statut: decision })
-      .eq("id", demande.id);
+const handleDecision = async (
+  demande: Demande,
+  decision: "APPROUVE" | "REJETE"
+) => {
+  const { error: updateError } = await supabase
+    .from("simulation_access_requests")
+    .update({ statut: decision })
+    .eq("id", demande.id);
 
-    if (updateError) {
-      notifyError("❌ Erreur lors de la mise à jour de la demande.");
-      return;
-    }
+  if (updateError) {
+    notifyError("Erreur lors de la mise à jour de la demande.");
+    return;
+  }
 
-    if (decision === "APPROUVE") {
+  if (decision === "APPROUVE") {
+    if (demande.role_demandeur === "PROFESSEUR") {
       const { error: insertError } = await supabase
         .from("simulations_professeurs")
         .insert({
@@ -83,22 +107,63 @@ const ListeDemandesAcces = () => {
         });
 
       if (insertError) {
-        notifyInfo("Demande approuvée, mais une erreur est survenue lors de l'autorisation.");
+        console.error("Erreur insertion simulation_professeur:", insertError);
+        notifyInfo("Demande approuvée, mais erreur lors de l'autorisation.");
         return;
       }
+
+    } else if (demande.role_demandeur === "ELEVE") {
+      // Cherche le professeur de l'élève
+      const { data: professeurData, error: profError } = await supabase.rpc("get_professeur_de_eleve", {
+        p_eleve_id: demande.demandeur_id,
+      });
+
+      if (profError || !professeurData) {
+        console.error("Erreur lors de la récupération du professeur :", profError);
+        notifyInfo("Demande approuvée, mais impossible de retrouver le professeur de l’élève.");
+        return;
+      }
+
+      // Vérifie si une autorisation existe déjà
+      const { data: existing, error: existError } = await supabase
+        .from("simulations_eleves")
+        .select("id")
+        .eq("eleve_id", demande.demandeur_id)
+        .eq("simulation_id", demande.simulation_id)
+        .maybeSingle();
+
+      if (existError) {
+        console.error("Erreur vérification existence:", existError);
+        notifyInfo("Demande approuvée, mais erreur lors de la vérification.");
+        return;
+      }
+
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from("simulations_eleves")
+          .insert({
+            simulation_id: demande.simulation_id,
+            eleve_id: demande.demandeur_id,
+            professeur_id: professeurData,
+            est_autorisee: true,
+            autorisee_at: new Date().toISOString(),
+            demande_envoyee: false,
+          });
+
+        if (insertError) {
+          console.error("Erreur insertion simulation_eleve:", insertError);
+          notifyInfo("Demande approuvée, mais erreur lors de l'autorisation.");
+          return;
+        }
+      }
     }
+  }
 
-    await loadDemandes();
-    notifySuccess(`Demande ${decision === "APPROUVE" ? "approuvée" : "rejetée"} avec succès.`);
-  };
-
-  // Regrouper par statut
-  const demandesEnAttente = demandes.filter(d => d.statut === "EN_ATTENTE");
-  const demandesApprouvees = demandes.filter(d => d.statut === "APPROUVE");
-  const demandesRejetees = demandes.filter(d => d.statut === "REJETE");
+  await loadDemandes();
+  notifySuccess(`Demande ${decision === "APPROUVE" ? "approuvée" : "rejetée"} avec succès.`);
+};
 
   const renderDemande = (demande: Demande) => {
-    // Choix icône + couleur selon statut
     let statutColor = "";
     let StatutIcon = null;
 
@@ -124,7 +189,8 @@ const ListeDemandesAcces = () => {
       >
         <div className="mb-4 md:mb-0">
           <p>
-            <span className="font-semibold">{demande.nom_demandeur}</span> demande l'accès à la simulation :{" "}
+            <span className="font-semibold">{demande.nom_demandeur}</span>{" "}
+            demande l'accès à la simulation :{" "}
             <span className="italic">{demande.simulation_titre}</span>
           </p>
           {demande.message && (
@@ -138,7 +204,6 @@ const ListeDemandesAcces = () => {
           </p>
         </div>
 
-        {/* Boutons uniquement si en attente */}
         {demande.statut === "EN_ATTENTE" && (
           <div className="flex gap-2">
             <button
@@ -171,29 +236,17 @@ const ListeDemandesAcces = () => {
         <>
           <section>
             <h3 className="text-xl font-semibold mb-4">Demandes en attente</h3>
-            {demandesEnAttente.length > 0 ? (
-              demandesEnAttente.map(renderDemande)
-            ) : (
-              <p className="text-gray-500">Aucune demande en attente.</p>
-            )}
+            {demandes.filter((d) => d.statut === "EN_ATTENTE").map(renderDemande)}
           </section>
 
           <section>
             <h3 className="text-xl font-semibold mb-4">Demandes approuvées</h3>
-            {demandesApprouvees.length > 0 ? (
-              demandesApprouvees.map(renderDemande)
-            ) : (
-              <p className="text-gray-500">Aucune demande approuvée.</p>
-            )}
+            {demandes.filter((d) => d.statut === "APPROUVE").map(renderDemande)}
           </section>
 
           <section>
             <h3 className="text-xl font-semibold mb-4">Demandes rejetées</h3>
-            {demandesRejetees.length > 0 ? (
-              demandesRejetees.map(renderDemande)
-            ) : (
-              <p className="text-gray-500">Aucune demande rejetée.</p>
-            )}
+            {demandes.filter((d) => d.statut === "REJETE").map(renderDemande)}
           </section>
         </>
       )}

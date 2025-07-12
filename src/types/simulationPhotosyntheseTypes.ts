@@ -84,10 +84,11 @@ export interface TutorialStep {
 /* ==================== TYPES QUIZ ==================== */
 export interface QuizQuestion {
   id: number
+  quiz_id: string
   question: string
   options: string[]
-  correctAnswer: number
-  explanation: string
+  reponse_correcte: string
+  explication: string
   difficulty: "facile" | "moyen" | "difficile"
   category: "equation" | "facteurs" | "processus" | "application" | "adaptation"
 }
@@ -105,6 +106,21 @@ export interface QuizResult {
   timeSpent: number
   answers: QuizAnswer[]
 }
+
+export interface LocalQuizAnswer {
+  questionId: number;
+  userAnswer: number;
+  correct: boolean;
+  timeSpent: number;
+}
+
+export interface LocalQuizResult {
+  score: number;
+  totalQuestions: number;
+  timeSpent: number;
+  answers: LocalQuizAnswer[];
+}
+
 
 /* ==================== TYPES SIMULATION ==================== */
 export type PhotosynthesisSimulationState = {

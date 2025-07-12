@@ -42,41 +42,60 @@ const Simulations = ({ user }: SimulationsProps) => {
   const [activeSimCode, setActiveSimCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Charger les simulations pour les utilisateurs non connectés ou connectés
   useEffect(() => {
     if (!user) {
+      // Utilisateur non connecté : liste statique des simulations publiques
       setSimulations([
-        { id: "photosynthese", code: "photosynthese", titre: "Expérience sur la photosynthèse", description: "Simulation de la photosynthèse" },
-        { id: "selection-naturelle", code: "selection-naturelle", titre: "Sélection naturelle", description: "Simulation de la sélection naturelle" },
-        { id: "energie", code: "energie", titre: "Formes et transformations de l'énergie", description: "Simulation sur les formes d'énergie" },
-        { id: "pollution", code: "pollution", titre: "Pollution de l'air", description: "Simulation sur la pollution de l'air" },
+        {
+          id: "photosynthese",
+          code: "photosynthese",
+          titre: "Expérience sur la photosynthèse",
+          description: "Simulation de la photosynthèse",
+        },
+        {
+          id: "selection-naturelle",
+          code: "selection-naturelle",
+          titre: "Sélection naturelle",
+          description: "Simulation de la sélection naturelle",
+        },
+        {
+          id: "energie",
+          code: "energie",
+          titre: "Formes et transformations de l'énergie",
+          description: "Simulation sur les formes d'énergie",
+        },
+        {
+          id: "pollution",
+          code: "pollution",
+          titre: "Pollution de l'air",
+          description: "Simulation sur la pollution de l'air",
+        },
       ]);
-      } else {
-        // Charger uniquement les simulations créées par un ADMIN
-        const loadSimulations = async () => {
-          const { data, error } = await supabase
-            .from("simulation")
-            .select("*")
-            .not("created_by", "is", null)
-            .order("created_at", { ascending: true });
-  
-          if (!error && data) {
-            setSimulations(data);
-          } else {
-            notifyError("Erreur chargement simulations : " + (error?.message || "inconnue"));
-          }
-        };
-        loadSimulations();
-      }
-    }, [user]);
+    } else {
+      // Chargement des simulations depuis la base pour utilisateur connecté
+      const loadSimulations = async () => {
+        const { data, error } = await supabase
+          .from("simulation")
+          .select("*")
+          .not("created_by", "is", null)
+          .order("created_at", { ascending: true });
 
+        if (!error && data) {
+          setSimulations(data);
+        } else {
+          notifyError("Erreur chargement simulations : " + (error?.message || "inconnue"));
+        }
+      };
+      loadSimulations();
+    }
+  }, [user]);
 
-  // Charger les simulations autorisées pour un utilisateur
+  // Charge les simulations autorisées pour l'utilisateur selon son rôle
   const reloadAuthorizedSimulations = async () => {
     if (!user) return;
 
     if (user.role === "ADMIN") {
-      setAuthorizedSimulations(["*"]);
+      setAuthorizedSimulations(["*"]); // Admin a accès à tout
       return;
     }
 
@@ -92,7 +111,7 @@ const Simulations = ({ user }: SimulationsProps) => {
     if (error) {
       notifyError("Erreur lors du chargement des autorisations : " + (error?.message || "inconnue"));
       setAuthorizedSimulations([]);
-    } else if (data) {
+    } else {
       const autorisees = data.map((sim) => sim.simulation_id.toString());
       setAuthorizedSimulations(autorisees);
     }
@@ -102,27 +121,56 @@ const Simulations = ({ user }: SimulationsProps) => {
     reloadAuthorizedSimulations();
   }, [user]);
 
+  // Demande d'accès à une simulation
   const handleAccessRequest = async (simulationId: string, titre: string) => {
     if (!user) return;
     setLoading(true);
 
-    const { data: adminData, error: adminError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("role", "ADMIN")
-      .limit(1)
-      .single();
+    let destinataireId: string | null = null;
 
-    if (adminError || !adminData) {
+    if (user.role === "ELEVE") {
+      // L'élève : récupère le prof de sa classe via fonction RPC
+      const { data: profId, error } = await supabase.rpc("get_professeur_de_eleve", {
+        p_eleve_id: user.id,
+      });
+
+      if (error || !profId) {
+        setLoading(false);
+        notifyError(
+          "Impossible de trouver le professeur de votre classe : " + (error?.message || "")
+        );
+        return;
+      }
+
+      destinataireId = profId;
+    } else if (user.role === "PROFESSEUR") {
+      // Le prof : envoie la demande à un admin
+      const { data: adminData, error: adminError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("role", "ADMIN")
+        .limit(1)
+        .single();
+
+      if (adminError || !adminData) {
+        setLoading(false);
+        notifyError("Impossible de trouver un administrateur.");
+        return;
+      }
+
+      destinataireId = adminData.id;
+    } else {
+      // Autres rôles (ex: ADMIN) : pas d'accès à cette fonctionnalité
       setLoading(false);
-      notifyError("Impossible de trouver un administrateur.");
+      notifyError("Vous n'êtes pas autorisé à faire cette demande.");
       return;
     }
 
+    // Envoi de la demande d'accès via fonction RPC
     const { error: requestError } = await supabase.rpc("request_simulation_access", {
       p_simulation_id: simulationId,
       p_demandeur_id: user.id,
-      p_destinataire_id: adminData.id,
+      p_destinataire_id: destinataireId,
       p_role_demandeur: user.role,
       p_message: `Demande d'accès à la simulation "${titre}"`,
     });
@@ -131,7 +179,6 @@ const Simulations = ({ user }: SimulationsProps) => {
 
     if (requestError) {
       notifyError("Erreur lors de l'envoi de la demande : " + requestError.message);
-      console.error(requestError);
     } else {
       notifySuccess("Demande envoyée !");
       await reloadAuthorizedSimulations();
@@ -152,7 +199,7 @@ const Simulations = ({ user }: SimulationsProps) => {
       {!activeSimCode ? (
         <div className="grid gap-8 md:grid-cols-3">
           {simulations.map((sim) => {
-            const simId = sim.id || sim.code; // clé unique
+            const simId = sim.id || sim.code;
             const isAuthorized =
               authorizedSimulations.includes("*") ||
               (sim.id && authorizedSimulations.includes(sim.id.toString()));
@@ -188,7 +235,6 @@ const Simulations = ({ user }: SimulationsProps) => {
                     </button>
                   ) : null
                 ) : (
-                  // Utilisateur non connecté : bouton verrouillé (cadenas) et message
                   <div className="absolute inset-0 bg-white/20 flex flex-col items-center justify-center rounded-2xl backdrop-blur-sm text-center px-4">
                     <Lock className="w-8 h-8 text-gray-800 mb-2" />
                     <p className="text-gray-800 font-semibold">
@@ -199,7 +245,6 @@ const Simulations = ({ user }: SimulationsProps) => {
               </div>
             );
           })}
-
         </div>
       ) : (
         <>
