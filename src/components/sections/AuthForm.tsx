@@ -30,21 +30,25 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
       // Validation
       if (!formData.email || !formData.password || (!isLogin && !formData.name)) {
         notifyError("Tous les champs sont obligatoires.");
+        setIsLoading(false);
         return;
       }
 
       if (!isValidEmail(formData.email)) {
         notifyError("Veuillez entrer une adresse e-mail valide.");
+        setIsLoading(false);
         return;
       }
 
       if (!isLogin && formData.name.trim().split(" ").length < 2) {
         notifyError("Veuillez entrer votre prénom et votre nom.");
+        setIsLoading(false);
         return;
       }
 
       if (formData.password.length < 6) {
         notifyError("Le mot de passe doit contenir au moins 6 caractères.");
+        setIsLoading(false);
         return;
       }
 
@@ -57,6 +61,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (signInError) {
           notifyError("Échec de la connexion : " + signInError.message);
+          setIsLoading(false);
           return;
         }
 
@@ -64,6 +69,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (sessionError || !session) {
           notifyError("Session utilisateur introuvable.");
+          setIsLoading(false);
           return;
         }
 
@@ -79,6 +85,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (profilError || !profil) {
           notifyError("Impossible de récupérer votre profil.");
+          setIsLoading(false);
           return;
         }
 
@@ -92,7 +99,27 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         onAuthSuccess?.();
       } else {
-        // Inscription
+        // Avant d'appeler signUp, vérifier si email est déjà utilisé
+        const { data: existingUser, error: fetchError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("email", formData.email)
+          .single();
+
+        if (fetchError && fetchError.code !== "PGRST116") {
+          // Erreur autre que "no rows found"
+          notifyError("Erreur lors de la vérification de l'email : " + fetchError.message);
+          setIsLoading(false);
+          return;
+        }
+
+        if (existingUser) {
+          notifyError("Cet email est déjà utilisé. Veuillez en choisir un autre.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Email libre, on inscrit l'utilisateur
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -105,6 +132,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (signUpError) {
           notifyError("Échec de l'inscription : " + signUpError.message);
+          setIsLoading(false);
           return;
         }
 
@@ -113,6 +141,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         if (!user) {
           setIsPendingConfirmation(true);
           notifySuccess("Inscription réussie ! Veuillez confirmer votre e-mail avant de vous connecter.");
+          setIsLoading(false);
           return;
         }
 
@@ -140,8 +169,9 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             setIsLogin(true);
             setIsPendingConfirmation(false);
           }}
-          className={`pb-2 border-b-4 font-semibold ${isLogin ? "border-green-600 text-green-700" : "border-transparent text-gray-500"
-            }`}
+          className={`pb-2 border-b-4 font-semibold ${
+            isLogin ? "border-green-600 text-green-700" : "border-transparent text-gray-500"
+          }`}
         >
           Connexion
         </button>
@@ -151,8 +181,9 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             setIsLogin(false);
             setIsPendingConfirmation(false);
           }}
-          className={`pb-2 border-b-4 font-semibold ${!isLogin ? "border-green-600 text-green-700" : "border-transparent text-gray-500"
-            }`}
+          className={`pb-2 border-b-4 font-semibold ${
+            !isLogin ? "border-green-600 text-green-700" : "border-transparent text-gray-500"
+          }`}
         >
           Inscription
         </button>
@@ -219,8 +250,11 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
         <button
           type="submit"
           disabled={isPendingConfirmation || isLoading}
-          className={`w-full ${(isPendingConfirmation || isLoading) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-            } text-white font-semibold py-3 rounded-xl shadow transition`}
+          className={`w-full ${
+            isPendingConfirmation || isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          } text-white font-semibold py-3 rounded-xl shadow transition`}
         >
           {isLoading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}
         </button>

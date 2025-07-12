@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Clock, MessagesSquare } from "lucide-react";
+import { notifySuccess, notifyError, notifyInfo } from "../../lib/notifications";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Demande {
   id: string;
@@ -65,8 +67,7 @@ const ListeDemandesAcces = () => {
       .eq("id", demande.id);
 
     if (updateError) {
-      console.error("Erreur mise à jour demande:", updateError);
-      alert("Erreur lors de la mise à jour de la demande");
+      notifyError("❌ Erreur lors de la mise à jour de la demande.");
       return;
     }
 
@@ -82,13 +83,13 @@ const ListeDemandesAcces = () => {
         });
 
       if (insertError) {
-        console.error("Erreur insertion autorisation:", insertError);
-        alert("Demande mise à jour mais erreur lors de l'ajout d'autorisation.");
+        notifyInfo("Demande approuvée, mais une erreur est survenue lors de l'autorisation.");
         return;
       }
     }
 
     await loadDemandes();
+    notifySuccess(`Demande ${decision === "APPROUVE" ? "approuvée" : "rejetée"} avec succès.`);
   };
 
   // Regrouper par statut
@@ -126,7 +127,12 @@ const ListeDemandesAcces = () => {
             <span className="font-semibold">{demande.nom_demandeur}</span> demande l'accès à la simulation :{" "}
             <span className="italic">{demande.simulation_titre}</span>
           </p>
-          {demande.message && <p className="text-sm text-gray-600 mt-1">💬 {demande.message}</p>}
+          {demande.message && (
+            <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+              <MessagesSquare className="w-4 h-4 text-gray-500" />
+              {demande.message}
+            </p>
+          )}
           <p className={`flex items-center gap-1 mt-2 font-semibold ${statutColor}`}>
             <StatutIcon className="w-5 h-5" /> {demande.statut.replace("_", " ")}
           </p>

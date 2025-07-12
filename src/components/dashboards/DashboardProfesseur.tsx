@@ -5,16 +5,18 @@ import { useState } from "react";
 import type { Profil } from "../../types";
 import Simulations from "../sections/Simulations";
 import Visualisations from "../sections/Visualisations";
-import { Users, Cpu, MonitorPlay, LogOut, CheckCircle } from "lucide-react";
+import { Users, Cpu, MonitorPlay, LogOut, CheckCircle, UserCircle } from "lucide-react";
 import EtatDemandesSimulation from "../admin/EtatDemandesSimulation";
-import CreateClasseForm from "../admin/CreateClasseForm"; // renommé pour être plus logique
+import CreateClasseForm from "../admin/CreateClasseForm";
+import MesClasses from "../admin/MesClasses";
+import CreateTPForm from "../admin/CreateTPForm";
 
 interface DashboardProfesseurProps {
   user: Profil;
   onLogout: () => void;
 }
 
-type Section = "simulations" | "visualisations" | "classes" | "demandes";
+type Section = "simulations" | "visualisations" | "classes" | "demandes" | "tps";
 
 const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   const [localUser] = useState(user);
@@ -47,7 +49,8 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         return (
           <div className="mt-4">
             <h2 className="text-2xl font-semibold mb-4">Mes classes</h2>
-            <CreateClasseForm user={localUser} />
+            <CreateClasseForm user={localUser} onCreated={() => setCurrentSection("classes")} />
+            <MesClasses user={localUser} />
           </div>
         );
       case "demandes":
@@ -55,6 +58,13 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
           <div className="mt-4">
             <h2 className="text-2xl font-semibold mb-4">Mes demandes d'accès</h2>
             <EtatDemandesSimulation user={localUser} />
+          </div>
+        );
+      case "tps":
+        return (
+          <div className="mt-4">
+            <h2 className="text-2xl font-semibold mb-4">Créer un TP</h2>
+            <CreateTPForm user={localUser} />
           </div>
         );
       default:
@@ -67,7 +77,8 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
       {/* Sidebar */}
       <aside className="md:w-64 w-full md:h-full h-auto bg-blue-700 text-white p-6 flex flex-col">
         <h1 className="text-2xl font-bold mb-8">
-          👨‍🏫 Bonjour {localUser.prenom} {localUser.nom}
+          <UserCircle className="w-6 h-6 text-white flex items-center gap-2" />
+          {localUser.prenom} {localUser.nom}
         </h1>
 
         <nav className="flex flex-col space-y-4 flex-grow">
@@ -109,6 +120,16 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
               }`}
           >
             <CheckCircle size={18} /> Demandes
+          </button>
+
+          <button
+            onClick={() => setCurrentSection("tps")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "tps"
+                ? "bg-white text-blue-700 font-bold"
+                : "hover:bg-blue-600"
+              }`}
+          >
+            <Cpu size={18} /> Créer un TP
           </button>
         </nav>
 

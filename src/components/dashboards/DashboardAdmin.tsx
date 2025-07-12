@@ -6,7 +6,7 @@ import type { Profil } from "../../types";
 import Simulations from "../sections/Simulations";
 import Visualisations from "../sections/Visualisations";
 import UserList from "../admin/UserList";
-import { Users, Cpu, MonitorPlay, LogOut, Mail } from "lucide-react";
+import { Users, Cpu, MonitorPlay, LogOut, Mail, UserCircle } from "lucide-react";
 import SimulationForm from "../admin/SimulationForm";
 import ListeDemandesAcces from "../admin/ListeDemandesAcces";
 
@@ -72,16 +72,17 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
     <div className="flex flex-col md:flex-row h-screen">
       {/* Sidebar */}
       <aside className="md:w-64 w-full md:h-full h-auto bg-green-700 text-white p-6 flex flex-col">
-        <h1 className="text-2xl font-bold mb-8">
-          👋 Bonjour {localUser.prenom} {localUser.nom}
+        <h1 className="text-2xl font-bold mb-8 flex items-center gap-2">
+          <UserCircle className="w-6 h-6 text-white" />
+          {localUser.prenom} {localUser.nom}
         </h1>
 
         <nav className="flex flex-col space-y-4 flex-grow">
           <button
             onClick={() => setCurrentSection("users")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "users"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
+              ? "bg-white text-green-700 font-bold"
+              : "hover:bg-green-600"
               }`}
           >
             <Users size={18} /> Utilisateurs
@@ -90,8 +91,8 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
           <button
             onClick={() => setCurrentSection("simulations")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "simulations"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
+              ? "bg-white text-green-700 font-bold"
+              : "hover:bg-green-600"
               }`}
           >
             <Cpu size={18} /> Simulations
@@ -100,8 +101,8 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
           <button
             onClick={() => setCurrentSection("visualisations")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "visualisations"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
+              ? "bg-white text-green-700 font-bold"
+              : "hover:bg-green-600"
               }`}
           >
             <MonitorPlay size={18} /> Visualisations
@@ -110,8 +111,8 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
           <button
             onClick={() => setCurrentSection("demandes")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "demandes"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
+              ? "bg-white text-green-700 font-bold"
+              : "hover:bg-green-600"
               }`}
           >
             <Mail size={18} /> Demandes d'accès

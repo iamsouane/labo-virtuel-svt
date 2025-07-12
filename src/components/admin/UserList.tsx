@@ -22,7 +22,7 @@ const UserList = () => {
       let query = supabase
         .from("users")
         .select("*")
-        .neq("role", "ADMIN") // ✅ Exclure les ADMIN
+        .neq("role", "ADMIN") // Exclure les ADMIN
         .order("created_at", { ascending: false });
 
       if (roleFilter) {

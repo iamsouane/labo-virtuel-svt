@@ -15,6 +15,8 @@ import SimulationSelectionNaturelle from "../views/SimulationSelectionNaturelle"
 import SimulationPhotosynthese from "../views/SimulationPhotosynthese";
 import SimulationEnergie from "../views/SimulationEnergie";
 import SimulationPollution from "../views/SimulationPollution";
+import { notifyError, notifySuccess } from "../../lib/notifications";
+import "react-toastify/dist/ReactToastify.css";
 
 interface SimulationsProps {
   user: Profil | null;
@@ -40,22 +42,36 @@ const Simulations = ({ user }: SimulationsProps) => {
   const [activeSimCode, setActiveSimCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Charger toutes les simulations
+  // Charger les simulations pour les utilisateurs non connectés ou connectés
   useEffect(() => {
-    const loadSimulations = async () => {
-      const { data, error } = await supabase
-        .from("simulation")
-        .select("*")
-        .order("created_at", { ascending: true });
+    if (!user) {
+      setSimulations([
+        { id: "photosynthese", code: "photosynthese", titre: "Expérience sur la photosynthèse", description: "Simulation de la photosynthèse" },
+        { id: "selection-naturelle", code: "selection-naturelle", titre: "Sélection naturelle", description: "Simulation de la sélection naturelle" },
+        { id: "energie", code: "energie", titre: "Formes et transformations de l'énergie", description: "Simulation sur les formes d'énergie" },
+        { id: "pollution", code: "pollution", titre: "Pollution de l'air", description: "Simulation sur la pollution de l'air" },
+      ]);
+      } else {
+        // Charger uniquement les simulations créées par un ADMIN
+        const loadSimulations = async () => {
+          const { data, error } = await supabase
+            .from("simulation")
+            .select("*")
+            .not("created_by", "is", null)
+            .order("created_at", { ascending: true });
+  
+          if (!error && data) {
+            setSimulations(data);
+          } else {
+            notifyError("Erreur chargement simulations : " + (error?.message || "inconnue"));
+          }
+        };
+        loadSimulations();
+      }
+    }, [user]);
 
-      if (!error && data) setSimulations(data);
-      else console.error("Erreur chargement simulations:", error);
-    };
 
-    loadSimulations();
-  }, []);
-
-  // Fonction pour charger les simulations autorisées
+  // Charger les simulations autorisées pour un utilisateur
   const reloadAuthorizedSimulations = async () => {
     if (!user) return;
 
@@ -64,24 +80,24 @@ const Simulations = ({ user }: SimulationsProps) => {
       return;
     }
 
-    if (user.role === "PROFESSEUR") {
-      const { data, error } = await supabase
-        .from("simulations_professeurs")
-        .select("simulation_id, est_autorisee")
-        .eq("professeur_id", user.id)
-        .eq("est_autorisee", true);
+    const table = user.role === "PROFESSEUR" ? "simulations_professeurs" : "simulations_eleves";
+    const idField = user.role === "PROFESSEUR" ? "professeur_id" : "eleve_id";
 
-      if (error) {
-        console.error("Erreur chargement autorisations:", error);
-        setAuthorizedSimulations([]);
-      } else if (data) {
-        const autorisees = data.map((sim) => sim.simulation_id.toString());
-        setAuthorizedSimulations(autorisees);
-      }
+    const { data, error } = await supabase
+      .from(table)
+      .select("simulation_id, est_autorisee")
+      .eq(idField, user.id)
+      .eq("est_autorisee", true);
+
+    if (error) {
+      notifyError("Erreur lors du chargement des autorisations : " + (error?.message || "inconnue"));
+      setAuthorizedSimulations([]);
+    } else if (data) {
+      const autorisees = data.map((sim) => sim.simulation_id.toString());
+      setAuthorizedSimulations(autorisees);
     }
   };
 
-  // Charger autorisations au chargement user
   useEffect(() => {
     reloadAuthorizedSimulations();
   }, [user]);
@@ -99,7 +115,7 @@ const Simulations = ({ user }: SimulationsProps) => {
 
     if (adminError || !adminData) {
       setLoading(false);
-      alert("Impossible de trouver un administrateur.");
+      notifyError("Impossible de trouver un administrateur.");
       return;
     }
 
@@ -107,18 +123,17 @@ const Simulations = ({ user }: SimulationsProps) => {
       p_simulation_id: simulationId,
       p_demandeur_id: user.id,
       p_destinataire_id: adminData.id,
-      p_role_demandeur: "PROFESSEUR",  // Attention au nom exact selon ta fonction RPC
+      p_role_demandeur: user.role,
       p_message: `Demande d'accès à la simulation "${titre}"`,
     });
 
     setLoading(false);
 
     if (requestError) {
-      alert("Erreur lors de l'envoi de la demande : " + requestError.message);
+      notifyError("Erreur lors de l'envoi de la demande : " + requestError.message);
       console.error(requestError);
     } else {
-      alert("Demande envoyée !");
-      // Rafraîchir la liste des autorisations (en cas d’évolution possible)
+      notifySuccess("Demande envoyée !");
       await reloadAuthorizedSimulations();
     }
   };
@@ -137,14 +152,17 @@ const Simulations = ({ user }: SimulationsProps) => {
       {!activeSimCode ? (
         <div className="grid gap-8 md:grid-cols-3">
           {simulations.map((sim) => {
+            const simId = sim.id || sim.code; // clé unique
             const isAuthorized =
-              authorizedSimulations.includes("*") || authorizedSimulations.includes(sim.id.toString());
+              authorizedSimulations.includes("*") ||
+              (sim.id && authorizedSimulations.includes(sim.id.toString()));
+
             const slug = sim.code;
             const icon = iconMap[slug] || <Zap />;
 
             return (
               <div
-                key={sim.id}
+                key={simId}
                 className="relative bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition"
               >
                 <div className="flex items-center justify-center text-5xl mb-4">{icon}</div>
@@ -170,6 +188,7 @@ const Simulations = ({ user }: SimulationsProps) => {
                     </button>
                   ) : null
                 ) : (
+                  // Utilisateur non connecté : bouton verrouillé (cadenas) et message
                   <div className="absolute inset-0 bg-white/20 flex flex-col items-center justify-center rounded-2xl backdrop-blur-sm text-center px-4">
                     <Lock className="w-8 h-8 text-gray-800 mb-2" />
                     <p className="text-gray-800 font-semibold">
@@ -180,6 +199,7 @@ const Simulations = ({ user }: SimulationsProps) => {
               </div>
             );
           })}
+
         </div>
       ) : (
         <>

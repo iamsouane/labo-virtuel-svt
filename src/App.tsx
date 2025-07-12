@@ -74,7 +74,7 @@ const App = () => {
         <Route path="/changer-mot-de-passe" element={<ChangePassword />} />
       </Routes>
 
-      {/* ✅ Activation globale des notifications */}
+      {/* Activation globale des notifications */}
       <ToastContainer />
     </BrowserRouter>
   );

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
+import { ClipboardList } from "lucide-react";
 
 interface Demande {
   id: string;
@@ -44,8 +45,10 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-bold mb-4">📋 État de mes demandes d'accès</h3>
-
+      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <ClipboardList className="w-5 h-5 text-blue-600" />
+        État de mes demandes d'accès
+      </h3>
       {loading ? (
         <p>Chargement...</p>
       ) : demandes.length === 0 ? (
@@ -64,13 +67,12 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
                 <p className="text-sm text-gray-600">{d.message}</p>
               </div>
               <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  d.statut === "EN_ATTENTE"
+                className={`px-3 py-1 rounded-full text-sm font-medium ${d.statut === "EN_ATTENTE"
                     ? "bg-yellow-100 text-yellow-700"
                     : d.statut === "APPROUVE"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
               >
                 {d.statut}
               </span>

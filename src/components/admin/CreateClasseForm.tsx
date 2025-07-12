@@ -1,7 +1,9 @@
-// src/components/classes/CreateClasseForm.tsx
+// src/components/admin/CreateClasseForm.tsx
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
+import "react-toastify/dist/ReactToastify.css";
+import { notifyError, notifyInfo, notifySuccess } from "../../lib/notifications";
 
 interface CreateClasseFormProps {
   user: Profil;
@@ -11,7 +13,7 @@ interface CreateClasseFormProps {
 const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
   const [codeClasse, setCodeClasse] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message] = useState("");
   const [eleves, setEleves] = useState<any[]>([]);
   const [selectedEleves, setSelectedEleves] = useState<string[]>([]);
 
@@ -30,47 +32,63 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
 
-    const { data: classeData, error } = await supabase
-      .from("classe")
-      .insert({
-        code_classe: codeClasse.trim(),
-        created_by: user.id,
-      })
-      .select()
-      .single();
+    try {
+      if (!user || !user.id) {
+        notifyInfo("Utilisateur non connecté.");
+        return;
+      }
 
-    if (error || !classeData) {
-      setMessage("Erreur : " + error?.message);
-      setLoading(false);
-      return;
-    }
+      if (!codeClasse.trim() || codeClasse.trim().length < 2) {
+        notifyError("Veuillez entrer un code de classe valide (au moins 2 caractères).");
+        return;
+      }
 
-    // Ajouter les élèves sélectionnés
-    if (selectedEleves.length > 0) {
-      const insertions = selectedEleves.map((eleveId) => ({
-        users_id: eleveId,
-        classe_id: classeData.id,
-      }));
+      setLoading(true);
 
-      const { error: insertError } = await supabase
-        .from("users_classe")
-        .insert(insertions);
+      const { data: classeData, error } = await supabase
+        .from("classe")
+        .insert({
+          code_classe: codeClasse.trim(),
+          created_by: user.id,
+        })
+        .select()
+        .single();
 
-      if (insertError) {
-        setMessage("Classe créée, mais erreur lors de l'ajout des élèves.");
+      if (error || !classeData) {
+        notifyError("Erreur : " + error?.message);
         setLoading(false);
         return;
       }
-    }
 
-    setMessage("✅ Classe et élèves ajoutés avec succès !");
-    setCodeClasse("");
-    setSelectedEleves([]);
-    if (onCreated) onCreated();
-    setLoading(false);
+      // Ajout élèves...
+      if (selectedEleves.length > 0) {
+        const insertions = selectedEleves.map((eleveId) => ({
+          users_id: eleveId,
+          classe_id: classeData.id,
+        }));
+
+        const { error: insertError } = await supabase
+          .from("users_classe")
+          .insert(insertions);
+
+        if (insertError) {
+          notifyInfo("Classe créée, mais erreur lors de l'ajout des élèves.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      notifySuccess("Classe et élèves ajoutés avec succès !");
+      setCodeClasse("");
+      setSelectedEleves([]);
+      if (onCreated) onCreated();
+    } catch (err) {
+      console.error("Erreur inattendue :", err);
+      notifyInfo("Une erreur inattendue est survenue.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCheckboxChange = (id: string) => {
@@ -90,7 +108,6 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
             value={codeClasse}
             onChange={(e) => setCodeClasse(e.target.value)}
             className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-blue-200"
-            required
           />
         </div>
 
@@ -114,7 +131,6 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
 
         <button
           type="submit"
-          disabled={loading || !codeClasse.trim()}
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
         >
           {loading ? "Création en cours..." : "Créer la classe"}

@@ -2,13 +2,14 @@
 import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Simulation } from "../../types";
+import { notifySuccess, notifyError } from "../../lib/notifications";
+import "react-toastify/dist/ReactToastify.css";
 
 interface SimulationFormProps {
   onSimulationAdded?: (simulation: Simulation) => void;
   createdBy: string;
 }
 
-// Liste des simulations disponibles
 const SIMULATION_PRESETS = [
   { code: "photosynthese", titre: "Expérience sur la photosynthèse" },
   { code: "selection-naturelle", titre: "Sélection naturelle" },
@@ -24,7 +25,6 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
   const [objectifs, setObjectifs] = useState("");
   const [resultats, setResultats] = useState("");
   const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,26 +32,27 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
 
     const { data, error } = await supabase
       .from("simulation")
-      .insert([
-        {
-          code,
-          titre,
-          description,
-          chapitre,
-          objectifs,
-          resultats_attendus: resultats,
-          created_by: createdBy,
-        },
-      ])
+      .insert([{
+        code,
+        titre,
+        description,
+        chapitre,
+        objectifs,
+        resultats_attendus: resultats,
+        created_by: createdBy,
+      }])
       .select()
       .single();
 
     setLoading(false);
 
     if (error) {
-      alert("Erreur lors de l'ajout : " + error.message);
-    } else if (data) {
-      setSuccessMsg("Simulation ajoutée avec succès !");
+      notifyError("❌ Erreur : " + error.message);
+      return;
+    }
+
+    if (data) {
+      notifySuccess("✅ Simulation ajoutée avec succès !");
       setCode("");
       setTitre("");
       setDescription("");
@@ -68,10 +69,6 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
       className="bg-white p-6 rounded-xl shadow-md space-y-4 max-w-3xl"
     >
       <h3 className="text-xl font-bold mb-2">Ajouter une simulation</h3>
-
-      {successMsg && (
-        <div className="text-green-600 font-semibold">{successMsg}</div>
-      )}
 
       <select
         required
