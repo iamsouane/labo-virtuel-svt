@@ -1,6 +1,50 @@
 // src/lib/quizService.ts
 import { supabase } from "../lib/supabaseClient";
-import type { LocalQuizResult, QuizResult } from "../types/simulationPhotosyntheseTypes";
+import type { LocalQuizResult, QuizQuestion, QuizResult } from "../types/simulationPhotosyntheseTypes";
+
+// lib/quizService.ts
+export function transformLocalToQuizResult(local: LocalQuizResult): QuizResult {
+  return {
+    score: local.score,
+    totalQuestions: local.totalQuestions,
+    timeSpent: local.timeSpent,
+    answers: local.answers.map((ans) => ({
+      questionId: ans.questionId,
+      userAnswer: ans.userAnswer,
+      correct: ans.correct,
+      timeSpent: ans.timeSpent ?? 0,
+    })),
+  }
+}
+
+/**
+ * Charge les questions d'un quiz depuis Supabase en fonction de l'id du quiz.
+ * Retourne un tableau typé QuizQuestion[]
+ * 
+ * @param quizId - id du quiz dont on veut récupérer les questions
+ * @returns Tableau des questions ou erreur
+ */
+export async function loadQuizQuestionsFromDB(
+  quizId: string
+): Promise<{ success: boolean; questions?: QuizQuestion[]; error?: any }> {
+  // Requête pour récupérer les questions filtrées par quiz_id
+  const { data, error } = await supabase
+    .from("question")
+    .select("*")        // Ou sélectionner seulement les champs nécessaires
+    .eq("quiz_id", quizId)
+    .order("id", { ascending: true }); // Optionnel : ordre des questions
+
+  if (error) {
+    console.error("Erreur lors du chargement des questions :", error);
+    return { success: false, error };
+  }
+
+  // data est du type any[], on cast en QuizQuestion[]
+  // Attention : assure-toi que les champs dans ta table 'question' correspondent bien au type QuizQuestion
+  const questions = data as QuizQuestion[];
+
+  return { success: true, questions };
+}
 
 export async function saveQuizResult(
   localResult: LocalQuizResult,

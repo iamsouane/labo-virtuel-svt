@@ -1,6 +1,5 @@
 // src/components/ui/QuizPhotosyntheseOverlay.tsx
 import { useState, useEffect } from "react"
-import { saveQuizResult } from "../../lib/quizService"
 import type { LocalQuizResult, QuizQuestion, QuizResult } from "../../types/simulationPhotosyntheseTypes"
 import {
   Trophy,
@@ -22,21 +21,7 @@ import {
 } from "lucide-react"
 
 // Fonction de transformation à importer ou définir ici
-function transformLocalToQuizResult(local: LocalQuizResult): QuizResult {
-  const answersWithTimeSpent = local.answers.map((ans) => ({
-    questionId: ans.questionId,
-    userAnswer: ans.userAnswer,
-    correct: ans.correct,
-    timeSpent: ans.timeSpent ?? 0,
-  }))
-
-  return {
-    score: local.score,
-    totalQuestions: local.totalQuestions,
-    timeSpent: local.timeSpent,
-    answers: answersWithTimeSpent,
-  }
-}
+import { saveQuizResult, transformLocalToQuizResult } from "../../lib/quizService"
 
 interface QuizOverlayProps {
   questions: QuizQuestion[]
@@ -48,6 +33,7 @@ interface QuizOverlayProps {
   onAnswerSelect: (answerIndex: number) => void
   onNext: () => void
   completed: boolean
+  simulationCode: string;
 }
 
 function QuizResults({

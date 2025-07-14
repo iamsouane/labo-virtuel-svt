@@ -1,5 +1,5 @@
 //src/components/views/SimulationPhotosynthese
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import type { LabEnvironment, DataPoint, Preset, QuizResult, } from "../../types/simulationPhotosyntheseTypes"
 import { PHOTOSYNTHESE_TUTORIAL_STEPS } from "../../data/photosyntheseTutorial"
@@ -17,8 +17,10 @@ import { useFullscreen } from "../../hooks/useFullscreen"
 import { PRESETS } from "../../data/presetsPhotosynthese"
 import { SimplePhotosynthesisScene } from "../photosynthese/SimplePhotosynthesisScene"
 import EnvironmentControlCard from "../ui/EnvironmentControlCard"
-import { GraduationCap, Brain, HelpCircle, Star, ThumbsUp, AlertCircle, Settings, RotateCw, Leaf, Play, Pause, Clock, Target, SunMedium, CloudDrizzle, ThermometerSun, Droplets, FlaskConical, BarChart3, Thermometer } from "lucide-react"
-import { supabase } from "../../lib/supabaseClient"
+import { GraduationCap, Brain, HelpCircle, Star, ThumbsUp, AlertCircle, Settings, RotateCw, Leaf, Play, Pause, Clock, Target, SunMedium, CloudDrizzle, ThermometerSun, Droplets } from "lucide-react"
+import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese"
+import { useSimulationPhotosyntheseEffects } from "../../hooks/useSimulationPhotosyntheseEffects"
+import PhotosyntheseInfos from "../ui/PhotosyntheseInfos"
 
 // Composant principal avec tutoriel intégré
 const SimulationPhotosynthese = () => {
@@ -50,71 +52,10 @@ const SimulationPhotosynthese = () => {
   const [quizAnswers, setQuizAnswers] = useState<number[]>([])
   const [quizStartTime, setQuizStartTime] = useState<number>(0)
   const [quizCompleted, setQuizCompleted] = useState(false)
-  const [quizResult, setQuizResult] = useState<QuizResult | null>(null)
+  const [, setQuizResult] = useState<QuizResult | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
+  const [simulationCode] = useState("photosynthese") // simulation ciblée
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([])
-  const [quizLoading, setQuizLoading] = useState(true)
-  const QUIZ_QUESTIONS = quizQuestions
-
-
-
-  // Vérifier si c'est la première visite
-  useEffect(() => {
-    const hasSeenTutorial = localStorage.getItem("photosynthesis-tutorial-completed")
-    if (!hasSeenTutorial) {
-      setShowTutorial(true)
-    }
-  }, [])
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 1000)
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout
-
-    if (isRunning) {
-      interval = setInterval(() => {
-        setTimeElapsed((prevTime) => {
-          const newTime = prevTime + 1
-
-          // Chaque 5 secondes, on enregistre une nouvelle entrée
-          if (newTime % 5 === 0) {
-            const { status } = getEnvironmentStatus()
-
-            // Taux de photosynthèse selon la qualité de l'environnement
-            let photosynthesisRate = 0.4
-            if (status === "Excellent") photosynthesisRate = 1.0
-            else if (status === "Bon") photosynthesisRate = 0.6
-            else if (status === "Difficile") photosynthesisRate = 0.2
-
-            // Calculs des valeurs produites
-            const avgHealth = Math.min(1, Math.max(0, 0.4 + (photosynthesisRate - 0.4)))
-            const avgOxygen = parseFloat((photosynthesisRate * avgHealth).toFixed(2))
-            const avgGlucose = parseFloat((photosynthesisRate * avgHealth * 0.7).toFixed(2))
-
-            // Mise à jour des données
-            setDataHistory((prev) => [
-              ...prev.slice(-19), // Garde les 20 dernières entrées
-              {
-                time: newTime,
-                oxygen: avgOxygen,
-                glucose: avgGlucose,
-                health: avgHealth,
-              },
-            ])
-          }
-
-          return newTime
-        })
-      }, 1000)
-    }
-
-    return () => clearInterval(interval)
-  }, [isRunning, environment])
-
-
 
   const [resetKey, setResetKey] = useState(0)
 
@@ -163,43 +104,6 @@ const SimulationPhotosynthese = () => {
     localStorage.setItem("photosynthesis-tutorial-completed", "true")
   }
 
-  //quiz
-useEffect(() => {
-  const fetchQuiz = async () => {
-    setQuizLoading(true)
-
-    // Recherche par code (ex: "photosynthese") au lieu de par id
-    const { data: sim, error: simError } = await supabase
-      .from('simulation')
-      .select('quiz_id')
-      .eq('code', 'photosynthese') // code dynamique à remplacer si besoin
-      .single()
-
-    if (simError || !sim?.quiz_id) {
-      console.error("Erreur récupération quiz_id", simError)
-      setQuizLoading(false)
-      return
-    }
-
-    const { data: questions, error: questionsError } = await supabase
-      .from('question')
-      .select('*')
-      .eq('quiz_id', sim.quiz_id)
-      .order('created_at', { ascending: true })
-
-    if (questionsError) {
-      console.error("Erreur récupération questions", questionsError)
-    } else {
-      setQuizQuestions(questions)
-    }
-
-    setQuizLoading(false)
-  }
-
-  fetchQuiz()
-}, [])
-
-
   const completeTutorial = () => {
     setShowTutorial(false)
     setTutorialCompleted(true)
@@ -229,6 +133,16 @@ useEffect(() => {
   }
 
   const envStatus = getEnvironmentStatus()
+  useSimulationPhotosyntheseEffects({
+    simulationCode,
+    isRunning,
+    environment,
+    setIsLoaded,
+    setTimeElapsed,
+    setDataHistory,
+    setQuizQuestions,
+    getEnvironmentStatus,
+  })
 
   const startQuiz = () => {
     setShowQuiz(true)
@@ -251,44 +165,43 @@ useEffect(() => {
     setQuizAnswers(newAnswers)
     setSelectedAnswer(null)
 
-    if (currentQuizQuestion < QUIZ_QUESTIONS.length - 1) {
+    if (currentQuizQuestion < QUIZ_QUESTIONS_PHOTOSYNTHESE.length - 1) {
       setCurrentQuizQuestion(currentQuizQuestion + 1)
     } else {
       completeQuiz(newAnswers)
     }
   }
 
-const completeQuiz = (answers: number[]) => {
-  const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
-  const results = answers.map((answer, index) => {
-    const question = QUIZ_QUESTIONS[index]
-    const userAnswerText = question.options[answer]
-    const isCorrect = userAnswerText === question.reponse_correcte
-    return {
-      questionId: question.id,
-      userAnswer: answer,
-      correct: isCorrect,
+  const completeQuiz = (answers: number[]) => {
+    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+    const results = answers.map((answer, index) => {
+      const question = QUIZ_QUESTIONS_PHOTOSYNTHESE[index]
+      const userAnswerText = question.options[answer]
+      const isCorrect = userAnswerText === question.reponse_correcte
+      return {
+        questionId: currentQuizQuestion,
+        userAnswer: answer,
+        correct: isCorrect,
+        timeSpent,
+      }
+    })
+
+    const score = results.filter((r) => r.correct).length
+
+    const result: QuizResult = {
+      score,
+      totalQuestions: QUIZ_QUESTIONS_PHOTOSYNTHESE.length,
       timeSpent,
+      answers: results,
     }
-  })
 
-  const score = results.filter((r) => r.correct).length
+    setQuizResult(result)
+    setQuizCompleted(true)
 
-  const result: QuizResult = {
-    score,
-    totalQuestions: QUIZ_QUESTIONS.length,
-    timeSpent,
-    answers: results,
+    // Notification de fin
+    const percentage = Math.round((score / QUIZ_QUESTIONS_PHOTOSYNTHESE.length) * 100)
+    notifySuccess(`Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS_PHOTOSYNTHESE.length} (${percentage}%)`)
   }
-
-  setQuizResult(result)
-  setQuizCompleted(true)
-
-  // Notification de fin
-  const percentage = Math.round((score / QUIZ_QUESTIONS.length) * 100)
-  notifySuccess(`Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS.length} (${percentage}%)`)
-}
-
 
   const restartQuiz = () => {
     startQuiz()
@@ -333,8 +246,6 @@ const completeQuiz = (answers: number[]) => {
 
   return (
     <FullscreenContainer className="bg-gray-50 py-20 px-6 text-center rounded-xl shadow-lg">
-
-
       {/* Tutoriel interactif */}
       {showTutorial && (
         <TutorialOverlayPhotosynthese
@@ -349,23 +260,17 @@ const completeQuiz = (answers: number[]) => {
 
       {/* Quiz interactif */}
       {showQuiz && (
-        quizLoading ? (
-          <div className="fixed inset-0 flex items-center justify-center bg-white/70 z-50">
-            <p className="text-lg font-semibold">Chargement du quiz...</p>
-          </div>
-        ) : (
-          <QuizOverlay
-            questions={quizQuestions}
-            currentQuestion={currentQuizQuestion}
-            selectedAnswer={selectedAnswer}
-            onAnswerSelect={answerQuestion}
-            onNext={nextQuestion}
-            onClose={closeQuiz}
-            result={quizResult}
-            completed={quizCompleted}
-            onRestart={restartQuiz}
-          />
-        )
+        <QuizOverlay
+          questions={quizQuestions}
+          currentQuestion={currentQuizQuestion}
+          selectedAnswer={selectedAnswer}
+          onClose={closeQuiz}
+          onRestart={restartQuiz}
+          onAnswerSelect={answerQuestion}
+          onNext={nextQuestion}
+          completed={quizCompleted}
+          simulationCode={simulationCode}
+        />
       )}
 
       {/* Aide contextuelle */}
@@ -586,62 +491,7 @@ const completeQuiz = (answers: number[]) => {
       </div>
 
       {/* Informations scientifiques */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-        <div className="bg-white p-6 rounded-xl shadow-lg text-left border border-gray-100" data-tutorial="equation">
-          <h3 className="font-bold text-xl mb-4 text-green-700 flex items-center gap-2">
-            <FlaskConical size={20} /> Équation de la photosynthèse
-          </h3>
-          <div className="bg-green-50 p-4 rounded-lg text-center mb-4 border border-green-200">
-            <code className="text-lg font-mono text-green-800">6CO₂ + 6H₂O + lumière → C₆H₁₂O₆ + 6O₂</code>
-          </div>
-          <p className="text-gray-700 leading-relaxed">
-            La photosynthèse convertit le CO₂ et l'eau en glucose et oxygène grâce à l'énergie lumineuse. Ce processus
-            est vital pour la vie sur Terre et produit l'oxygène que nous respirons.
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-lg text-left border border-gray-100">
-          <h3 className="font-bold text-xl mb-4 text-blue-700 flex items-center gap-2">
-            <BarChart3 size={20} /> Facteurs limitants
-          </h3>          <div className="space-y-3">
-            {[
-              {
-                icon: <SunMedium size={20} />,
-                factor: "Lumière",
-                desc: "Fournit l'énergie nécessaire à la photosynthèse (optimal : 60-80%).",
-                color: "yellow",
-              },
-              {
-                icon: <CloudDrizzle size={20} />,
-                factor: "CO₂",
-                desc: "Gaz absorbé par la plante pour fabriquer du glucose (optimal : 30-60%).",
-                color: "gray",
-              },
-              {
-                icon: <Thermometer size={20} />,
-                factor: "Température",
-                desc: "Influe sur l'activité des enzymes (optimal : 20-30°C).",
-                color: "red",
-              },
-              {
-                icon: <Droplets size={20} />,
-                factor: "Humidité",
-                desc: "Favorise les échanges gazeux au niveau des feuilles (optimal : 50-80%).",
-                color: "blue",
-              },
-            ].map(({ icon, factor, desc, color }) => (
-              <div key={factor} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-                <span className="text-xl">{icon}</span>
-                <div>
-                  <strong className={`text-${color}-600`}>{factor} :</strong>
-                  <p className="text-sm text-gray-600 mt-1">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
+      <PhotosyntheseInfos />
 
       <p className="mt-8 text-gray-700 max-w-3xl mx-auto leading-relaxed text-center" data-tutorial="completion">
         Cette simulation interactive vous permet d'expérimenter avec les facteurs qui influencent la photosynthèse.
@@ -678,5 +528,4 @@ const completeQuiz = (answers: number[]) => {
     </FullscreenContainer>
   )
 }
-
 export default SimulationPhotosynthese
