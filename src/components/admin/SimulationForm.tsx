@@ -47,12 +47,12 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
     setLoading(false);
 
     if (error) {
-      notifyError("❌ Erreur : " + error.message);
+      notifyError("Erreur : " + error.message);
       return;
     }
 
     if (data) {
-      notifySuccess("✅ Simulation ajoutée avec succès !");
+      notifySuccess("Simulation ajoutée avec succès !");
       setCode("");
       setTitre("");
       setDescription("");

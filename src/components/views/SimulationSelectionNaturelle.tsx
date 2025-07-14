@@ -8,8 +8,6 @@ import { useSelectionNaturelleShortcuts } from "../../hooks/useSelectionNaturell
 import GuideOverlaySelection from "../ui/GuideOverlaySelection";
 import TutorialOverlaySelection from "../ui/TutorialOverlaySelection";
 import { SELECTION_NATURELLE_TUTORIAL_STEPS } from "../../data/selectionNaturelleTutorial";
-import { QUIZ_QUESTIONS_SELECTION } from "../../data/quizSelection";
-import QuizOverlay from "../ui/QuizSelectionOverlay";
 import { FullscreenContainer } from "../../components/ui/FullscreenContainer";
 import { FullscreenButton } from "../../components/ui/FullscreenButton";
 import { useFullscreen } from "../../hooks/useFullscreen";
@@ -21,7 +19,6 @@ import type {
   StatsDataPoint,
   GenerationExplanation,
   QuizResult,
-  QuizAnswer,
   QuizQuestion
 } from "../../types/selectionNaturelleTypes";
 import { createRandomRabbit } from "../utils/naturalSelection";
@@ -72,11 +69,11 @@ const SimulationSelectionNaturelle = () => {
   const [showGuide, setShowGuide] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0);
-  const [questionTimes, setQuestionTimes] = useState<number[]>([]);
+  const [, setQuestionTimes] = useState<number[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [, setQuizResult] = useState<QuizResult | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
 
@@ -244,7 +241,6 @@ const SimulationSelectionNaturelle = () => {
     setTutorialCompleted(false);
   };
 
-  // Chargement dynamique des questions depuis Supabase
   // Chargement dynamique des questions depuis Supabase
 useEffect(() => {
   const fetchQuizQuestions = async () => {
@@ -477,7 +473,7 @@ useEffect(() => {
           onClose={closeQuiz}
           completed={quizCompleted}
           onRestart={restartQuiz}
-          simulationCode={"selection-naturelle"} // si nécessaire
+          simulationCode={"energie"}
         />
       )}
 

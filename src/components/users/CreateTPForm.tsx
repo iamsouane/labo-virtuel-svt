@@ -4,6 +4,7 @@ import { notifySuccess, notifyError } from "../../lib/notifications";
 import type { Profil } from "../../types";
 import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese";
 import { QUIZ_QUESTIONS_SELECTION } from "../../data/quizSelection";
+import { QUIZ_QUESTIONS_ENERGIE } from "../../data/quizEnergie";7
 
 const CreateTPForm = ({ user }: { user: Profil }) => {
   const [classes, setClasses] = useState<any[]>([]);
@@ -46,68 +47,70 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
   }, [user.id]);
 
   // Charger les questions selon la simulation sélectionnée
-useEffect(() => {
-  const fetchQuestionsForSimulation = async () => {
-    if (!selectedSimulation) {
-      setAvailableQuestions([]);
-      return;
-    }
+  useEffect(() => {
+    const fetchQuestionsForSimulation = async () => {
+      if (!selectedSimulation) {
+        setAvailableQuestions([]);
+        return;
+      }
 
-    // Récupérer la simulation pour obtenir son code
-    const { data: simulation, error: simError } = await supabase
-      .from("simulation")
-      .select("*")
-      .eq("id", selectedSimulation)
-      .single();
+      // Récupérer la simulation pour obtenir son code
+      const { data: simulation, error: simError } = await supabase
+        .from("simulation")
+        .select("*")
+        .eq("id", selectedSimulation)
+        .single();
 
-    if (simError || !simulation) {
-      setAvailableQuestions([]);
-      return;
-    }
+      if (simError || !simulation) {
+        setAvailableQuestions([]);
+        return;
+      }
 
-    const code = simulation.code?.toLowerCase();
+      const code = simulation.code?.toLowerCase();
 
-    // 1. Cas 1 : simulation connue en dur
-    if (code === "photosynthese") {
-      setAvailableQuestions(QUIZ_QUESTIONS_PHOTOSYNTHESE);
-      return;
-    } else if (code === "selection-naturelle") {
-      setAvailableQuestions(QUIZ_QUESTIONS_SELECTION);
-      return;
-    }
+      // Cas des quiz codés en dur
+      if (code === "photosynthese") {
+        setAvailableQuestions(QUIZ_QUESTIONS_PHOTOSYNTHESE);
+        return;
+      } else if (code === "selection-naturelle") {
+        setAvailableQuestions(QUIZ_QUESTIONS_SELECTION);
+        return;
+      } else if (code === "energie") {
+        setAvailableQuestions(QUIZ_QUESTIONS_ENERGIE);
+        return;
+      }
 
-    // 2. Cas 2 : quiz dynamique associé à la simulation (via simulation_quiz)
-    const { data: simQuiz, error: simQuizError } = await supabase
-      .from("simulation_quiz")
-      .select("quiz_id")
-      .eq("simulation_id", selectedSimulation)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+      // Cas quiz dynamique lié via simulation_quiz
+      const { data: simQuiz, error: simQuizError } = await supabase
+        .from("simulation_quiz")
+        .select("quiz_id")
+        .eq("simulation_id", selectedSimulation)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-    if (simQuizError || !simQuiz) {
-      setAvailableQuestions([]);
-      return;
-    }
+      if (simQuizError || !simQuiz) {
+        setAvailableQuestions([]);
+        return;
+      }
 
-    const quizId = simQuiz.quiz_id;
+      const quizId = simQuiz.quiz_id;
 
-    const { data: questions, error: qError } = await supabase
-      .from("question")
-      .select("*")
-      .eq("quiz_id", quizId);
+      const { data: questions, error: qError } = await supabase
+        .from("question")
+        .select("*")
+        .eq("quiz_id", quizId);
 
-    if (qError) {
-      notifyError("Erreur chargement questions : " + qError.message);
-      return;
-    }
+      if (qError) {
+        notifyError("Erreur chargement questions : " + qError.message);
+        return;
+      }
 
-    setAvailableQuestions(questions || []);
-  };
+      setAvailableQuestions(questions || []);
+    };
 
-  fetchQuestionsForSimulation();
-}, [selectedSimulation]);
-
+    fetchQuestionsForSimulation();
+  }, [selectedSimulation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,9 +145,9 @@ useEffect(() => {
       return;
     }
 
-    // 2. Insertion des questions
-    const questionsWithQuizId = selectedQuestions.map((i) => ({
-      ...availableQuestions[i],
+    // 2. Insertion des questions sélectionnées dans la table question avec quiz_id
+    const questionsWithQuizId = selectedQuestions.map((index) => ({
+      ...availableQuestions[index],
       quiz_id: quizCreated.id,
     }));
 
@@ -193,7 +196,7 @@ useEffect(() => {
     >
       <h3 className="text-xl font-semibold">Créer un TP Quiz pour une classe</h3>
 
-      {/* Classe */}
+      {/* Sélection de la classe */}
       <div>
         <label className="block mb-1">Classe</label>
         <select
@@ -210,7 +213,7 @@ useEffect(() => {
         </select>
       </div>
 
-      {/* Simulation */}
+      {/* Sélection de la simulation */}
       <div>
         <label className="block mb-1">Simulation liée</label>
         <select
@@ -227,7 +230,7 @@ useEffect(() => {
         </select>
       </div>
 
-      {/* Titre */}
+      {/* Titre du quiz */}
       <div>
         <label className="block mb-1">Titre du quiz</label>
         <input
@@ -239,7 +242,7 @@ useEffect(() => {
         />
       </div>
 
-      {/* Questions */}
+      {/* Sélection des questions */}
       <div>
         <label className="block mb-1">Sélectionnez les questions</label>
         <div className="space-y-3 max-h-64 overflow-y-auto border rounded p-3 bg-gray-50">
@@ -248,7 +251,7 @@ useEffect(() => {
           )}
           {availableQuestions.map((q, index) => (
             <div key={index} className="p-2 border rounded bg-white">
-              <label className="flex items-start gap-2">
+              <label className="flex items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selectedQuestions.includes(index)}

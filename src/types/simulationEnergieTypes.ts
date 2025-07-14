@@ -51,17 +51,18 @@ export const DEVICES: Record<OutputDevice, DeviceConfig> = {
 }
 
 /* ==================== TYPES QUIZ ==================== */
-export type QuizQuestionEnergie = {
+export interface QuizQuestion {
   id: number
+  quiz_id: string
   question: string
   options: string[]
-  correctAnswer: number
-  explanation: string
+  reponse_correcte: string
+  explication: string
   difficulty: "facile" | "moyen" | "difficile"
-  category: "efficacite" | "transformation" | "application" | "processus" | "sources"
+  category: "equation" | "facteurs" | "processus" | "application" | "adaptation"
 }
 
-export type QuizAnswer = {
+export interface QuizAnswer {
   questionId: number
   userAnswer: number
   correct: boolean
@@ -69,10 +70,24 @@ export type QuizAnswer = {
 }
 
 export interface QuizResult {
+  score: number
+  totalQuestions: number
+  timeSpent: number
+  answers: QuizAnswer[]
+}
+
+export interface LocalQuizAnswer {
+  questionId: number;
+  userAnswer: number;
+  correct: boolean;
+  timeSpent: number;
+}
+
+export interface LocalQuizResult {
   score: number;
   totalQuestions: number;
   timeSpent: number;
-  answers: QuizAnswer[];
+  answers: LocalQuizAnswer[];
 }
 
 export type ParticleType = "mechanical" | "solar" | "electrical" | "output"

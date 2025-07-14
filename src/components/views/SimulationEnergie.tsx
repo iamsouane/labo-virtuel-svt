@@ -6,7 +6,6 @@ import { useEnergyShortcuts } from "../../hooks/useEnergyShortcuts";
 import GuideOverlayEnergie from "../ui/GuideOverlayEnergie";
 import { TutorialOverlayEnergie } from "../ui/TutorialOverlayEnergie";
 import { ENERGIE_TUTORIAL_STEPS } from "../../data/energieTutorial";
-import { QUIZ_QUESTIONS_ENERGIE } from "../../data/quizEnergie";
 import { QuizEnergieOverlay } from "../ui/QuizEnergieOverlay";
 import { FullscreenContainer } from "../../components/ui/FullscreenContainer";
 import { FullscreenButton } from "../../components/ui/FullscreenButton";
@@ -17,8 +16,8 @@ import type {
   OutputDevice,
   EnergySource,
   GeneratorType,
-  QuizAnswer,
-  QuizResult
+  QuizResult,
+  QuizQuestion
 } from "../../types/simulationEnergieTypes";
 import { DEVICES } from "../../types/simulationEnergieTypes";
 import { useEnergySimulation } from "../../hooks/useEnergySimulation";
@@ -29,7 +28,8 @@ import RenderOutputDevice from "../energie/RenderOutputDevice";
 import RenderEnergyParticles from "../energie/RenderEnergyParticles";
 import RenderEnergySymbolsLegend from "../energie/RenderEnergySymbolsLegend";
 import Tooltip from "../ui/Tooltip";
-import { notifySuccess } from "../../lib/notifications";
+import { supabase } from "../../lib/supabaseClient";
+import { notifyError, notifySuccess } from "../../lib/notifications";
 
 const SimulationEnergie = () => {
   // États principaux
@@ -54,12 +54,14 @@ const SimulationEnergie = () => {
   const [showGuide, setShowGuide] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0);
-  const [questionTimes, setQuestionTimes] = useState<number[]>([]);
+  const [, setQuestionTimes] = useState<number[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [, setQuizResult] = useState<QuizResult | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+    const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+
 
   // Fonctions du tutoriel
   const nextTutorialStep = () => {
@@ -97,7 +99,66 @@ const SimulationEnergie = () => {
   };
 
   // Fonctions du quiz
-  const startQuiz = () => {
+useEffect(() => {
+  const fetchQuizQuestions = async () => {
+    try {
+      // 1. Récupérer l'ID de la simulation à partir de son code
+      const { data: simulation, error: simError } = await supabase
+        .from("simulation")
+        .select("id")
+        .eq("code", "energie") 
+        .single();
+
+      if (simError || !simulation) {
+        notifyError("Erreur lors de la récupération de la simulation.");
+        console.error("Erreur simulation:", simError);
+        return;
+      }
+
+      const simulationId = simulation.id;
+
+      // 2. Récupérer le dernier quiz associé à cette simulation
+      const { data: latestQuiz, error: quizError } = await supabase
+        .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId });
+
+      if (quizError || !latestQuiz || latestQuiz.length === 0) {
+        notifyError("Aucun quiz disponible pour cette simulation.");
+        console.warn("Aucun quiz lié à cette simulation.", quizError);
+        return;
+      }
+
+      const quizId = latestQuiz[0].quiz_id;
+
+      // 3. Récupérer les questions du quiz
+      const { data: questions, error: questionsError } = await supabase
+        .from("question")
+        .select("*")
+        .eq("quiz_id", quizId)
+        .order("created_at", { ascending: true });
+
+      if (questionsError) {
+        notifyError("Erreur lors du chargement des questions.");
+        console.error("Erreur questions:", questionsError);
+        return;
+      }
+
+      if (!questions || questions.length === 0) {
+        notifyError("Aucune question disponible pour ce quiz.");
+        return;
+      }
+
+      // 4. Mise à jour de l'état local
+      setQuizQuestions(questions as QuizQuestion[]);
+    } catch (error) {
+      notifyError("Erreur inattendue lors du chargement du quiz.");
+      console.error("Erreur globale :", error);
+    }
+  };
+
+  fetchQuizQuestions();
+}, []);
+
+    const startQuiz = () => {
     setShowQuiz(true);
     setCurrentQuizQuestion(0);
     setQuizAnswers([]);
@@ -120,39 +181,43 @@ const SimulationEnergie = () => {
     setQuizAnswers(newAnswers);
     setSelectedAnswer(null);
 
-    if (currentQuizQuestion < QUIZ_QUESTIONS_ENERGIE.length - 1) {
+    if (currentQuizQuestion < quizQuestions.length - 1) {
       setCurrentQuizQuestion(currentQuizQuestion + 1);
     } else {
       completeQuiz(newAnswers);
     }
   };
 
-  const completeQuiz = (answers: number[]) => {
-    const totalTimeSpent = Math.floor((Date.now() - quizStartTime) / 1000);
-
-    const results: QuizAnswer[] = answers.map((answer, index) => ({
-      questionId: QUIZ_QUESTIONS_ENERGIE[index].id,
-      userAnswer: answer,
-      correct: answer === QUIZ_QUESTIONS_ENERGIE[index].correctAnswer,
-      timeSpent: Math.floor(((questionTimes[index + 1] || Date.now()) - questionTimes[index]) / 1000)
-    }));
-
-    const score = results.filter(r => r.correct).length;
-    const percentage = Math.round((score / QUIZ_QUESTIONS_ENERGIE.length) * 100);
-
-    setQuizResult({
-      score,
-      totalQuestions: QUIZ_QUESTIONS_ENERGIE.length,
-      timeSpent: totalTimeSpent,
-      answers: results,
-    });
-
-    setQuizCompleted(true);
-
-    notifySuccess(
-      `Quiz terminé ! Vous avez obtenu ${score} sur ${QUIZ_QUESTIONS_ENERGIE.length} questions (${percentage}%).`
-    );
-  };
+   const completeQuiz = (answers: number[]) => {
+     const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+     // Utilisation de quizQuestions dynamiques (pas de constante dure)
+     const results = answers.map((answer, index) => {
+       const question = quizQuestions[index]
+       const userAnswerText = question.options[answer]
+       const isCorrect = userAnswerText === question.reponse_correcte
+       return {
+         questionId: question.id, // bonne clé ici
+         userAnswer: answer,
+         correct: isCorrect,
+         timeSpent,
+       }
+     })
+ 
+     const score = results.filter((r) => r.correct).length
+ 
+     const result: QuizResult = {
+       score,
+       totalQuestions: quizQuestions.length,
+       timeSpent,
+       answers: results,
+     }
+ 
+     setQuizResult(result)
+     setQuizCompleted(true)
+ 
+     const percentage = Math.round((score / quizQuestions.length) * 100)
+     notifySuccess(`Quiz terminé ! Score: ${score}/${quizQuestions.length} (${percentage}%)`)
+   }
 
   const restartQuiz = () => startQuiz();
   const closeQuiz = () => {
@@ -252,15 +317,15 @@ const SimulationEnergie = () => {
       )}
       {showQuiz && (
         <QuizEnergieOverlay
-          questions={QUIZ_QUESTIONS_ENERGIE}
+          questions={quizQuestions}
           currentQuestion={currentQuizQuestion}
           selectedAnswer={selectedAnswer}
           onAnswerSelect={answerQuestion}
           onNext={nextQuestion}
           onClose={closeQuiz}
-          result={quizResult}
           completed={quizCompleted}
           onRestart={restartQuiz}
+          simulationCode={"energie"} // si nécessaire
         />
       )}
 

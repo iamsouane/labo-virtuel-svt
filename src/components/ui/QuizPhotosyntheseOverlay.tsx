@@ -19,8 +19,6 @@ import {
   Info,
   ArrowRight,
 } from "lucide-react"
-
-// Fonction de transformation à importer ou définir ici
 import { saveQuizResult, transformLocalToQuizResult } from "../../lib/quizService"
 
 interface QuizOverlayProps {
