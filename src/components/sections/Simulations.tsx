@@ -215,7 +215,14 @@ const Simulations = ({ user }: SimulationsProps) => {
                 <div className="flex items-center justify-center text-5xl mb-4">{icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{sim.titre}</h3>
                 <p className="text-gray-600 mb-4">{sim.description}</p>
-
+                {/*afficher l'obetif si l'utilisateur est connecté eleve*/}
+                {user && user.role === "ELEVE" && sim.objectifs && (
+                  <p className="text-gray-500 italic mb-4">Objectif : {sim.objectifs}</p>
+                )}
+                {/*resultats attendus si l'utilisateur est connecté eleve*/}
+                {user && user.role === "ELEVE" && sim.resultats_attendus && (
+                  <p className="text-gray-500 italic mb-4">Résultats attendus : {sim.resultats_attendus}</p>
+                )}
                 {user ? (
                   isAuthorized ? (
                     <button

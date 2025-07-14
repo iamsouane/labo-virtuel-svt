@@ -175,7 +175,7 @@ export default function SimulationPollution() {
         const { data: simulation, error: simError } = await supabase
           .from("simulation")
           .select("id")
-          .eq("code", "pollution") // adapte si le code est passé en prop
+          .eq("code", "pollution")
           .single();
 
         if (simError || !simulation) {
