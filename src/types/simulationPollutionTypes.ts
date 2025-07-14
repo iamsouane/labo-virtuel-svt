@@ -65,6 +65,16 @@ export interface Vehicle {
 }
 
 /* ==================== TYPES QUIZ ==================== */
+export interface QuizQuestion {
+  id: number
+  quiz_id: string
+  question: string
+  options: string[]
+  reponse_correcte: string
+  explication: string
+  difficulty: "facile" | "moyen" | "difficile"
+  category: "equation" | "facteurs" | "processus" | "application" | "adaptation"
+}
 
 export interface QuizAnswer {
   questionId: number
@@ -80,17 +90,18 @@ export interface QuizResult {
   answers: QuizAnswer[]
 }
 
-export type QuizDifficulty = "facile" | "moyen" | "difficile"
-export type QuizCategoryPollution = "concepts" | "emissions" | "sante" | "environnement"
+export interface LocalQuizAnswer {
+  questionId: number;
+  userAnswer: number;
+  correct: boolean;
+  timeSpent: number;
+}
 
-export interface QuizQuestionPollution {
-  id: number
-  question: string
-  options: string[]
-  correctAnswer: number
-  explanation: string
-  difficulty: QuizDifficulty
-  category: QuizCategoryPollution
+export interface LocalQuizResult {
+  score: number;
+  totalQuestions: number;
+  timeSpent: number;
+  answers: LocalQuizAnswer[];
 }
 
 /* ==================== TOOLTIP ==================== */

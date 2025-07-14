@@ -1,82 +1,77 @@
 // src/components/ui/QuizPollution.tsx
 import { useEffect, useState } from "react"
-import { QUIZ_QUESTIONS_POLLUTION } from "../../data/quizPollution"
-import type { QuizResult } from "../../types/simulationPollutionTypes"
 import QuizOverlay from "./QuizPollutionOverlay"
+import { supabase } from "../../lib/supabaseClient"
+import type { QuizQuestion } from "../../types/simulationPollutionTypes"
 
-export default function QuizzPollution({ onClose }: { onClose: () => void }) {
+export default function QuizPollution({
+  simulationCode,
+  onClose,
+}: {
+  simulationCode: string
+  onClose: () => void
+}) {
+  const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [answers, setAnswers] = useState<
-    { questionId: number; userAnswer: number; correct: boolean }[]
-  >([])
   const [completed, setCompleted] = useState(false)
-  const [result, setResult] = useState<QuizResult | null>(null)
-  const [startTime, setStartTime] = useState<number>(Date.now())
 
-  useEffect(() => {
-    setStartTime(Date.now())
-  }, [])
+useEffect(() => {
+    const fetchQuizFromSimulation = async () => {
+      // 1. On récupère la simulation via son code
+      const { data: simulation, error: simError } = await supabase
+        .from("simulation")
+        .select("quiz_id")
+        .eq("code", simulationCode)
+        .single()
 
-  const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex)
-  }
-
-  const handleNext = () => {
-    if (selectedAnswer === null) return
-
-    const question = QUIZ_QUESTIONS_POLLUTION[currentQuestion]
-    const isCorrect = selectedAnswer === question.correctAnswer
-
-    const updatedAnswers = [
-      ...answers,
-      {
-        questionId: question.id,
-        userAnswer: selectedAnswer,
-        correct: isCorrect,
-      },
-    ]
-    setAnswers(updatedAnswers)
-    setSelectedAnswer(null)
-
-    if (currentQuestion < QUIZ_QUESTIONS_POLLUTION.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-    } else {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000)
-      const score = updatedAnswers.filter((a) => a.correct).length
-
-      const finalResult: QuizResult = {
-        score,
-        totalQuestions: QUIZ_QUESTIONS_POLLUTION.length,
-        timeSpent,
-        answers: updatedAnswers,
+      if (simError || !simulation?.quiz_id) {
+        console.error("Quiz non trouvé pour la simulation :", simError)
+        return
       }
 
-      setResult(finalResult)
-      setCompleted(true)
+      // 2. On récupère les questions du quiz lié
+      const { data: questionData, error: questionError } = await supabase
+        .from("question")
+        .select("*")
+        .eq("quiz_id", simulation.quiz_id)
+
+      if (questionData) {
+        setQuestions(questionData)
+      } else {
+        console.error("Erreur chargement questions :", questionError)
+      }
     }
-  }
+
+    fetchQuizFromSimulation()
+  }, [simulationCode])
 
   const handleRestart = () => {
     setCurrentQuestion(0)
     setSelectedAnswer(null)
-    setAnswers([])
     setCompleted(false)
-    setResult(null)
-    setStartTime(Date.now())
+  }
+
+  const handleAnswerSelect = (index: number) => {
+    setSelectedAnswer(index)
+  }
+
+  const handleNext = () => {
+    setSelectedAnswer(null)
+    setCurrentQuestion((prev) => prev + 1)
   }
 
   return (
     <QuizOverlay
-      questions={QUIZ_QUESTIONS_POLLUTION}
-      currentQuestion={currentQuestion}
-      selectedAnswer={selectedAnswer}
-      onAnswerSelect={handleAnswerSelect}
-      onNext={handleNext}
-      onClose={onClose}
-      result={result}
-      completed={completed}
-      onRestart={handleRestart}
+     questions={questions}
+    currentQuestion={currentQuestion}
+    selectedAnswer={selectedAnswer}
+    onClose={onClose}
+    onRestart={handleRestart}
+    onAnswerSelect={handleAnswerSelect}
+    onNext={handleNext}
+    completed={completed}
+    simulationCode={simulationCode} 
     />
   )
 }

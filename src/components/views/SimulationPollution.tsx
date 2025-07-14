@@ -3,23 +3,22 @@ import { useState, useEffect } from "react";
 import { TutorialOverlayPollution } from "../ui/TutorialOverlayPollution";
 import GuideOverlayPollution from "../ui/GuideOverlayPollution";
 import QuizPollution from "../ui/QuizPollutionOverlay";
-import type { PollutionData, Solution, Vehicle, QuizResult, TooltipData } from "../../types/simulationPollutionTypes";
+import type { PollutionData, Solution, Vehicle, QuizResult, TooltipData, QuizQuestion } from "../../types/simulationPollutionTypes";
 import { INITIAL_POLLUTION_DATA, INITIAL_SOLUTIONS } from "../../data/initialPollutionState";
-import { QUIZ_QUESTIONS_POLLUTION } from "../../data/quizPollution";
 import { calculatePollution } from "../../hooks/calculatePollution";
 import { usePollutionParticles } from "../../hooks/usePollutionParticles";
 import { usePollutionVehicles } from "../../hooks/usePollutionVehicles";
 import { getAQIStatus } from "../utils/aqiUtils";
 import { POLLUTION_TUTORIAL_STEPS } from "../../data/pollutionTutorial";
 import {
-   GraduationCap, Brain, HelpCircle,
+  GraduationCap, Brain, HelpCircle,
   Factory, Car, RotateCw, Play, Pause,
   Clock, FlaskConical,
   BarChart3, Target,
 } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { notifySuccess, notifyInfo } from "../../lib/notifications";
+import { notifySuccess, notifyInfo, notifyError } from "../../lib/notifications";
 import PollutionScene from "../pollution/PollutionScene";
 import TooltipFloating from "../ui/TooltipFloating";
 import { FullscreenContainer } from "../ui/FullscreenContainer";
@@ -29,6 +28,7 @@ import HealthEffects from "../pollution/HealthEffects";
 import CarCountControl from "../pollution/CarCountControl";
 import IndustryCountControl from "../pollution/IndustryCountControl";
 import { usePollutionShortcuts } from "../../hooks/usePollutionShortcuts";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function SimulationPollution() {
   // États de la simulation
@@ -54,8 +54,11 @@ export default function SimulationPollution() {
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [, setQuizResult] = useState<QuizResult | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [, setQuestionTimes] = useState<number[]>([]);
+
 
   // États d'aide
   const [showHelp, setShowHelp] = useState(false);
@@ -64,7 +67,6 @@ export default function SimulationPollution() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [particles, setParticles] = useState<any[]>([]);
 
-  const QUIZ_QUESTIONS = QUIZ_QUESTIONS_POLLUTION;
   const currentStep = POLLUTION_TUTORIAL_STEPS[currentTutorialStep];
   const aqiStatus = getAQIStatus(pollutionData.aqi);
   const solutionImpact = solutions.filter((s) => s.active).reduce((sum, s) => sum + s.impact, 0);
@@ -165,53 +167,126 @@ export default function SimulationPollution() {
     );
   };
 
-  // Quiz
+  // Chargement dynamique des questions depuis Supabase
+  useEffect(() => {
+    const fetchQuizQuestions = async () => {
+      try {
+        // 1. Récupérer l'ID de la simulation à partir de son code
+        const { data: simulation, error: simError } = await supabase
+          .from("simulation")
+          .select("id")
+          .eq("code", "pollution") // adapte si le code est passé en prop
+          .single();
+
+        if (simError || !simulation) {
+          notifyError("Erreur lors de la récupération de la simulation.");
+          console.error("Erreur simulation:", simError);
+          return;
+        }
+
+        const simulationId = simulation.id;
+
+        // 2. Récupérer le dernier quiz associé à cette simulation
+        const { data: latestQuiz, error: quizError } = await supabase
+          .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId });
+
+        if (quizError || !latestQuiz || latestQuiz.length === 0) {
+          notifyError("Aucun quiz disponible pour cette simulation.");
+          console.warn("Aucun quiz lié à cette simulation.", quizError);
+          return;
+        }
+
+        const quizId = latestQuiz[0].quiz_id;
+
+        // 3. Récupérer les questions du quiz
+        const { data: questions, error: questionsError } = await supabase
+          .from("question")
+          .select("*")
+          .eq("quiz_id", quizId)
+          .order("created_at", { ascending: true });
+
+        if (questionsError) {
+          notifyError("Erreur lors du chargement des questions.");
+          console.error("Erreur questions:", questionsError);
+          return;
+        }
+
+        if (!questions || questions.length === 0) {
+          notifyError("Aucune question disponible pour ce quiz.");
+          return;
+        }
+
+        // 4. Mise à jour de l'état local
+        setQuizQuestions(questions as QuizQuestion[]);
+      } catch (error) {
+        notifyError("Erreur inattendue lors du chargement du quiz.");
+        console.error("Erreur globale :", error);
+      }
+    };
+
+    fetchQuizQuestions();
+  }, []);
+
   const startQuiz = () => {
     setShowQuiz(true);
     setCurrentQuizQuestion(0);
     setQuizAnswers([]);
     setQuizStartTime(Date.now());
+    setQuestionTimes([Date.now()]);
     setQuizCompleted(false);
     setQuizResult(null);
     setSelectedAnswer(null);
   };
 
-  const answerQuestion = (answerIndex: number) => setSelectedAnswer(answerIndex);
+  const answerQuestion = (answerIndex: number) => {
+    setSelectedAnswer(answerIndex);
+  };
 
   const nextQuestion = () => {
     if (selectedAnswer === null) return;
 
+    setQuestionTimes(prev => [...prev, Date.now()]);
     const newAnswers = [...quizAnswers, selectedAnswer];
     setQuizAnswers(newAnswers);
     setSelectedAnswer(null);
 
-    if (currentQuizQuestion < QUIZ_QUESTIONS.length - 1) {
-      setCurrentQuizQuestion(prev => prev + 1);
+    if (currentQuizQuestion < quizQuestions.length - 1) {
+      setCurrentQuizQuestion(currentQuizQuestion + 1);
     } else {
       completeQuiz(newAnswers);
     }
   };
 
   const completeQuiz = (answers: number[]) => {
-    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000);
-    const score = answers.filter((answer, index) => answer === QUIZ_QUESTIONS[index].correctAnswer).length;
-    const percentage = Math.round((score / QUIZ_QUESTIONS.length) * 100);
-
-    setQuizResult({
-      score,
-      totalQuestions: QUIZ_QUESTIONS.length,
-      timeSpent,
-      answers: answers.map((answer, index) => ({
-        questionId: QUIZ_QUESTIONS[index].id,
+    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+    // Utilisation de quizQuestions dynamiques (pas de constante dure)
+    const results = answers.map((answer, index) => {
+      const question = quizQuestions[index]
+      const userAnswerText = question.options[answer]
+      const isCorrect = userAnswerText === question.reponse_correcte
+      return {
+        questionId: question.id, // bonne clé ici
         userAnswer: answer,
-        correct: answer === QUIZ_QUESTIONS[index].correctAnswer,
+        correct: isCorrect,
         timeSpent,
-      })),
-    });
+      }
+    })
 
-    setQuizCompleted(true);
-    notifySuccess(`Quiz Pollution terminé ! Score: ${score}/${QUIZ_QUESTIONS.length} (${percentage}%)`);
-  };
+    const score = results.filter((r) => r.correct).length
+
+    const result: QuizResult = {
+      score,
+      totalQuestions: quizQuestions.length,
+      timeSpent,
+      answers: results,
+    }
+
+    setQuizResult(result)
+    setQuizCompleted(true)
+
+    const percentage = Math.round((score / quizQuestions.length) * 100)
+    notifySuccess(`Quiz terminé ! Score: ${score}/${quizQuestions.length} (${percentage}%)`)
+  }
 
   const restartQuiz = () => startQuiz();
   const closeQuiz = () => {
@@ -266,15 +341,15 @@ export default function SimulationPollution() {
 
       {showQuiz && (
         <QuizPollution
-          questions={QUIZ_QUESTIONS}
+          questions={quizQuestions}
           currentQuestion={currentQuizQuestion}
           selectedAnswer={selectedAnswer}
           onAnswerSelect={answerQuestion}
           onNext={nextQuestion}
           onClose={closeQuiz}
-          result={quizResult}
           completed={quizCompleted}
           onRestart={restartQuiz}
+          simulationCode={"pollution"}
         />
       )}
 

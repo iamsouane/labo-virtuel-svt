@@ -242,64 +242,64 @@ const SimulationSelectionNaturelle = () => {
   };
 
   // Chargement dynamique des questions depuis Supabase
-useEffect(() => {
-  const fetchQuizQuestions = async () => {
-    try {
-      // 1. Récupérer l'ID de la simulation à partir de son code
-      const { data: simulation, error: simError } = await supabase
-        .from("simulation")
-        .select("id")
-        .eq("code", "selection-naturelle") // adapte si le code est passé en prop
-        .single();
+  useEffect(() => {
+    const fetchQuizQuestions = async () => {
+      try {
+        // 1. Récupérer l'ID de la simulation à partir de son code
+        const { data: simulation, error: simError } = await supabase
+          .from("simulation")
+          .select("id")
+          .eq("code", "selection-naturelle") // adapte si le code est passé en prop
+          .single();
 
-      if (simError || !simulation) {
-        notifyError("Erreur lors de la récupération de la simulation.");
-        console.error("Erreur simulation:", simError);
-        return;
+        if (simError || !simulation) {
+          notifyError("Erreur lors de la récupération de la simulation.");
+          console.error("Erreur simulation:", simError);
+          return;
+        }
+
+        const simulationId = simulation.id;
+
+        // 2. Récupérer le dernier quiz associé à cette simulation
+        const { data: latestQuiz, error: quizError } = await supabase
+          .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId });
+
+        if (quizError || !latestQuiz || latestQuiz.length === 0) {
+          notifyError("Aucun quiz disponible pour cette simulation.");
+          console.warn("Aucun quiz lié à cette simulation.", quizError);
+          return;
+        }
+
+        const quizId = latestQuiz[0].quiz_id;
+
+        // 3. Récupérer les questions du quiz
+        const { data: questions, error: questionsError } = await supabase
+          .from("question")
+          .select("*")
+          .eq("quiz_id", quizId)
+          .order("created_at", { ascending: true });
+
+        if (questionsError) {
+          notifyError("Erreur lors du chargement des questions.");
+          console.error("Erreur questions:", questionsError);
+          return;
+        }
+
+        if (!questions || questions.length === 0) {
+          notifyError("Aucune question disponible pour ce quiz.");
+          return;
+        }
+
+        // 4. Mise à jour de l'état local
+        setQuizQuestions(questions as QuizQuestion[]);
+      } catch (error) {
+        notifyError("Erreur inattendue lors du chargement du quiz.");
+        console.error("Erreur globale :", error);
       }
+    };
 
-      const simulationId = simulation.id;
-
-      // 2. Récupérer le dernier quiz associé à cette simulation
-      const { data: latestQuiz, error: quizError } = await supabase
-        .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId });
-
-      if (quizError || !latestQuiz || latestQuiz.length === 0) {
-        notifyError("Aucun quiz disponible pour cette simulation.");
-        console.warn("Aucun quiz lié à cette simulation.", quizError);
-        return;
-      }
-
-      const quizId = latestQuiz[0].quiz_id;
-
-      // 3. Récupérer les questions du quiz
-      const { data: questions, error: questionsError } = await supabase
-        .from("question")
-        .select("*")
-        .eq("quiz_id", quizId)
-        .order("created_at", { ascending: true });
-
-      if (questionsError) {
-        notifyError("Erreur lors du chargement des questions.");
-        console.error("Erreur questions:", questionsError);
-        return;
-      }
-
-      if (!questions || questions.length === 0) {
-        notifyError("Aucune question disponible pour ce quiz.");
-        return;
-      }
-
-      // 4. Mise à jour de l'état local
-      setQuizQuestions(questions as QuizQuestion[]);
-    } catch (error) {
-      notifyError("Erreur inattendue lors du chargement du quiz.");
-      console.error("Erreur globale :", error);
-    }
-  };
-
-  fetchQuizQuestions();
-}, []);
+    fetchQuizQuestions();
+  }, []);
 
   const startQuiz = () => {
     setShowQuiz(true);

@@ -1,10 +1,12 @@
+// src/components/ui/CreateTPForm.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { notifySuccess, notifyError } from "../../lib/notifications";
 import type { Profil } from "../../types";
 import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese";
 import { QUIZ_QUESTIONS_SELECTION } from "../../data/quizSelection";
-import { QUIZ_QUESTIONS_ENERGIE } from "../../data/quizEnergie";7
+import { QUIZ_QUESTIONS_ENERGIE } from "../../data/quizEnergie";
+import { QUIZ_QUESTIONS_POLLUTION } from "../../data/quizPollution"; // <-- Import ajouté
 
 const CreateTPForm = ({ user }: { user: Profil }) => {
   const [classes, setClasses] = useState<any[]>([]);
@@ -77,6 +79,9 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
         return;
       } else if (code === "energie") {
         setAvailableQuestions(QUIZ_QUESTIONS_ENERGIE);
+        return;
+      } else if (code === "pollution") {
+        setAvailableQuestions(QUIZ_QUESTIONS_POLLUTION);
         return;
       }
 
