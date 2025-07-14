@@ -121,7 +121,6 @@ export interface LocalQuizResult {
   answers: LocalQuizAnswer[];
 }
 
-
 /* ==================== TYPES SIMULATION ==================== */
 export type PhotosynthesisSimulationState = {
   plants: PlantGenetics[]

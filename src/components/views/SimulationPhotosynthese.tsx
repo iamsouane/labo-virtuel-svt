@@ -1,10 +1,15 @@
-//src/components/views/SimulationPhotosynthese
+// src/components/views/SimulationPhotosynthese.tsx
 import { useState } from "react"
 import { Canvas } from "@react-three/fiber"
-import type { LabEnvironment, DataPoint, Preset, QuizResult, } from "../../types/simulationPhotosyntheseTypes"
+import type {
+  LabEnvironment,
+  DataPoint,
+  Preset,
+  QuizResult,
+  QuizQuestion,
+} from "../../types/simulationPhotosyntheseTypes"
 import { PHOTOSYNTHESE_TUTORIAL_STEPS } from "../../data/photosyntheseTutorial"
 import { TutorialOverlayPhotosynthese } from "../ui/TutorialOverlayPhotosynthese"
-import type { QuizQuestion } from "../../types/simulationPhotosyntheseTypes"
 import QuizOverlay from "../ui/QuizPhotosyntheseOverlay"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -17,12 +22,28 @@ import { useFullscreen } from "../../hooks/useFullscreen"
 import { PRESETS } from "../../data/presetsPhotosynthese"
 import { SimplePhotosynthesisScene } from "../photosynthese/SimplePhotosynthesisScene"
 import EnvironmentControlCard from "../ui/EnvironmentControlCard"
-import { GraduationCap, Brain, HelpCircle, Star, ThumbsUp, AlertCircle, Settings, RotateCw, Leaf, Play, Pause, Clock, Target, SunMedium, CloudDrizzle, ThermometerSun, Droplets } from "lucide-react"
-import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese"
+import {
+  GraduationCap,
+  Brain,
+  HelpCircle,
+  Star,
+  ThumbsUp,
+  AlertCircle,
+  Settings,
+  RotateCw,
+  Leaf,
+  Play,
+  Pause,
+  Clock,
+  Target,
+  SunMedium,
+  CloudDrizzle,
+  ThermometerSun,
+  Droplets,
+} from "lucide-react"
 import { useSimulationPhotosyntheseEffects } from "../../hooks/useSimulationPhotosyntheseEffects"
 import PhotosyntheseInfos from "../ui/PhotosyntheseInfos"
 
-// Composant principal avec tutoriel intégré
 const SimulationPhotosynthese = () => {
   const [environment, setEnvironment] = useState<LabEnvironment>({
     lightIntensity: 60,
@@ -38,15 +59,15 @@ const SimulationPhotosynthese = () => {
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
   const [, setDataHistory] = useState<DataPoint[]>([])
   const [showHelp, setShowHelp] = useState(false)
-  const { isFullscreen } = useFullscreen();
+  const { isFullscreen } = useFullscreen()
 
-  // États du tutoriel
+  // Tutoriel
   const [showTutorial, setShowTutorial] = useState(false)
   const [currentTutorialStep, setCurrentTutorialStep] = useState(0)
   const [tutorialCompleted, setTutorialCompleted] = useState(false)
   const currentStep = PHOTOSYNTHESE_TUTORIAL_STEPS[currentTutorialStep]
 
-  // États du quiz
+  // Quiz
   const [showQuiz, setShowQuiz] = useState(false)
   const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
   const [quizAnswers, setQuizAnswers] = useState<number[]>([])
@@ -54,7 +75,7 @@ const SimulationPhotosynthese = () => {
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [, setQuizResult] = useState<QuizResult | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [simulationCode] = useState("photosynthese") // simulation ciblée
+  const [simulationCode] = useState("photosynthese") // code fixe ici
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([])
 
   const [resetKey, setResetKey] = useState(0)
@@ -63,12 +84,14 @@ const SimulationPhotosynthese = () => {
     setTimeElapsed(0)
     setIsRunning(false)
     setDataHistory([])
-    setEnvironment({ lightIntensity: 60, co2Level: 40, temperature: 25, humidity: 60 })
+    setEnvironment({
+      lightIntensity: 60,
+      co2Level: 40,
+      temperature: 25,
+      humidity: 60,
+    })
     setSelectedPreset(null)
-
-    // Changer la clé pour forcer un reset dans SimplePhotosynthesisScene
-    setResetKey(prev => prev + 1)
-
+    setResetKey((prev) => prev + 1)
     notifyInfo("Simulation réinitialisée")
   }
 
@@ -85,18 +108,11 @@ const SimulationPhotosynthese = () => {
   }
 
   const nextTutorialStep = () => {
-    console.log("Next step called, current:", currentTutorialStep, "moving to:", currentTutorialStep + 1)
-    setCurrentTutorialStep((prev) => {
-      const newStep = prev + 1
-      console.log("Setting new step:", newStep)
-      return newStep
-    })
+    setCurrentTutorialStep((prev) => Math.min(prev + 1, PHOTOSYNTHESE_TUTORIAL_STEPS.length - 1))
   }
 
   const previousTutorialStep = () => {
-    if (currentTutorialStep > 0) {
-      setCurrentTutorialStep(currentTutorialStep - 1)
-    }
+    setCurrentTutorialStep((prev) => Math.max(prev - 1, 0))
   }
 
   const skipTutorial = () => {
@@ -108,9 +124,7 @@ const SimulationPhotosynthese = () => {
     setShowTutorial(false)
     setTutorialCompleted(true)
     localStorage.setItem("photosynthesis-tutorial-completed", "true")
-    notifySuccess(
-      "Tutoriel Photosynthèse terminé ! Vous êtes prêt à expérimenter !"
-    )
+    notifySuccess("Tutoriel Photosynthèse terminé ! Vous êtes prêt à expérimenter !")
   }
 
   const formatTime = (seconds: number) => {
@@ -133,6 +147,7 @@ const SimulationPhotosynthese = () => {
   }
 
   const envStatus = getEnvironmentStatus()
+
   useSimulationPhotosyntheseEffects({
     simulationCode,
     isRunning,
@@ -165,7 +180,7 @@ const SimulationPhotosynthese = () => {
     setQuizAnswers(newAnswers)
     setSelectedAnswer(null)
 
-    if (currentQuizQuestion < QUIZ_QUESTIONS_PHOTOSYNTHESE.length - 1) {
+    if (currentQuizQuestion < quizQuestions.length - 1) {
       setCurrentQuizQuestion(currentQuizQuestion + 1)
     } else {
       completeQuiz(newAnswers)
@@ -174,12 +189,13 @@ const SimulationPhotosynthese = () => {
 
   const completeQuiz = (answers: number[]) => {
     const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+    // Utilisation de quizQuestions dynamiques (pas de constante dure)
     const results = answers.map((answer, index) => {
-      const question = QUIZ_QUESTIONS_PHOTOSYNTHESE[index]
+      const question = quizQuestions[index]
       const userAnswerText = question.options[answer]
       const isCorrect = userAnswerText === question.reponse_correcte
       return {
-        questionId: currentQuizQuestion,
+        questionId: question.id, // bonne clé ici
         userAnswer: answer,
         correct: isCorrect,
         timeSpent,
@@ -190,7 +206,7 @@ const SimulationPhotosynthese = () => {
 
     const result: QuizResult = {
       score,
-      totalQuestions: QUIZ_QUESTIONS_PHOTOSYNTHESE.length,
+      totalQuestions: quizQuestions.length,
       timeSpent,
       answers: results,
     }
@@ -198,9 +214,8 @@ const SimulationPhotosynthese = () => {
     setQuizResult(result)
     setQuizCompleted(true)
 
-    // Notification de fin
-    const percentage = Math.round((score / QUIZ_QUESTIONS_PHOTOSYNTHESE.length) * 100)
-    notifySuccess(`Quiz terminé ! Score: ${score}/${QUIZ_QUESTIONS_PHOTOSYNTHESE.length} (${percentage}%)`)
+    const percentage = Math.round((score / quizQuestions.length) * 100)
+    notifySuccess(`Quiz terminé ! Score: ${score}/${quizQuestions.length} (${percentage}%)`)
   }
 
   const restartQuiz = () => {
@@ -226,8 +241,13 @@ const SimulationPhotosynthese = () => {
 
   if (!isLoaded) {
     return (
-      <section id="photosynthese" className="py-20 px-6 bg-gray-50 max-w-7xl mx-auto text-center rounded-xl shadow-lg">
-        <h2 className="text-3xl font-semibold mb-6 text-gray-800">Expérience sur la photosynthèse</h2>
+      <section
+        id="photosynthese"
+        className="py-20 px-6 bg-gray-50 max-w-7xl mx-auto text-center rounded-xl shadow-lg"
+      >
+        <h2 className="text-3xl font-semibold mb-6 text-gray-800">
+          Expérience sur la photosynthèse
+        </h2>
         <div className="flex items-center justify-center h-96 bg-gradient-to-br from-green-50 via-blue-50 to-green-100 rounded-lg">
           <div className="text-center">
             <div className="relative">
@@ -235,7 +255,6 @@ const SimulationPhotosynthese = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 <Leaf size={32} className="text-green-600" />
               </div>
-
             </div>
             <p className="text-gray-700 font-medium">Préparation du laboratoire...</p>
           </div>
@@ -274,12 +293,12 @@ const SimulationPhotosynthese = () => {
       )}
 
       {/* Aide contextuelle */}
-      {showHelp && (
-        <GuideOverlayPhotosynthese onClose={() => setShowHelp(false)} />
-      )}
+      {showHelp && <GuideOverlayPhotosynthese onClose={() => setShowHelp(false)} />}
 
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold text-gray-800">Expérience sur la photosynthèse</h2>
+        <h2 className="text-3xl font-semibold text-gray-800">
+          Expérience sur la photosynthèse
+        </h2>
         <div className="flex gap-2">
           <button
             onClick={startTutorial}
@@ -306,15 +325,22 @@ const SimulationPhotosynthese = () => {
             <HelpCircle className="w-5 h-5" />
           </button>
           <FullscreenButton className="ml-2" />
-
         </div>
       </div>
 
       {/* Statut de l'environnement */}
-      <div className="mb-6" data-tutorial="env-status">
+      <div
+        className="mb-6"
+        data-tutorial="env-status"
+      >
         <div
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium ${envStatus.color === "green" ? "bg-green-500" : envStatus.color === "yellow" ? "bg-yellow-500" : "bg-red-500"
-            }`}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium ${
+            envStatus.color === "green"
+              ? "bg-green-500"
+              : envStatus.color === "yellow"
+              ? "bg-yellow-500"
+              : "bg-red-500"
+          }`}
         >
           <span>{envStatus.icon}</span>
           <span>Conditions: {envStatus.status}</span>
@@ -322,13 +348,17 @@ const SimulationPhotosynthese = () => {
       </div>
 
       {/* Contrôles principaux */}
-      <div className="mb-6 flex flex-wrap justify-center gap-4" data-tutorial="controls">
+      <div
+        className="mb-6 flex flex-wrap justify-center gap-4"
+        data-tutorial="controls"
+      >
         <button
           onClick={() => setIsRunning(!isRunning)}
-          className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center ${isRunning
-            ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
-            : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-            }`}
+          className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center ${
+            isRunning
+              ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
+              : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+          }`}
           aria-label={isRunning ? "Pause" : "Démarrer"}
         >
           {isRunning ? <Pause size={24} /> : <Play size={24} />}
@@ -351,7 +381,6 @@ const SimulationPhotosynthese = () => {
             <Clock size={20} />
             {formatTime(timeElapsed)}
           </span>
-
         </div>
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
@@ -376,12 +405,15 @@ const SimulationPhotosynthese = () => {
             <button
               key={preset.name}
               onClick={() => applyPreset(preset)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${selectedPreset === preset.name
-                ? `bg-${preset.color}-500 text-white shadow-lg`
-                : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
-                }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${
+                selectedPreset === preset.name
+                  ? `bg-${preset.color}-500 text-white shadow-lg`
+                  : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
+              }`}
               title={preset.description}
-              data-tutorial={preset.name === "Conditions Optimales" ? "preset-optimal" : undefined}
+              data-tutorial={
+                preset.name === "Conditions Optimales" ? "preset-optimal" : undefined
+              }
             >
               <div className="flex items-center gap-2">
                 {preset.icon}
@@ -389,7 +421,6 @@ const SimulationPhotosynthese = () => {
               </div>
             </button>
           ))}
-
         </div>
       </div>
 
@@ -465,7 +496,9 @@ const SimulationPhotosynthese = () => {
               color={color}
               optimalRange={optimal as [number, number]}
               showAdvanced={showAdvanced}
-              onChange={(newValue) => setEnvironment((prev) => ({ ...prev, [key]: newValue }))}
+              onChange={(newValue) =>
+                setEnvironment((prev) => ({ ...prev, [key]: newValue }))
+              }
               tutorialId={tutorial}
             />
           )
@@ -474,8 +507,9 @@ const SimulationPhotosynthese = () => {
 
       {/* Scène 3D */}
       <div
-        className={`rounded-xl border-2 border-gray-200 overflow-hidden bg-gradient-to-br from-blue-50 via-green-50 to-blue-100 mb-8 shadow-xl ${isFullscreen ? "h-[calc(100vh-300px)]" : "h-[500px]"
-          }`}
+        className={`rounded-xl border-2 border-gray-200 overflow-hidden bg-gradient-to-br from-blue-50 via-green-50 to-blue-100 mb-8 shadow-xl ${
+          isFullscreen ? "h-[calc(100vh-300px)]" : "h-[500px]"
+        }`}
         data-tutorial="canvas"
       >
         <Canvas camera={{ position: [0, 2, 6], fov: 60 }}>
@@ -486,18 +520,21 @@ const SimulationPhotosynthese = () => {
             timeElapsed={timeElapsed}
             resetKey={resetKey}
           />
-
         </Canvas>
       </div>
 
       {/* Informations scientifiques */}
       <PhotosyntheseInfos />
 
-      <p className="mt-8 text-gray-700 max-w-3xl mx-auto leading-relaxed text-center" data-tutorial="completion">
+      <p
+        className="mt-8 text-gray-700 max-w-3xl mx-auto leading-relaxed text-center"
+        data-tutorial="completion"
+      >
         Cette simulation interactive vous permet d'expérimenter avec les facteurs qui influencent la photosynthèse.
         {!tutorialCompleted && (
           <>
-            {" "}Cliquez sur le bouton
+            {" "}
+            Cliquez sur le bouton
             <button
               onClick={startTutorial}
               className="inline-flex items-center gap-1 px-2 py-1 ml-2 mr-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition"
@@ -510,22 +547,21 @@ const SimulationPhotosynthese = () => {
         )}
       </p>
 
-
-
-      {/* Conteneur React-Toastify qui affiche toutes les notifications */}
+      {/* Toastify notifications */}
       <ToastContainer
-        position="top-right"       // Position par défaut (peut être redondant avec options toast)
-        autoClose={4000}           // Durée fermeture par défaut
-        hideProgressBar={false}    // Affiche la barre de progression
-        newestOnTop={false}        // L'ordre des notifications (les anciennes en haut)
-        closeOnClick               // Ferme la notif au clic
-        rtl={false}                // Texte non RTL (sens normal)
-        pauseOnFocusLoss           // Pause si la fenêtre perd le focus
-        draggable                  // Peut glisser la notification
-        pauseOnHover              // Pause au survol
-        theme="colored"            // Thème coloré (correspond aux appels toast.success/error)
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
       />
     </FullscreenContainer>
   )
 }
+
 export default SimulationPhotosynthese

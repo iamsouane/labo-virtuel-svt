@@ -82,28 +82,43 @@ export type GenerationExplanation = {
 
 /* ==================== TYPES QUIZ ==================== */
 
-export type QuizQuestion = {
+export interface QuizQuestion {
   id: number
+  quiz_id: string
   question: string
   options: string[]
-  correctAnswer: number       // Index de la bonne réponse
-  explanation: string
+  reponse_correcte: string
+  explication: string
   difficulty: "facile" | "moyen" | "difficile"
-  category: "genetique" | "adaptation" | "processus" | "concepts" | "application"
+  category: "equation" | "facteurs" | "processus" | "application" | "adaptation"
 }
 
-export type QuizAnswer = {
+export interface QuizAnswer {
   questionId: number
-  userAnswer: number          // Index de la réponse choisie
+  userAnswer: number
   correct: boolean
-  timeSpent: number           // Temps passé en secondes
+  timeSpent: number
 }
 
-export type QuizResult = {
+export interface QuizResult {
   score: number
   totalQuestions: number
-  timeSpent: number           // Temps total en secondes
+  timeSpent: number
   answers: QuizAnswer[]
+}
+
+export interface LocalQuizAnswer {
+  questionId: number;
+  userAnswer: number;
+  correct: boolean;
+  timeSpent: number;
+}
+
+export interface LocalQuizResult {
+  score: number;
+  totalQuestions: number;
+  timeSpent: number;
+  answers: LocalQuizAnswer[];
 }
 
 /* ==================== TYPES SIMULATION ==================== */

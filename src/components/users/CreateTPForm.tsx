@@ -1,9 +1,9 @@
-//src/components/users/CreateTPForm.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { notifySuccess, notifyError } from "../../lib/notifications";
 import type { Profil } from "../../types";
 import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese";
+import { QUIZ_QUESTIONS_SELECTION } from "../../data/quizSelection";
 
 const CreateTPForm = ({ user }: { user: Profil }) => {
   const [classes, setClasses] = useState<any[]>([]);
@@ -12,6 +12,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
   const [selectedSimulation, setSelectedSimulation] = useState("");
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [quizTitle, setQuizTitle] = useState("");
+  const [availableQuestions, setAvailableQuestions] = useState<any[]>([]);
 
   // Charger les classes du prof connecté
   useEffect(() => {
@@ -43,6 +44,70 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
     };
     fetchSimulations();
   }, [user.id]);
+
+  // Charger les questions selon la simulation sélectionnée
+useEffect(() => {
+  const fetchQuestionsForSimulation = async () => {
+    if (!selectedSimulation) {
+      setAvailableQuestions([]);
+      return;
+    }
+
+    // Récupérer la simulation pour obtenir son code
+    const { data: simulation, error: simError } = await supabase
+      .from("simulation")
+      .select("*")
+      .eq("id", selectedSimulation)
+      .single();
+
+    if (simError || !simulation) {
+      setAvailableQuestions([]);
+      return;
+    }
+
+    const code = simulation.code?.toLowerCase();
+
+    // 1. Cas 1 : simulation connue en dur
+    if (code === "photosynthese") {
+      setAvailableQuestions(QUIZ_QUESTIONS_PHOTOSYNTHESE);
+      return;
+    } else if (code === "selection-naturelle") {
+      setAvailableQuestions(QUIZ_QUESTIONS_SELECTION);
+      return;
+    }
+
+    // 2. Cas 2 : quiz dynamique associé à la simulation (via simulation_quiz)
+    const { data: simQuiz, error: simQuizError } = await supabase
+      .from("simulation_quiz")
+      .select("quiz_id")
+      .eq("simulation_id", selectedSimulation)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (simQuizError || !simQuiz) {
+      setAvailableQuestions([]);
+      return;
+    }
+
+    const quizId = simQuiz.quiz_id;
+
+    const { data: questions, error: qError } = await supabase
+      .from("question")
+      .select("*")
+      .eq("quiz_id", quizId);
+
+    if (qError) {
+      notifyError("Erreur chargement questions : " + qError.message);
+      return;
+    }
+
+    setAvailableQuestions(questions || []);
+  };
+
+  fetchQuestionsForSimulation();
+}, [selectedSimulation]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +144,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
 
     // 2. Insertion des questions
     const questionsWithQuizId = selectedQuestions.map((i) => ({
-      ...QUIZ_QUESTIONS_PHOTOSYNTHESE[i],
+      ...availableQuestions[i],
       quiz_id: quizCreated.id,
     }));
 
@@ -118,6 +183,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
     setSelectedSimulation("");
     setSelectedQuestions([]);
     setQuizTitle("");
+    setAvailableQuestions([]);
   };
 
   return (
@@ -177,7 +243,10 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
       <div>
         <label className="block mb-1">Sélectionnez les questions</label>
         <div className="space-y-3 max-h-64 overflow-y-auto border rounded p-3 bg-gray-50">
-          {QUIZ_QUESTIONS_PHOTOSYNTHESE.map((q, index) => (
+          {availableQuestions.length === 0 && (
+            <p className="text-gray-500 text-sm">Aucune question disponible pour cette simulation.</p>
+          )}
+          {availableQuestions.map((q, index) => (
             <div key={index} className="p-2 border rounded bg-white">
               <label className="flex items-start gap-2">
                 <input

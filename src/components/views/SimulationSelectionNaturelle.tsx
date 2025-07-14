@@ -21,7 +21,8 @@ import type {
   StatsDataPoint,
   GenerationExplanation,
   QuizResult,
-  QuizAnswer
+  QuizAnswer,
+  QuizQuestion
 } from "../../types/selectionNaturelleTypes";
 import { createRandomRabbit } from "../utils/naturalSelection";
 import { simulationSelectionNaturelle } from "../utils/simulationSelectionNaturelle";
@@ -31,6 +32,8 @@ import RabbitInfo from "../selection/RabbitInfo";
 import Wolf from "../selection/Wolf";
 import Food from "../selection/Food";
 import RabbitCreator from "../selection/RabbitCreator";
+import QuizSelectionOverlay from "../ui/QuizSelectionOverlay";
+import { supabase } from "../../lib/supabaseClient";
 
 const DEFAULT_ENVIRONMENT: EnvironmentalFactors = {
   wolvesPresent: false,
@@ -75,6 +78,8 @@ const SimulationSelectionNaturelle = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+
 
   // Fonction pour calculer la distribution des traits
   const calculateTraitsDistribution = (rabbits: RabbitGenetics[]): StatsDataPoint['traits'] => {
@@ -93,7 +98,7 @@ const SimulationSelectionNaturelle = () => {
   // Fonction pour obtenir les effets environnementaux actifs
   const getActiveEnvironmentalEffects = (): string[] => {
     const effects: string[] = [];
-    
+
     if (environment.wolvesPresent) {
       effects.push("Présence de loups : cela exerce une pression de sélection en faveur des lapins rapides, qui échappent plus facilement aux prédateurs.");
     }
@@ -160,7 +165,7 @@ const SimulationSelectionNaturelle = () => {
     const { newLivingRabbits, explanation, newDeadRabbits } = result;
 
     const newTraits = calculateTraitsDistribution(newLivingRabbits);
-    
+
     if (!newTraits) {
       notifyError("Erreur dans le calcul des traits");
       return;
@@ -239,7 +244,67 @@ const SimulationSelectionNaturelle = () => {
     setTutorialCompleted(false);
   };
 
-  // Fonctions du quiz
+  // Chargement dynamique des questions depuis Supabase
+  // Chargement dynamique des questions depuis Supabase
+useEffect(() => {
+  const fetchQuizQuestions = async () => {
+    try {
+      // 1. Récupérer l'ID de la simulation à partir de son code
+      const { data: simulation, error: simError } = await supabase
+        .from("simulation")
+        .select("id")
+        .eq("code", "selection-naturelle") // adapte si le code est passé en prop
+        .single();
+
+      if (simError || !simulation) {
+        notifyError("Erreur lors de la récupération de la simulation.");
+        console.error("Erreur simulation:", simError);
+        return;
+      }
+
+      const simulationId = simulation.id;
+
+      // 2. Récupérer le dernier quiz associé à cette simulation
+      const { data: latestQuiz, error: quizError } = await supabase
+        .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId });
+
+      if (quizError || !latestQuiz || latestQuiz.length === 0) {
+        notifyError("Aucun quiz disponible pour cette simulation.");
+        console.warn("Aucun quiz lié à cette simulation.", quizError);
+        return;
+      }
+
+      const quizId = latestQuiz[0].quiz_id;
+
+      // 3. Récupérer les questions du quiz
+      const { data: questions, error: questionsError } = await supabase
+        .from("question")
+        .select("*")
+        .eq("quiz_id", quizId)
+        .order("created_at", { ascending: true });
+
+      if (questionsError) {
+        notifyError("Erreur lors du chargement des questions.");
+        console.error("Erreur questions:", questionsError);
+        return;
+      }
+
+      if (!questions || questions.length === 0) {
+        notifyError("Aucune question disponible pour ce quiz.");
+        return;
+      }
+
+      // 4. Mise à jour de l'état local
+      setQuizQuestions(questions as QuizQuestion[]);
+    } catch (error) {
+      notifyError("Erreur inattendue lors du chargement du quiz.");
+      console.error("Erreur globale :", error);
+    }
+  };
+
+  fetchQuizQuestions();
+}, []);
+
   const startQuiz = () => {
     setShowQuiz(true);
     setCurrentQuizQuestion(0);
@@ -263,7 +328,7 @@ const SimulationSelectionNaturelle = () => {
     setQuizAnswers(newAnswers);
     setSelectedAnswer(null);
 
-    if (currentQuizQuestion < QUIZ_QUESTIONS_SELECTION.length - 1) {
+    if (currentQuizQuestion < quizQuestions.length - 1) {
       setCurrentQuizQuestion(currentQuizQuestion + 1);
     } else {
       completeQuiz(newAnswers);
@@ -271,31 +336,35 @@ const SimulationSelectionNaturelle = () => {
   };
 
   const completeQuiz = (answers: number[]) => {
-    const totalTimeSpent = Math.floor((Date.now() - quizStartTime) / 1000);
+    const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
+    // Utilisation de quizQuestions dynamiques (pas de constante dure)
+    const results = answers.map((answer, index) => {
+      const question = quizQuestions[index]
+      const userAnswerText = question.options[answer]
+      const isCorrect = userAnswerText === question.reponse_correcte
+      return {
+        questionId: question.id, // bonne clé ici
+        userAnswer: answer,
+        correct: isCorrect,
+        timeSpent,
+      }
+    })
 
-    const results: QuizAnswer[] = answers.map((answer, index) => ({
-      questionId: QUIZ_QUESTIONS_SELECTION[index].id,
-      userAnswer: answer,
-      correct: answer === QUIZ_QUESTIONS_SELECTION[index].correctAnswer,
-      timeSpent: Math.floor(((questionTimes[index + 1] || Date.now()) - questionTimes[index]) / 1000)
-    }));
+    const score = results.filter((r) => r.correct).length
 
-    const score = results.filter(r => r.correct).length;
-    const percentage = Math.round((score / QUIZ_QUESTIONS_SELECTION.length) * 100);
-
-    setQuizResult({
+    const result: QuizResult = {
       score,
-      totalQuestions: QUIZ_QUESTIONS_SELECTION.length,
-      timeSpent: totalTimeSpent,
+      totalQuestions: quizQuestions.length,
+      timeSpent,
       answers: results,
-    });
+    }
 
-    setQuizCompleted(true);
+    setQuizResult(result)
+    setQuizCompleted(true)
 
-    notifySuccess(
-      `Quiz terminé ! Vous avez obtenu ${score} sur ${QUIZ_QUESTIONS_SELECTION.length} (${percentage}%).`
-    );
-  };
+    const percentage = Math.round((score / quizQuestions.length) * 100)
+    notifySuccess(`Quiz terminé ! Score: ${score}/${quizQuestions.length} (${percentage}%)`)
+  }
 
   const restartQuiz = () => startQuiz();
   const closeQuiz = () => {
@@ -397,17 +466,18 @@ const SimulationSelectionNaturelle = () => {
           onComplete={completeTutorial}
         />
       )}
+
       {showQuiz && (
-        <QuizOverlay
-          questions={QUIZ_QUESTIONS_SELECTION}
+        <QuizSelectionOverlay
+          questions={quizQuestions}
           currentQuestion={currentQuizQuestion}
           selectedAnswer={selectedAnswer}
           onAnswerSelect={answerQuestion}
           onNext={nextQuestion}
           onClose={closeQuiz}
-          result={quizResult}
           completed={quizCompleted}
           onRestart={restartQuiz}
+          simulationCode={"selection-naturelle"} // si nécessaire
         />
       )}
 
@@ -685,7 +755,7 @@ const SimulationSelectionNaturelle = () => {
                     if (!currentTraits) return null;
 
                     const phenotypeText = (() => {
-                      switch(trait) {
+                      switch (trait) {
                         case "fur": return `${currentTraits.fur.brown} bruns, ${currentTraits.fur.white} blancs`;
                         case "ear": return `${currentTraits.ears.straight} droites, ${currentTraits.ears.floppy} tombantes`;
                         case "tooth": return `${currentTraits.teeth.long} longues, ${currentTraits.teeth.short} courtes`;
@@ -694,7 +764,7 @@ const SimulationSelectionNaturelle = () => {
                     })();
 
                     const traitName = (() => {
-                      switch(trait) {
+                      switch (trait) {
                         case "fur": return "Fourrure";
                         case "ear": return "Oreilles";
                         case "tooth": return "Dents";

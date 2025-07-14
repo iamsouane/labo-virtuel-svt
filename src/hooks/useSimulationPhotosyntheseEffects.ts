@@ -1,3 +1,4 @@
+//src/hooks/useSimulationPhotosyntheseEffects.ts
 import { useEffect } from "react"
 import { supabase } from "../lib/supabaseClient"
 import type { QuizQuestion, DataPoint, LabEnvironment } from "../types/simulationPhotosyntheseTypes"
