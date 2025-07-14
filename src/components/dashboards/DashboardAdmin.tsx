@@ -1,5 +1,5 @@
 // src/components/dashboards/DashboardAdmin.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
@@ -20,7 +20,45 @@ type Section = "users" | "simulations" | "visualisations" | "demandes";
 const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
   const [localUser] = useState(user);
   const [currentSection, setCurrentSection] = useState<Section>("users");
+  const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
   const navigate = useNavigate();
+
+  // Fonction pour charger le nombre de demandes en attente
+  const fetchNbDemandes = async () => {
+  const { count, error } = await supabase
+    .from("simulation_access_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("statut", "EN_ATTENTE")
+    .eq("destinataire_id", localUser.id);  // <- Filtre sur destinataire_id
+
+  if (error) {
+    console.error("Erreur chargement demandes en attente:", error.message);
+    setNbDemandesEnAttente(0);
+  } else {
+    setNbDemandesEnAttente(count || 0);
+  }
+};
+
+  useEffect(() => {
+    fetchNbDemandes();
+
+    // Mise à jour en temps réel via Supabase Realtime
+    const subscription = supabase
+  .channel("public:simulation_access_requests")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "simulation_access_requests" },
+    () => {
+      fetchNbDemandes();
+    }
+  )
+  .subscribe();
+
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -60,7 +98,7 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
         return (
           <div className="mt-4">
             <h2 className="text-2xl font-semibold mb-4">Demandes d'accès</h2>
-            <ListeDemandesAcces user={user}/>
+            <ListeDemandesAcces user={user} />
           </div>
         );
       default:
@@ -80,44 +118,52 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
         <nav className="flex flex-col space-y-4 flex-grow">
           <button
             onClick={() => setCurrentSection("users")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "users"
-              ? "bg-white text-green-700 font-bold"
-              : "hover:bg-green-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "users"
+                ? "bg-white text-green-700 font-bold"
+                : "hover:bg-green-600"
+            }`}
           >
             <Users size={18} /> Utilisateurs
           </button>
 
           <button
             onClick={() => setCurrentSection("simulations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "simulations"
-              ? "bg-white text-green-700 font-bold"
-              : "hover:bg-green-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "simulations"
+                ? "bg-white text-green-700 font-bold"
+                : "hover:bg-green-600"
+            }`}
           >
             <Cpu size={18} /> Simulations
           </button>
 
           <button
             onClick={() => setCurrentSection("visualisations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "visualisations"
-              ? "bg-white text-green-700 font-bold"
-              : "hover:bg-green-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "visualisations"
+                ? "bg-white text-green-700 font-bold"
+                : "hover:bg-green-600"
+            }`}
           >
             <MonitorPlay size={18} /> Visualisations
           </button>
 
           <button
             onClick={() => setCurrentSection("demandes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "demandes"
-              ? "bg-white text-green-700 font-bold"
-              : "hover:bg-green-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "demandes"
+                ? "bg-white text-green-700 font-bold"
+                : "hover:bg-green-600"
+            }`}
           >
             <Mail size={18} /> Demandes d'accès
+            {nbDemandesEnAttente > 0 && (
+              <span className="ml-auto inline-block bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                {nbDemandesEnAttente}
+              </span>
+            )}
           </button>
-
         </nav>
 
         <button

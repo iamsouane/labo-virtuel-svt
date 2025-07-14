@@ -1,7 +1,7 @@
 // src/components/dashboards/DashboardProfesseur.tsx
+import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import type { Profil } from "../../types";
 import Simulations from "../sections/Simulations";
 import Visualisations from "../sections/Visualisations";
@@ -23,7 +23,49 @@ type Section = "simulations" | "visualisations" | "classes" | "demandes" | "tps"
 const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   const [localUser] = useState(user);
   const [currentSection, setCurrentSection] = useState<Section>("simulations");
+  const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
   const navigate = useNavigate();
+
+  // Charger le nombre de demandes en attente adressées au prof connecté
+  const fetchNbDemandes = async () => {
+    if (!localUser?.id) {
+      setNbDemandesEnAttente(0);
+      return;
+    }
+
+    const { count, error } = await supabase
+      .from("simulation_access_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("statut", "EN_ATTENTE")
+      .eq("destinataire_id", localUser.id);
+
+    if (error) {
+      console.error("Erreur chargement demandes en attente:", error.message);
+      setNbDemandesEnAttente(0);
+    } else {
+      setNbDemandesEnAttente(count || 0);
+    }
+  };
+
+  useEffect(() => {
+    fetchNbDemandes();
+
+    // Souscription realtime pour mise à jour automatique
+    const subscription = supabase
+      .channel("public:simulation_access_requests")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "simulation_access_requests" },
+        () => {
+          fetchNbDemandes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [localUser.id]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -82,6 +124,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
             <CreateTPForm user={localUser} />
           </div>
         );
+
       case "resultats":
         return (
           <div className="mt-4">
@@ -89,6 +132,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
             <ResultatsEleves professeur={localUser} />
           </div>
         );
+
       default:
         return null;
     }
@@ -106,60 +150,71 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         <nav className="flex flex-col space-y-4 flex-grow">
           <button
             onClick={() => setCurrentSection("simulations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "simulations"
-              ? "bg-white text-blue-700 font-bold"
-              : "hover:bg-blue-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "simulations"
+                ? "bg-white text-blue-700 font-bold"
+                : "hover:bg-blue-600"
+            }`}
           >
             <Cpu size={18} /> Simulations
           </button>
 
           <button
             onClick={() => setCurrentSection("visualisations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "visualisations"
-              ? "bg-white text-blue-700 font-bold"
-              : "hover:bg-blue-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "visualisations"
+                ? "bg-white text-blue-700 font-bold"
+                : "hover:bg-blue-600"
+            }`}
           >
             <MonitorPlay size={18} /> Visualisations
           </button>
 
           <button
             onClick={() => setCurrentSection("classes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "classes"
-              ? "bg-white text-blue-700 font-bold"
-              : "hover:bg-blue-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "classes"
+                ? "bg-white text-blue-700 font-bold"
+                : "hover:bg-blue-600"
+            }`}
           >
             <Users size={18} /> Classes
           </button>
 
           <button
             onClick={() => setCurrentSection("tps")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "tps"
-              ? "bg-white text-blue-700 font-bold"
-              : "hover:bg-blue-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "tps"
+                ? "bg-white text-blue-700 font-bold"
+                : "hover:bg-blue-600"
+            }`}
           >
             <Cpu size={18} /> Créer un TP
           </button>
 
           <button
             onClick={() => setCurrentSection("demandes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "demandes"
-              ? "bg-white text-green-700 font-bold"
-              : "hover:bg-green-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "demandes"
+                ? "bg-white text-green-700 font-bold"
+                : "hover:bg-green-600"
+            }`}
           >
             <CheckCircle size={18} /> Demandes
+            {nbDemandesEnAttente > 0 && (
+              <span className="ml-auto inline-block bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                {nbDemandesEnAttente}
+              </span>
+            )}
           </button>
 
           <button
             onClick={() => setCurrentSection("resultats")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${currentSection === "resultats"
-              ? "bg-white text-blue-700 font-bold"
-              : "hover:bg-blue-600"
-              }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
+              currentSection === "resultats"
+                ? "bg-white text-blue-700 font-bold"
+                : "hover:bg-blue-600"
+            }`}
           >
             <FileCheck size={18} /> Résultats élèves
           </button>
