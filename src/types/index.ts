@@ -139,3 +139,17 @@ export interface ActivityLog {
   target_id?: string | null;
   created_at: string;
 }
+
+export interface ResultatEleve {
+  id: string;
+  users_id: string;
+  eleve_nom: string;
+  eleve_prenom: string;
+  eleve_classe: string;
+  quiz_id: string;
+  quiz_title: string;
+  note: number;
+  reponses: Record<string, { userAnswer: number; correct: boolean; timeSpent?: number }>;
+  completed_at: string;
+  time_spent?: number;
+}
