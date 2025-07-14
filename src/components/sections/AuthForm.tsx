@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../lib/notifications";
+import { Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps {
   onAuthSuccess?: () => void;
@@ -15,6 +16,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [isPendingConfirmation, setIsPendingConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -157,8 +159,11 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   };
 
   return (
-    <section id="auth" className="py-20 px-6 bg-white max-w-md mx-auto rounded-xl shadow-lg">
-      <h2 className="text-3xl font-semibold mb-8 text-center">
+    <section
+      id="auth"
+      className="py-20 px-6 bg-light max-w-md mx-auto rounded-2xl shadow-lg"
+    >
+      <h2 className="text-3xl font-heading font-bold mb-8 text-primary text-center">
         {isLogin ? "Connexion" : "Inscription"}
       </h2>
 
@@ -169,9 +174,10 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             setIsLogin(true);
             setIsPendingConfirmation(false);
           }}
-          className={`pb-2 border-b-4 font-semibold ${
-            isLogin ? "border-green-600 text-green-700" : "border-transparent text-gray-500"
-          }`}
+          className={`pb-2 border-b-4 font-semibold transition ${isLogin
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-secondary"
+            }`}
         >
           Connexion
         </button>
@@ -181,25 +187,32 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             setIsLogin(false);
             setIsPendingConfirmation(false);
           }}
-          className={`pb-2 border-b-4 font-semibold ${
-            !isLogin ? "border-green-600 text-green-700" : "border-transparent text-gray-500"
-          }`}
+          className={`pb-2 border-b-4 font-semibold transition ${!isLogin
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-secondary"
+            }`}
         >
           Inscription
         </button>
       </div>
 
       {isPendingConfirmation && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-lg">
           <p className="font-semibold">📧 Merci pour votre inscription !</p>
-          <p>Veuillez confirmer votre adresse email via le lien envoyé. Vous pourrez vous connecter après vérification.</p>
+          <p>
+            Veuillez confirmer votre adresse email via le lien envoyé. Vous
+            pourrez vous connecter après vérification.
+          </p>
         </div>
       )}
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         {!isLogin && (
           <div>
-            <label htmlFor="name" className="block mb-2 font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block mb-2 font-semibold text-primary"
+            >
               Nom complet
             </label>
             <input
@@ -210,13 +223,16 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
               onChange={handleChange}
               placeholder="Votre nom complet"
               disabled={isPendingConfirmation || isLoading}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         )}
 
         <div>
-          <label htmlFor="email" className="block mb-2 font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block mb-2 font-semibold text-primary"
+          >
             Email
           </label>
           <input
@@ -227,34 +243,45 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             onChange={handleChange}
             placeholder="exemple@domaine.com"
             disabled={isPendingConfirmation || isLoading}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
-        <div>
-          <label htmlFor="password" className="block mb-2 font-medium text-gray-700">
+        <div className="relative">
+          <label
+            htmlFor="password"
+            className="block mb-2 font-semibold text-primary"
+          >
             Mot de passe
           </label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="******"
             disabled={isPendingConfirmation || isLoading}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute top-9 right-3 text-gray-500 hover:text-primary focus:outline-none items-center justify-center rounded-full p-2 transition-colors"
+            tabIndex={-1} // pour ne pas être tabulé en tab
+            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         </div>
 
         <button
           type="submit"
           disabled={isPendingConfirmation || isLoading}
-          className={`w-full ${
-            isPendingConfirmation || isLoading
+          className={`w-full ${isPendingConfirmation || isLoading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
-          } text-white font-semibold py-3 rounded-xl shadow transition`}
+              : "bg-primary hover:bg-secondary"
+            } text-light font-semibold py-3 rounded-xl shadow transition`}
         >
           {isLoading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}
         </button>

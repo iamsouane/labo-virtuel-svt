@@ -1,17 +1,31 @@
-//src/components/sections/Hero.tsx
+// src/components/sections/Hero.tsx
+import { Link } from "react-scroll";
+import Navbar from "../layout/Navbar";
+
 const Hero = () => (
-  <section id="hero" className="min-h-screen bg-gradient-to-br from-green-100 to-blue-200 flex items-center justify-center text-center px-4">
-    <div>
-      <h1 className="text-4xl md:text-6xl font-bold mb-4">Laboratoire Virtuel SVT</h1>
-      <p className="text-lg md:text-xl mb-6">
+  <section
+    id="hero"
+    className="min-h-screen bg-gradient-to-br from-accent via-white to-secondary flex items-center justify-center text-center px-4 relative"
+  >
+    {/* Navbar intégrée en haut */}
+    <Navbar />
+
+    {/* Contenu principal du Hero */}
+    <div className="mt-16 md:mt-24 max-w-2xl">
+      <h1 className="text-4xl md:text-6xl font-heading font-bold text-primary mb-6">
+        Laboratoire Virtuel SVT
+      </h1>
+      <p className="text-lg md:text-xl text-dark mb-8 font-sans">
         Une plateforme interactive pour les classes de Seconde
       </p>
-       <a
-        href="#auth-form"
-        className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition"
+      <Link
+        to="auth-form"
+        smooth={true}
+        duration={500}
+        className="inline-block bg-primary hover:bg-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer"
       >
         Accéder au labo
-      </a>
+      </Link>
     </div>
   </section>
 );

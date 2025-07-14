@@ -1,9 +1,10 @@
-//src/components/sections/CTA.tsx
-
 const CTA = () => (
-  <section id="footer" className="py-20 px-6 bg-green-600 text-white text-center">
-    <h2 className="text-3xl font-semibold mb-6">Prêt à explorer le labo ?</h2>
-    <h1>Connectez-vous</h1>
+  <section
+    id="footer"
+    className="py-14 px-1 bg-primary text-light text-center"
+  >
+    <h2 className="text-2xl font-heading font-bold mb-6">Prêt à explorer le labo ?</h2>
+    <h1 className="text-3xl font-heading font-extrabold mb-4">Connectez-vous</h1>
   </section>
 );
 
