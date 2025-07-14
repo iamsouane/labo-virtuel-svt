@@ -26,6 +26,7 @@ const MesClasses = ({ user }: MesClassesProps) => {
 
   // État modal élève sélectionné
   const [selectedEleve, setSelectedEleve] = useState<Eleve | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchClassesAndEleves = async () => {
@@ -58,8 +59,16 @@ const MesClasses = ({ user }: MesClassesProps) => {
             .eq("classe_id", classe.id);
 
           if (elevesError) {
-            console.error("Erreur récupération élèves pour la classe", classe.code_classe, elevesError);
-            classesWithEleves.push({ id: classe.id, code_classe: classe.code_classe, eleves: [] });
+            console.error(
+              "Erreur récupération élèves pour la classe",
+              classe.code_classe,
+              elevesError
+            );
+            classesWithEleves.push({
+              id: classe.id,
+              code_classe: classe.code_classe,
+              eleves: [],
+            });
           } else {
             classesWithEleves.push({
               id: classe.id,
@@ -81,17 +90,38 @@ const MesClasses = ({ user }: MesClassesProps) => {
     fetchClassesAndEleves();
   }, [user.id]);
 
+  // Met à jour photoUrl quand selectedEleve change
+  useEffect(() => {
+    if (!selectedEleve || !selectedEleve.photo_profil) {
+      setPhotoUrl(null);
+      return;
+    }
+
+    if (selectedEleve.photo_profil.startsWith("http")) {
+      setPhotoUrl(selectedEleve.photo_profil);
+    } else {
+      const { data } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(selectedEleve.photo_profil);
+      setPhotoUrl(data?.publicUrl ?? null);
+    }
+  }, [selectedEleve]);
+
   if (loading) return <p>Chargement des classes...</p>;
   if (classes.length === 0) return <p>Aucune classe créée.</p>;
 
   return (
     <>
-      {/* Ici ton formulaire */}
-
+      {/* Liste des classes et élèves */}
       <div className="mt-6 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {classes.map((classe) => (
-          <div key={classe.id} className="p-4 border rounded shadow-sm bg-white">
-            <h3 className="text-lg font-semibold mb-2">Classe : {classe.code_classe}</h3>
+          <div
+            key={classe.id}
+            className="p-4 border rounded shadow-sm bg-white"
+          >
+            <h3 className="text-lg font-semibold mb-2">
+              Classe : {classe.code_classe}
+            </h3>
             {classe.eleves.length === 0 ? (
               <p>Aucun élève dans cette classe.</p>
             ) : (
@@ -130,9 +160,9 @@ const MesClasses = ({ user }: MesClassesProps) => {
             </button>
 
             <div className="flex flex-col items-center gap-4">
-              {selectedEleve.photo_profil ? (
+              {photoUrl ? (
                 <img
-                  src={selectedEleve.photo_profil}
+                  src={photoUrl}
                   alt={`${selectedEleve.prenom} ${selectedEleve.nom}`}
                   className="w-24 h-24 rounded-full object-cover"
                 />
@@ -146,8 +176,7 @@ const MesClasses = ({ user }: MesClassesProps) => {
                 {selectedEleve.prenom} {selectedEleve.nom}
               </h2>
               <p className="text-gray-700">{selectedEleve.email}</p>
-
-              {/* Tu peux ajouter d'autres infos ici */}
+              {/* Ajoute ici d’autres infos si besoin */}
             </div>
           </div>
         </div>
