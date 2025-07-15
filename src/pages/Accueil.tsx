@@ -25,15 +25,15 @@ const Accueil = ({ user }: AccueilProps) => {
   return (
     <>
       <Hero />
-      <section id="a-propos">
-        <APropos  />
-      </section>
       <Fonctionnalites />
       <section id="simulations">
-        <Simulations user={user}  />
+        <Simulations user={user} />
       </section>
       <section id="visualisations">
-        <Visualisations  />
+        <Visualisations />
+      </section>
+      <section id="a-propos">
+        <APropos />
       </section>
       <Technologies />
       <CTA />

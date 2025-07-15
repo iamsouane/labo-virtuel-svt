@@ -1,6 +1,8 @@
+// src/components/users/MesClasses.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
+import { notifyError, notifySuccess } from "../../lib/notifications";
 
 interface Eleve {
   eleve_id: string;
@@ -23,9 +25,8 @@ interface MesClassesProps {
 const MesClasses = ({ user }: MesClassesProps) => {
   const [classes, setClasses] = useState<ClasseWithEleves[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // État modal élève sélectionné
   const [selectedEleve, setSelectedEleve] = useState<Eleve | null>(null);
+  const [selectedClasseId, setSelectedClasseId] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,15 +45,9 @@ const MesClasses = ({ user }: MesClassesProps) => {
           return;
         }
 
-        if (!classesData) {
-          setClasses([]);
-          setLoading(false);
-          return;
-        }
-
         const classesWithEleves: ClasseWithEleves[] = [];
 
-        for (const classe of classesData) {
+        for (const classe of classesData || []) {
           const { data: elevesData, error: elevesError } = await supabase
             .from("eleves_par_classe")
             .select("*")
@@ -90,7 +85,6 @@ const MesClasses = ({ user }: MesClassesProps) => {
     fetchClassesAndEleves();
   }, [user.id]);
 
-  // Met à jour photoUrl quand selectedEleve change
   useEffect(() => {
     if (!selectedEleve || !selectedEleve.photo_profil) {
       setPhotoUrl(null);
@@ -106,6 +100,39 @@ const MesClasses = ({ user }: MesClassesProps) => {
       setPhotoUrl(data?.publicUrl ?? null);
     }
   }, [selectedEleve]);
+
+  const supprimerEleveDeClasse = async () => {
+    if (!selectedEleve || !selectedClasseId) return;
+
+    const { error } = await supabase
+      .from("users_classe")
+      .delete()
+      .match({
+        users_id: selectedEleve.eleve_id,
+        classe_id: selectedClasseId,
+      });
+
+    if (error) {
+      console.error("Erreur lors de la suppression de l'élève:", error);
+      notifyError("Erreur lors de la suppression de l'élève.");
+      return;
+    }
+
+    notifySuccess("Élève supprimé de la classe avec succès.");
+
+    const updatedClasses = classes.map((c) =>
+      c.id === selectedClasseId
+        ? {
+          ...c,
+          eleves: c.eleves.filter((e) => e.eleve_id !== selectedEleve.eleve_id),
+        }
+        : c
+    );
+
+    setClasses(updatedClasses);
+    setSelectedEleve(null);
+    setSelectedClasseId(null);
+  };
 
   if (loading) return <p>Chargement des classes...</p>;
   if (classes.length === 0) return <p>Aucune classe créée.</p>;
@@ -130,7 +157,10 @@ const MesClasses = ({ user }: MesClassesProps) => {
                   <li
                     key={eleve.eleve_id}
                     className="cursor-pointer hover:text-blue-600"
-                    onClick={() => setSelectedEleve(eleve)}
+                    onClick={() => {
+                      setSelectedEleve(eleve);
+                      setSelectedClasseId(classe.id);
+                    }}
                   >
                     {eleve.prenom} {eleve.nom}
                   </li>
@@ -145,7 +175,10 @@ const MesClasses = ({ user }: MesClassesProps) => {
       {selectedEleve && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setSelectedEleve(null)}
+          onClick={() => {
+            setSelectedEleve(null);
+            setSelectedClasseId(null);
+          }}
         >
           <div
             className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative"
@@ -153,7 +186,10 @@ const MesClasses = ({ user }: MesClassesProps) => {
           >
             <button
               className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 font-bold text-xl"
-              onClick={() => setSelectedEleve(null)}
+              onClick={() => {
+                setSelectedEleve(null);
+                setSelectedClasseId(null);
+              }}
               aria-label="Fermer"
             >
               &times;
@@ -176,7 +212,13 @@ const MesClasses = ({ user }: MesClassesProps) => {
                 {selectedEleve.prenom} {selectedEleve.nom}
               </h2>
               <p className="text-gray-700">{selectedEleve.email}</p>
-              {/* Ajoute ici d’autres infos si besoin */}
+
+              <button
+                onClick={supprimerEleveDeClasse}
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Supprimer cet élève de la classe
+              </button>
             </div>
           </div>
         </div>
