@@ -1,4 +1,3 @@
-// src/components/views/AccueilUtilisateur.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Profil } from "../../types";
@@ -145,16 +144,24 @@ const AccueilUtilisateur = ({ user, onLogout }: AccueilUtilisateurProps) => {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      <div className={localUser.must_change_password ? "blur-sm opacity-60 pointer-events-none h-full" : "h-full"}>
+    <div className="relative w-screen h-screen overflow-auto bg-light">
+      <div
+        className={`transition-all duration-300 ${
+          localUser.must_change_password
+            ? "blur-sm opacity-60 pointer-events-none h-full"
+            : "h-full"
+        }`}
+      >
         {localUser.role === "ADMIN" && <DashboardAdmin user={localUser} onLogout={handleLogout} />}
-        {localUser.role === "PROFESSEUR" && <DashboardProfesseur user={localUser} onLogout={handleLogout} />}
+        {localUser.role === "PROFESSEUR" && (
+          <DashboardProfesseur user={localUser} onLogout={handleLogout} />
+        )}
         {localUser.role === "ELEVE" && <DashboardEleve user={localUser} onLogout={handleLogout} />}
       </div>
 
       {localUser.must_change_password && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-auto">
             <p className="mb-4 text-red-600 font-semibold text-center">
               Vous devez changer votre mot de passe avant de continuer.
             </p>
