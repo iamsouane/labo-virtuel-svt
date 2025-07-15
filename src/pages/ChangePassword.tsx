@@ -1,7 +1,7 @@
-// src/pages/ChangePassword.tsx
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import { notifyError } from "../lib/notifications";
+import { notifyError, notifySuccess } from "../lib/notifications";
 
 interface ChangePasswordFormProps {
   onSuccess?: () => void;
@@ -10,19 +10,18 @@ interface ChangePasswordFormProps {
 const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // 1. Vérification basique
     if (newPassword.trim().length < 6) {
       notifyError("Le mot de passe doit contenir au moins 6 caractères.");
       setLoading(false);
       return;
     }
 
-    // 2. Mise à jour dans Supabase Auth
     const { error: authError } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -33,7 +32,6 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
       return;
     }
 
-    // 3. Récupérer l'utilisateur
     const {
       data: { user },
       error: userError,
@@ -45,7 +43,6 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
       return;
     }
 
-    // 4. Mise à jour du champ `must_change_password`
     const { error: dbError } = await supabase
       .from("users")
       .update({ must_change_password: false })
@@ -57,29 +54,50 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
       return;
     }
 
+    notifySuccess("Mot de passe mis à jour avec succès.");
     setLoading(false);
-    onSuccess?.(); // Appelé une seule fois, aucune notification ici
+    onSuccess?.();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <label className="block text-left font-medium text-sm text-gray-700">
-        Nouveau mot de passe
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6 mx-auto mt-10"
+    >
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-primary mb-2">Changer le mot de passe</h2>
+        <p className="text-sm text-gray-600">Entrez un nouveau mot de passe sécurisé.</p>
+      </div>
+
+      <div className="relative">
+        <label htmlFor="password" className="block text-left font-semibold text-primary mb-1">
+          Nouveau mot de passe
+        </label>
         <input
-          type="password"
+          id="password"
+          type={showPassword ? "text" : "password"}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="mt-1 block w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="******"
           required
-          minLength={6}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
         />
-      </label>
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="absolute top-9 right-3 text-gray-600 hover:text-primary"
+          aria-label="Afficher le mot de passe"
+        >
+          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
+      </div>
 
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-2 px-4 rounded-md text-white transition ${
-          loading ? "bg-green-400" : "bg-green-600 hover:bg-green-700"
+        className={`w-full py-3 rounded-xl text-white font-semibold transition ${
+          loading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-green-700"
         }`}
       >
         {loading ? "Mise à jour..." : "Mettre à jour"}

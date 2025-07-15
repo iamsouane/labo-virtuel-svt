@@ -75,7 +75,21 @@ const App = () => {
       </Routes>
 
       {/* Activation globale des notifications */}
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        pauseOnHover
+        draggable
+        theme="colored"
+        toastClassName={(context) =>
+          context?.type === "success"
+            ? "bg-green-100 text-green-700 border-l-4 border-green-500 rounded-lg px-4 py-3 shadow"
+            : context?.type === "error"
+              ? "bg-red-100 text-red-700 border-l-4 border-red-500 rounded-lg px-4 py-3 shadow"
+              : "bg-blue-100 text-blue-700 border-l-4 border-blue-500 rounded-lg px-4 py-3 shadow"
+        }
+      />
     </BrowserRouter>
   );
 };

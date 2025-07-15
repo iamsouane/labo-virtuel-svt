@@ -1,21 +1,27 @@
-//src/components/auth/RequirePasswordChange.tsx
+//src/components/auth/RequirePasswordChange
 import { Navigate } from "react-router-dom";
 import type { Profil } from "../../types";
-import type { JSX } from "react";
+import type { ReactNode } from "react";
 
-interface Props {
+interface RequirePasswordChangeProps {
   user: Profil | null;
-  children: JSX.Element;
+  children: ReactNode;
 }
 
 /**
- * Si l'utilisateur est connecté mais doit changer son mot de passe,
- * on le redirige vers la page de changement de mot de passe.
+ * Redirige l'utilisateur vers la page de changement de mot de passe
+ * s'il est connecté et que le champ `must_change_password` est activé.
  */
-const RequirePasswordChange = ({ user, children }: Props) => {
-  if (!user) return <Navigate to="/" replace />;
-  if (user.must_change_password) return <Navigate to="/change-password" replace />;
-  return children;
+const RequirePasswordChange = ({ user, children }: RequirePasswordChangeProps) => {
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (user.must_change_password) {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 export default RequirePasswordChange;
