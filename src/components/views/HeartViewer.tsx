@@ -329,14 +329,16 @@ const HeartViewer: React.FC = () => {
       {isLoading && <LoadingSpinner />}
 
       {/* En-tête */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-black/30 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-white text-center">Anatomie du Cœur Humain</h1>
-          <p className="text-center text-gray-300 mt-2 text-sm md:text-base">
-            Modèle 3D réaliste - Explorez les structures cardiaques
-          </p>
-        </div>
-      </div>
+<div className="absolute top-0 left-0 right-0 z-20 bg-black/40 backdrop-blur-md">
+  <div className="max-w-4xl mx-auto px-4 py-6 text-center space-y-2">
+    <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+      Anatomie du Cœur Humain
+    </h1>
+    <p className="text-sm md:text-base text-red-100">
+      Modèle 3D réaliste – Explorez les structures cardiaques
+    </p>
+  </div>
+</div>
 
       {/* Panneau d'annotation */}
       <AnnotationPanel annotation={selectedAnnotation} onClose={handleCloseAnnotation} />
@@ -353,29 +355,29 @@ const HeartViewer: React.FC = () => {
         <Card className="bg-black/70 backdrop-blur-sm border-red-800">
           <CardContent className="p-3">
             <p className="text-white text-xs leading-relaxed">
-              <strong className="text-red-300">Instructions:</strong>
-              <br /> <strong className="text-red-300"> • Cliquez et faites glisser pour faire tourner</strong>
-              <br /> <strong className="text-red-300"> • Molette pour zoomer/dézoomer</strong>
-              <br /> <strong className="text-red-300"> • Survolez les points lumineux pour les infos</strong>
-              <br /> <strong className="text-red-300"> • Cliquez sur un point pour voir les détails</strong>
-              <br /> <strong className="text-red-300"> • Modèle 3D haute qualité de Sketchfab</strong>
+              <strong className="text-red-900">Instructions:</strong>
+              <br /> <strong className="text-red-900"> • Cliquez et faites glisser pour faire tourner</strong>
+              <br /> <strong className="text-red-900"> • Molette pour zoomer/dézoomer</strong>
+              <br /> <strong className="text-red-900"> • Survolez les points lumineux pour les infos</strong>
+              <br /> <strong className="text-red-900"> • Cliquez sur un point pour voir les détails</strong>
+              <br /> <strong className="text-red-900"> • Modèle 3D haute qualité de Sketchfab</strong>
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Compteur d'annotations */}
-      <div className="absolute top-24 right-4 z-20">
-        <Card className="bg-red-900/80 backdrop-blur-sm border-red-700">
-          <CardContent className="p-3">
-            <div className="text-red text-center">
-              <div className="text-lg font-bold">{heartAnnotations.length}</div>
-              <div className="text-xs">Structures</div>
-              <div className="text-xs">anatomiques</div>
-            </div>
-          </CardContent>
-        </Card>
+<div className="absolute top-24 right-4 z-20">
+  <Card className="bg-red-900/80 backdrop-blur-md border-red-700 rounded-2xl shadow-lg">
+    <CardContent className="p-4">
+      <div className="text-center text-red-900 space-y-1">
+        <div className="text-xl font-extrabold">{heartAnnotations.length}</div>
+        <div className="text-xs uppercase tracking-wide">Structures</div>
+        <div className="text-xs uppercase tracking-wide">anatomiques</div>
       </div>
+    </CardContent>
+  </Card>
+</div>
 
       {/* Scène 3D */}
       <Canvas

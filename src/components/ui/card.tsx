@@ -1,30 +1,34 @@
 // src/components/ui/card.tsx
-import type { HTMLAttributes } from 'react';
-
+import type { HTMLAttributes, ReactNode } from "react";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
+  children: ReactNode;
 }
 
 interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
+  children: ReactNode;
 }
 
 interface CardContentProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
+  children: ReactNode;
 }
 
 interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {
   className?: string;
+  children: ReactNode;
 }
 
 export const Card = ({ className, children, ...props }: CardProps) => {
   return (
-    <div 
+    <div
       className={`
-        bg-white rounded-lg shadow-sm
-        border border-gray-200
-        ${className || ''}
+        bg-white rounded-2xl border border-gray-300 shadow-sm
+        transition-shadow duration-200
+        hover:shadow-md
+        ${className || ""}
       `}
       {...props}
     >
@@ -35,10 +39,10 @@ export const Card = ({ className, children, ...props }: CardProps) => {
 
 export const CardHeader = ({ className, children, ...props }: CardHeaderProps) => {
   return (
-    <div 
+    <div
       className={`
-        p-4 border-b border-gray-200
-        ${className || ''}
+        px-6 py-4 border-b border-gray-300
+        ${className || ""}
       `}
       {...props}
     >
@@ -49,10 +53,10 @@ export const CardHeader = ({ className, children, ...props }: CardHeaderProps) =
 
 export const CardContent = ({ className, children, ...props }: CardContentProps) => {
   return (
-    <div 
+    <div
       className={`
-        p-4
-        ${className || ''}
+        px-6 py-5
+        ${className || ""}
       `}
       {...props}
     >
@@ -63,14 +67,14 @@ export const CardContent = ({ className, children, ...props }: CardContentProps)
 
 export const CardTitle = ({ className, children, ...props }: CardTitleProps) => {
   return (
-    <h1 
+    <h2
       className={`
-        text-2xl font-bold
-        ${className || ''}
+        text-2xl font-bold text-primary
+        ${className || ""}
       `}
       {...props}
     >
       {children}
-    </h1>
+    </h2>
   );
 };

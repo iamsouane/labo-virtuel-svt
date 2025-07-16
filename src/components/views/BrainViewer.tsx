@@ -457,9 +457,11 @@ const BrainViewer: React.FC = () => {
 
       {/* En-tête */}
       <div className="absolute top-0 left-0 right-0 z-20 bg-black/30 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-white text-center">Anatomie du Cerveau Humain</h1>
-          <p className="text-center text-gray-300 mt-2 text-sm md:text-base">
+        <div className="container mx-auto px-6 py-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white text-center leading-tight">
+            Anatomie du Cerveau Humain
+          </h1>
+          <p className="text-center text-purple-300 mt-3 text-base md:text-lg max-w-2xl mx-auto">
             Modèle 3D haute qualité de Sketchfab - Explorez les structures cérébrales
           </p>
         </div>
@@ -480,12 +482,12 @@ const BrainViewer: React.FC = () => {
         <Card className="bg-black/70 backdrop-blur-sm border-purple-800">
           <CardContent className="p-3">
             <p className="text-white text-xs leading-relaxed">
-              <strong className="text-purple-300">Instructions:</strong>
-              <br /><strong className="text-purple-300">• Cliquez et faites glisser pour faire tourner</strong>
-              <br /><strong className="text-purple-300">• Molette pour zoomer/dézoomer</strong>
-              <br /><strong className="text-purple-300">• Survolez les points colorés pour les infos</strong>
-              <br /><strong className="text-purple-300">• Cliquez sur un point pour voir les détails</strong>
-              <br /><strong className="text-purple-300">• Modèle 3D professionnel de Sketchfab</strong>
+              <strong className="text-purple-900">Instructions:</strong>
+              <br /><strong className="text-purple-900">• Cliquez et faites glisser pour faire tourner</strong>
+              <br /><strong className="text-purple-900">• Molette pour zoomer/dézoomer</strong>
+              <br /><strong className="text-purple-900">• Survolez les points colorés pour les infos</strong>
+              <br /><strong className="text-purple-900">• Cliquez sur un point pour voir les détails</strong>
+              <br /><strong className="text-purple-900">• Modèle 3D professionnel de Sketchfab</strong>
             </p>
           </CardContent>
         </Card>
@@ -493,13 +495,13 @@ const BrainViewer: React.FC = () => {
 
       {/* Compteur d'annotations */}
       <div className="absolute top-24 right-4 z-20">
-        <Card className="bg-purple-900/80 backdrop-blur-sm border-purple-700">
-          <CardContent className="p-3">
-            <div className="text-white text-center">
-              <div className="text-lg font-bold">{brainAnnotations.length}</div>
-              <div className="text-xs">Régions</div>
-              <div className="text-xs">annotées</div>
+        <Card className="bg-purple-900/80 backdrop-blur-sm border border-purple-700 rounded-2xl shadow-lg">
+          <CardContent className="p-4 text-center text-purple-900">
+            <div className="text-xl font-bold">
+              {brainAnnotations.length}
             </div>
+            <div className="text-xs uppercase tracking-wide">Régions</div>
+            <div className="text-xs uppercase tracking-wide">annotées</div>
           </CardContent>
         </Card>
       </div>

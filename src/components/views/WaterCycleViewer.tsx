@@ -594,18 +594,17 @@ const WaterCycleViewer: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full">
+        <div className="text-center space-y-6">
+          <div className="flex items-center justify-center gap-3">
+            <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full shadow-md">
               <Droplets className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">
               Cycle de l'Eau
             </h1>
           </div>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            Découvrez le processus fascinant de circulation de l'eau dans la nature à travers une simulation 3D
-            interactive
+          <p className="text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Découvrez le processus fascinant de circulation de l'eau dans la nature à travers une simulation 3D interactive.
           </p>
         </div>
 
@@ -760,16 +759,16 @@ const WaterCycleViewer: React.FC = () => {
                   <div
                     key={index}
                     className={`p-3 rounded-xl border transition-all duration-300 cursor-pointer ${step?.title === s.title
-                        ? "bg-gradient-to-r from-blue-500/20 to-cyan-600/20 border-blue-500/40"
-                        : "bg-slate-700/30 border-slate-600/30 hover:bg-slate-700/50"
+                      ? "bg-gradient-to-r from-blue-500/20 to-cyan-600/20 border-blue-500/40"
+                      : "bg-slate-700/30 border-slate-600/30 hover:bg-slate-700/50"
                       }`}
                     onClick={() => setAnimationTime((s.start + s.end) / 2 / speed)}
                   >
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step?.title === s.title
-                            ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
-                            : "bg-slate-600 text-slate-300"
+                          ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+                          : "bg-slate-600 text-slate-300"
                           }`}
                       >
                         {index + 1}
@@ -802,7 +801,7 @@ const WaterCycleViewer: React.FC = () => {
           </p>
         </div>
         {/* Légende des annotations */}
-        <div className="absolute top-32 left-4 z-10 max-w-xs">
+        <div className="relative top-30 left-4 z-10 max-w-xs">
           <div className="bg-black/70 backdrop-blur-sm border-blue-800 rounded-2xl p-3">
             <h4 className="text-white text-sm font-bold mb-2 flex items-center gap-2">
               <Droplets className="w-4 h-4" />
@@ -825,11 +824,11 @@ const WaterCycleViewer: React.FC = () => {
 
         {/* Compteur pour inclure les annotations */}
         <div className="absolute top-24 right-4 z-10">
-          <div className="bg-blue-900/80 backdrop-blur-sm border-blue-700 rounded-2xl p-3">
-            <div className="text-white text-center">
-              <div className="text-lg font-bold">{waterCycleAnnotations.length}</div>
-              <div className="text-xs">Éléments</div>
-              <div className="text-xs">annotés</div>
+          <div className="bg-blue-900/80 backdrop-blur-md border border-blue-700 rounded-2xl shadow-lg px-4 py-3">
+            <div className="text-white text-center space-y-0.5">
+              <div className="text-xl font-extrabold text-blue-200">{waterCycleAnnotations.length}</div>
+              <div className="text-xs text-blue-100">Éléments</div>
+              <div className="text-xs text-blue-100">annotés</div>
             </div>
           </div>
         </div>

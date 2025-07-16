@@ -390,9 +390,11 @@ const AbdomenViewer: React.FC = () => {
       {isLoading && <LoadingSpinner />}
 
       <div className="absolute top-0 left-0 right-0 z-20 bg-black/30 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-white text-center">Anatomie de l'Abdomen</h1>
-          <p className="text-center text-gray-300 mt-2 text-sm md:text-base">
+        <div className="container mx-auto px-6 py-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white text-center leading-tight">
+            Anatomie de l&apos;Abdomen
+          </h1>
+          <p className="text-center text-green-300 mt-3 text-base md:text-lg max-w-2xl mx-auto">
             Modèle 3D interactif des organes abdominaux
           </p>
         </div>
@@ -410,11 +412,11 @@ const AbdomenViewer: React.FC = () => {
         <Card className="bg-black/70 backdrop-blur-sm border-green-800">
           <CardContent className="p-3">
             <p className="text-white text-xs leading-relaxed">
-              <strong className="text-green-300">Instructions:</strong>
-              <br /> <strong className="text-green-300"> • Rotation: clic + glisser</strong>
-              <br /> <strong className="text-green-300"> • Zoom: molette souris</strong>
-              <br /> <strong className="text-green-300"> • Survolez les points colorés</strong>
-              <br /> <strong className="text-green-300"> • Cliquez pour les détails</strong>
+              <strong className="text-green-900">Instructions:</strong>
+              <br /> <strong className="text-green-900"> • Rotation: clic + glisser</strong>
+              <br /> <strong className="text-green-900"> • Zoom: molette souris</strong>
+              <br /> <strong className="text-green-900"> • Survolez les points colorés</strong>
+              <br /> <strong className="text-green-900"> • Cliquez pour les détails</strong>
             </p>
           </CardContent>
         </Card>
@@ -422,11 +424,11 @@ const AbdomenViewer: React.FC = () => {
 
       <div className="absolute top-24 right-4 z-20">
         <Card className="bg-green-900/80 backdrop-blur-sm border-green-700">
-          <CardContent className="p-3">
-            <div className="text-white text-center">
-              <div className="text-lg font-bold">{abdomenAnnotations.length}</div>
-              <div className="text-xs">Organes</div>
-              <div className="text-xs">annotés</div>
+          <CardContent className="p-4">
+            <div className="text-primary text-center">
+              <div className="text-xl font-bold">{abdomenAnnotations.length}</div>
+              <div className="text-xs uppercase tracking-wide">Organes</div>
+              <div className="text-xs uppercase tracking-wide">annotés</div>
             </div>
           </CardContent>
         </Card>
