@@ -1,4 +1,3 @@
-// src/components/dashboards/DashboardAdmin.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
@@ -6,9 +5,17 @@ import type { Profil } from "../../types";
 import Simulations from "../sections/Simulations";
 import Visualisations from "../sections/Visualisations";
 import UserList from "../admin/UserList";
-import { Users, Cpu, MonitorPlay, LogOut, Mail, UserCircle } from "lucide-react";
+import {
+  Users,
+  Cpu,
+  MonitorPlay,
+  LogOut,
+  Mail,
+  UserCircle,
+  Menu,
+} from "lucide-react";
 import SimulationForm from "../admin/SimulationForm";
-import ListeDemandesAcces from "../views/ListeDemandesAcces";
+import ListeDemandesAcces from "../users/ListeDemandesAcces";
 
 interface DashboardAdminProps {
   user: Profil;
@@ -22,38 +29,33 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
   const [currentSection, setCurrentSection] = useState<Section>("users");
   const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Fonction pour charger le nombre de demandes en attente
   const fetchNbDemandes = async () => {
-  const { count, error } = await supabase
-    .from("simulation_access_requests")
-    .select("id", { count: "exact", head: true })
-    .eq("statut", "EN_ATTENTE")
-    .eq("destinataire_id", localUser.id);  // <- Filtre sur destinataire_id
+    const { count, error } = await supabase
+      .from("simulation_access_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("statut", "EN_ATTENTE")
+      .eq("destinataire_id", localUser.id);
 
-  if (error) {
-    console.error("Erreur chargement demandes en attente:", error.message);
-    setNbDemandesEnAttente(0);
-  } else {
-    setNbDemandesEnAttente(count || 0);
-  }
-};
+    if (error) {
+      console.error("Erreur chargement demandes en attente:", error.message);
+      setNbDemandesEnAttente(0);
+    } else {
+      setNbDemandesEnAttente(count || 0);
+    }
+  };
 
   useEffect(() => {
     fetchNbDemandes();
-
-    // Mise à jour en temps réel via Supabase Realtime
     const subscription = supabase
-  .channel("public:simulation_access_requests")
-  .on(
-    "postgres_changes",
-    { event: "*", schema: "public", table: "simulation_access_requests" },
-    () => {
-      fetchNbDemandes();
-    }
-  )
-  .subscribe();
-
+      .channel("public:simulation_access_requests")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "simulation_access_requests" },
+        () => fetchNbDemandes()
+      )
+      .subscribe();
 
     return () => {
       supabase.removeChannel(subscription);
@@ -70,35 +72,39 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
     switch (currentSection) {
       case "users":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Gestion des utilisateurs</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">
+              Gestion des utilisateurs
+            </h2>
             <UserList />
           </div>
         );
       case "simulations":
         return (
-          <div className="mt-4 space-y-8">
-            <h2 className="text-2xl font-semibold">Simulations disponibles</h2>
-
-            {/* Formulaire d'ajout */}
+          <div className="space-y-8">
+            <h2 className="text-3xl font-heading font-bold text-primary">
+              Simulations disponibles
+            </h2>
             <SimulationForm createdBy={localUser.id} />
-
-            {/* Liste des simulations existantes */}
             <Simulations user={localUser} />
           </div>
         );
       case "visualisations":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Visualisations interactives</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">
+              Visualisations interactives
+            </h2>
             <Visualisations />
           </div>
         );
       case "demandes":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Demandes d'accès</h2>
-            <ListeDemandesAcces user={user} />
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">
+              Demandes d'accès
+            </h2>
+            <ListeDemandesAcces user={localUser} />
           </div>
         );
       default:
@@ -107,75 +113,83 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
+    <div className="flex flex-col md:flex-row h-screen bg-light">
+      {/* Header mobile */}
+      <header className="md:hidden flex items-center justify-between bg-primary text-white px-5 py-3 shadow-md">
+        <div className="flex items-center gap-3 font-bold text-lg">
+          <UserCircle size={28} />
+          <span>
+            {localUser.prenom} {localUser.nom}
+          </span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Ouvrir le menu"
+          className="p-1 hover:bg-primary-dark rounded-md transition"
+        >
+          <Menu size={28} />
+        </button>
+      </header>
+
       {/* Sidebar */}
-      <aside className="md:w-64 w-full md:h-full h-auto bg-green-700 text-white p-6 flex flex-col">
-        <h1 className="text-2xl font-bold mb-8 flex items-center gap-2">
-          <UserCircle className="w-6 h-6 text-white" />
-          {localUser.prenom} {localUser.nom}
+      <aside
+        className={`${sidebarOpen ? "block" : "hidden"
+          } md:flex md:flex-col md:w-72 w-full bg-primary text-white p-5 md:h-screen h-auto z-30 shadow-lg`}
+      >
+        <h1 className="text-2xl font-heading font-bold mb-8 flex flex-col items-center gap-1">
+          <UserCircle className="w-10 h-10" />
+          <span className="truncate text-center">
+            {localUser.prenom} {localUser.nom}
+          </span>
         </h1>
 
-        <nav className="flex flex-col space-y-4 flex-grow">
-          <button
-            onClick={() => setCurrentSection("users")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "users"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
-            }`}
-          >
-            <Users size={18} /> Utilisateurs
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("simulations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "simulations"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
-            }`}
-          >
-            <Cpu size={18} /> Simulations
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("visualisations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "visualisations"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
-            }`}
-          >
-            <MonitorPlay size={18} /> Visualisations
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("demandes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "demandes"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
-            }`}
-          >
-            <Mail size={18} /> Demandes d'accès
-            {nbDemandesEnAttente > 0 && (
-              <span className="ml-auto inline-block bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                {nbDemandesEnAttente}
-              </span>
-            )}
-          </button>
+        <nav className="flex flex-col space-y-3 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
+          {[
+            { label: "Utilisateurs", icon: <Users size={20} />, value: "users" },
+            { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
+            { label: "Visualisations", icon: <MonitorPlay size={20} />, value: "visualisations" },
+            {
+              label: "Demandes d'accès",
+              icon: <Mail size={20} />,
+              value: "demandes",
+              badge: nbDemandesEnAttente,
+            },
+          ].map((item) => (
+            <button
+              key={item.value}
+              onClick={() => {
+                setCurrentSection(item.value as Section);
+                setSidebarOpen(false);
+              }}
+              className={`flex items-center gap-4 px-5 py-3 rounded-3xl transition text-base font-semibold select-none
+                ${currentSection === item.value
+                  ? "bg-light text-primary shadow-md"
+                  : "hover:bg-primary-dark/80"
+                }`}
+            >
+              {item.icon}
+              <span className="flex-grow text-left">{item.label}</span>
+              {item.badge && (
+                <span className="ml-auto bg-red-600 text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          ))}
         </nav>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 mt-auto bg-red-600 hover:bg-red-700 rounded-md transition"
+          className="flex items-center gap-4 px-6 py-3 mt-8 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-3xl shadow-md transition select-none"
         >
-          <LogOut size={18} /> Déconnexion
+          <LogOut size={20} /> Déconnexion
         </button>
       </aside>
 
       {/* Contenu principal */}
-      <main className="flex-1 p-6 overflow-y-auto bg-white">{renderContent()}</main>
+      <main className="flex-1 p-6 bg-white overflow-y-auto">
+        {renderContent()}
+      </main>
     </div>
   );
 };

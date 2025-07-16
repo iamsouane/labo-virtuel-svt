@@ -14,6 +14,7 @@ import {
   MonitorPlay,
   LogOut,
   UserCircle,
+  Menu,
 } from "lucide-react";
 
 type Section = "simulations" | "visualisations" | "tps" | "demandes" | "profil";
@@ -29,9 +30,9 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [currentSection, setCurrentSection] = useState<Section>("simulations");
   const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Recharge le profil
   useEffect(() => {
     const fetchUser = async () => {
       setIsLoadingUser(true);
@@ -54,7 +55,6 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
     fetchUser();
   }, [user.id]);
 
-  // Photo de profil
   useEffect(() => {
     const updatePhotoUrl = () => {
       if (!localUser.photo_profil) return setPhotoUrl(null);
@@ -71,13 +71,12 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
     updatePhotoUrl();
   }, [localUser.photo_profil]);
 
-  // Nombre de demandes en attente envoyées par l'élève
   const fetchNbDemandes = async () => {
     const { count, error } = await supabase
       .from("simulation_access_requests")
       .select("id", { count: "exact", head: true })
       .eq("statut", "EN_ATTENTE")
-      .eq("demandeur_id", localUser.id); // <== Correction ici
+      .eq("demandeur_id", localUser.id);
 
     if (error) {
       console.error("Erreur chargement demandes en attente:", error.message);
@@ -116,15 +115,17 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
     switch (currentSection) {
       case "simulations":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Simulations</h2>
+          <div className="mt-6">
+            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
+              Simulations
+            </h2>
             <Simulations user={localUser} />
           </div>
         );
       case "visualisations":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">
+          <div className="mt-6">
+            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
               Visualisations interactives
             </h2>
             <Visualisations />
@@ -132,22 +133,28 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
         );
       case "tps":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Mes Travaux Pratiques</h2>
+          <div className="mt-6">
+            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
+              Mes Travaux Pratiques
+            </h2>
             <MesTPs />
           </div>
         );
       case "demandes":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Mes demandes d’accès</h2>
+          <div className="mt-6">
+            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
+              Mes demandes d’accès
+            </h2>
             <EtatDemandesSimulation user={localUser} />
           </div>
         );
       case "profil":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Mon profil</h2>
+          <div className="mt-6">
+            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
+              Mon profil
+            </h2>
             <ProfilEditor user={localUser} onUpdate={setLocalUser} />
           </div>
         );
@@ -157,100 +164,108 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
-      <aside className="md:w-64 w-full md:h-full h-auto bg-blue-700 text-white p-6 flex flex-col">
-        <div className="flex items-center gap-3 mb-8">
+    <div className="flex flex-col md:flex-row h-screen bg-light">
+      {/* Header mobile */}
+      <header className="md:hidden flex items-center justify-between bg-primary text-white px-5 py-3 shadow-md">
+        <div className="flex items-center gap-3 font-bold text-lg">
           {photoUrl ? (
             <img
               src={photoUrl}
               alt="Photo de profil"
-              className="w-12 h-12 rounded-full object-cover border-2 border-white"
+              className="w-9 h-9 rounded-full object-cover border-2 border-white"
             />
           ) : (
-            <UserCircle className="w-10 h-10 text-white" />
+            <UserCircle size={28} />
           )}
-          <h1 className="text-2xl font-bold">
+          <span>
+            {localUser.prenom} {localUser.nom}
+          </span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Ouvrir le menu"
+          className="p-1 hover:bg-primary-dark rounded-md transition"
+        >
+          <Menu size={28} />
+        </button>
+      </header>
+
+      {/* Sidebar */}
+      <aside
+        className={`${
+          sidebarOpen ? "block" : "hidden"
+        } md:flex md:flex-col md:w-72 w-full bg-primary text-white p-6 md:h-screen h-auto z-30 shadow-lg`}
+      >
+        <div className="flex flex-col items-center mb-10">
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt="Profil"
+              className="w-20 h-20 rounded-full object-cover border-2 border-white mb-3"
+            />
+          ) : (
+            <UserCircle className="w-20 h-20 text-white mb-3" />
+          )}
+          <h1 className="text-2xl font-heading font-bold text-center whitespace-normal">
             {localUser.prenom} {localUser.nom}
           </h1>
         </div>
 
-        <nav className="flex flex-col space-y-4 flex-grow">
-          <button
-            onClick={() => setCurrentSection("simulations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "simulations"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <Cpu size={18} /> Simulations
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("visualisations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "visualisations"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <MonitorPlay size={18} /> Visualisations
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("tps")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "tps"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <BookOpenCheck size={18} /> Mes TPs
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("demandes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "demandes"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <CheckCircle size={18} /> Demandes
-            {nbDemandesEnAttente > 0 && (
-              <span className="ml-auto inline-block bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                {nbDemandesEnAttente}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("profil")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "profil"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <UserCircle size={18} /> Mon profil
-          </button>
+        <nav className="flex flex-col space-y-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
+          {[
+            { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
+            {
+              label: "Visualisations",
+              icon: <MonitorPlay size={20} />,
+              value: "visualisations",
+            },
+            { label: "Mes TPs", icon: <BookOpenCheck size={20} />, value: "tps" },
+            {
+              label: "Demandes",
+              icon: <CheckCircle size={20} />,
+              value: "demandes",
+              badge: nbDemandesEnAttente,
+            },
+            { label: "Mon profil", icon: <UserCircle size={20} />, value: "profil" },
+          ].map((item) => (
+            <button
+              key={item.value}
+              onClick={() => {
+                setCurrentSection(item.value as Section);
+                setSidebarOpen(false);
+              }}
+              className={`flex items-center gap-4 px-6 py-3 rounded-3xl transition text-base font-semibold select-none
+                ${
+                  currentSection === item.value
+                    ? "bg-light text-primary shadow-md"
+                    : "hover:bg-primary-dark/80"
+                }`}
+            >
+              {item.icon}
+              <span className="flex-grow text-left">{item.label}</span>
+              {item.badge && (
+                <span className="ml-auto bg-red-600 text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          ))}
         </nav>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 mt-auto bg-red-600 hover:bg-red-700 rounded-md transition"
+          className="flex items-center gap-4 px-6 py-3 mt-8 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-3xl shadow-md transition select-none"
         >
-          <LogOut size={18} /> Déconnexion
+          <LogOut size={20} /> Déconnexion
         </button>
       </aside>
 
-      <main className="flex-1 p-6 overflow-y-auto bg-white">
-        {isLoadingUser ? (
-          <p className="text-gray-600">Chargement du profil...</p>
-        ) : (
-          renderContent()
-        )}
-      </main>
+      {/* Contenu principal */}
+      <main className="flex-1 p-6 bg-white overflow-y-auto">{isLoadingUser ? (
+        <p className="text-gray-600">Chargement du profil...</p>
+      ) : (
+        renderContent()
+      )}</main>
     </div>
   );
 };

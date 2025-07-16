@@ -1,4 +1,4 @@
-// src/components/admin/SimulationForm.tsx
+//src/components/admin/SimulationForm.tsx
 import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Simulation } from "../../types";
@@ -66,60 +66,80 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-xl shadow-md space-y-4 max-w-3xl"
+      className="bg-white p-6 rounded-xl shadow-md space-y-6 max-w-3xl border border-gray-200"
     >
-      <h3 className="text-xl font-bold mb-2">Ajouter une simulation</h3>
+      <h3 className="text-xl font-heading font-bold text-primary mb-2">Ajouter une simulation</h3>
 
-      <select
-        required
-        value={titre}
-        onChange={(e) => {
-          const selected = SIMULATION_PRESETS.find(
-            (preset) => preset.titre === e.target.value
-          );
-          setTitre(selected?.titre || "");
-          setCode(selected?.code || "");
-        }}
-        className="w-full border px-4 py-2 rounded"
-      >
-        <option value="">-- Choisir une simulation --</option>
-        {SIMULATION_PRESETS.map((sim) => (
-          <option key={sim.code} value={sim.titre}>
-            {sim.titre}
-          </option>
-        ))}
-      </select>
+      <div>
+        <label className="block mb-1 font-semibold text-gray-700">Type de simulation</label>
+        <select
+          required
+          value={titre}
+          onChange={(e) => {
+            const selected = SIMULATION_PRESETS.find(
+              (preset) => preset.titre === e.target.value
+            );
+            setTitre(selected?.titre || "");
+            setCode(selected?.code || "");
+          }}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:outline-none"
+        >
+          <option value="">-- Choisir une simulation --</option>
+          {SIMULATION_PRESETS.map((sim) => (
+            <option key={sim.code} value={sim.titre}>
+              {sim.titre}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <textarea
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="w-full border px-4 py-2 rounded"
-      />
-      <input
-        type="text"
-        placeholder="Chapitre (optionnel)"
-        value={chapitre}
-        onChange={(e) => setChapitre(e.target.value)}
-        className="w-full border px-4 py-2 rounded"
-      />
-      <textarea
-        placeholder="Objectifs pédagogiques"
-        value={objectifs}
-        onChange={(e) => setObjectifs(e.target.value)}
-        className="w-full border px-4 py-2 rounded"
-      />
-      <textarea
-        placeholder="Résultats attendus"
-        value={resultats}
-        onChange={(e) => setResultats(e.target.value)}
-        className="w-full border px-4 py-2 rounded"
-      />
+      <div>
+        <label className="block mb-1 font-semibold text-gray-700">Description</label>
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="block mb-1 font-semibold text-gray-700">Chapitre (optionnel)</label>
+        <input
+          type="text"
+          placeholder="Chapitre"
+          value={chapitre}
+          onChange={(e) => setChapitre(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="block mb-1 font-semibold text-gray-700">Objectifs pédagogiques</label>
+        <textarea
+          placeholder="Objectifs"
+          value={objectifs}
+          onChange={(e) => setObjectifs(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="block mb-1 font-semibold text-gray-700">Résultats attendus</label>
+        <textarea
+          placeholder="Résultats attendus"
+          value={resultats}
+          onChange={(e) => setResultats(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary focus:outline-none"
+        />
+      </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
+        className={`w-full py-3 rounded-xl font-semibold transition text-white ${
+          loading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-green-700"
+        }`}
       >
         {loading ? "Ajout en cours..." : "Ajouter la simulation"}
       </button>

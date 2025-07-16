@@ -41,7 +41,6 @@ const MesClasses = ({ user }: MesClassesProps) => {
         if (classesError) {
           console.error("Erreur récupération classes:", classesError);
           setClasses([]);
-          setLoading(false);
           return;
         }
 
@@ -53,24 +52,11 @@ const MesClasses = ({ user }: MesClassesProps) => {
             .select("*")
             .eq("classe_id", classe.id);
 
-          if (elevesError) {
-            console.error(
-              "Erreur récupération élèves pour la classe",
-              classe.code_classe,
-              elevesError
-            );
-            classesWithEleves.push({
-              id: classe.id,
-              code_classe: classe.code_classe,
-              eleves: [],
-            });
-          } else {
-            classesWithEleves.push({
-              id: classe.id,
-              code_classe: classe.code_classe,
-              eleves: elevesData || [],
-            });
-          }
+          classesWithEleves.push({
+            id: classe.id,
+            code_classe: classe.code_classe,
+            eleves: elevesError ? [] : elevesData || [],
+          });
         }
 
         setClasses(classesWithEleves);
@@ -86,7 +72,7 @@ const MesClasses = ({ user }: MesClassesProps) => {
   }, [user.id]);
 
   useEffect(() => {
-    if (!selectedEleve || !selectedEleve.photo_profil) {
+    if (!selectedEleve?.photo_profil) {
       setPhotoUrl(null);
       return;
     }
@@ -120,43 +106,78 @@ const MesClasses = ({ user }: MesClassesProps) => {
 
     notifySuccess("Élève supprimé de la classe avec succès.");
 
+    let classeVideId: string | null = null;
+
     const updatedClasses = classes.map((c) =>
       c.id === selectedClasseId
         ? {
-          ...c,
-          eleves: c.eleves.filter((e) => e.eleve_id !== selectedEleve.eleve_id),
-        }
+            ...c,
+            eleves: c.eleves.filter((e) => e.eleve_id !== selectedEleve.eleve_id),
+          }
         : c
     );
 
-    setClasses(updatedClasses);
+    const classeVide = updatedClasses.find(
+      (c) => c.id === selectedClasseId && c.eleves.length === 0
+    );
+
+    if (classeVide) {
+      classeVideId = classeVide.id;
+    }
+
+    setClasses(
+      classeVideId
+        ? updatedClasses.filter((c) => c.id !== classeVideId)
+        : updatedClasses
+    );
+
     setSelectedEleve(null);
     setSelectedClasseId(null);
+
+    if (classeVideId) {
+      await supprimeClasse(classeVideId);
+    }
   };
 
-  if (loading) return <p>Chargement des classes...</p>;
-  if (classes.length === 0) return <p>Aucune classe créée.</p>;
+  const supprimeClasse = async (classeId: string) => {
+    const { error } = await supabase.from("classe").delete().eq("id", classeId);
+
+    if (error) {
+      console.error("Erreur lors de la suppression de la classe vide:", error);
+      notifyError("Erreur lors de la suppression de la classe vide.");
+    } else {
+      notifySuccess("Classe supprimée car elle ne contenait plus d'élèves.");
+    }
+  };
+
+  if (loading)
+    return (
+      <p className="text-center text-dark font-semibold mt-6">Chargement des classes...</p>
+    );
+  if (classes.length === 0)
+    return (
+      <p className="text-center text-dark/70 font-semibold mt-6">Aucune classe créée.</p>
+    );
 
   return (
     <>
-      {/* Liste des classes et élèves */}
       <div className="mt-6 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {classes.map((classe) => (
           <div
             key={classe.id}
-            className="p-4 border rounded shadow-sm bg-white"
+            className="p-4 border border-dark/20 rounded-2xl shadow bg-light"
           >
-            <h3 className="text-lg font-semibold mb-2">
+            <h3 className="text-lg font-semibold font-heading text-primary mb-3">
               Classe : {classe.code_classe}
             </h3>
             {classe.eleves.length === 0 ? (
-              <p>Aucun élève dans cette classe.</p>
+              <p className="text-dark/60 text-sm">Aucun élève dans cette classe.</p>
             ) : (
-              <ul className="list-disc pl-6">
+              <ul className="list-disc pl-5 space-y-1 text-dark">
                 {classe.eleves.map((eleve) => (
                   <li
                     key={eleve.eleve_id}
-                    className="cursor-pointer hover:text-blue-600"
+                    className="cursor-pointer hover:text-primary transition"
                     onClick={() => {
                       setSelectedEleve(eleve);
                       setSelectedClasseId(classe.id);
@@ -171,21 +192,20 @@ const MesClasses = ({ user }: MesClassesProps) => {
         ))}
       </div>
 
-      {/* Modal élève */}
       {selectedEleve && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
           onClick={() => {
             setSelectedEleve(null);
             setSelectedClasseId(null);
           }}
         >
           <div
-            className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative"
-            onClick={(e) => e.stopPropagation()} // empêcher fermeture au clic dans le modal
+            className="bg-light rounded-2xl shadow-xl max-w-sm w-full p-6 relative"
+            onClick={(e) => e.stopPropagation()}
           >
             <button
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 font-bold text-xl"
+              className="absolute top-2 right-3 text-dark/60 hover:text-dark text-xl font-bold"
               onClick={() => {
                 setSelectedEleve(null);
                 setSelectedClasseId(null);
@@ -200,7 +220,7 @@ const MesClasses = ({ user }: MesClassesProps) => {
                 <img
                   src={photoUrl}
                   alt={`${selectedEleve.prenom} ${selectedEleve.nom}`}
-                  className="w-24 h-24 rounded-full object-cover"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-primary"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center text-2xl text-gray-700">
@@ -208,14 +228,14 @@ const MesClasses = ({ user }: MesClassesProps) => {
                 </div>
               )}
 
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-semibold font-heading text-primary">
                 {selectedEleve.prenom} {selectedEleve.nom}
               </h2>
-              <p className="text-gray-700">{selectedEleve.email}</p>
+              <p className="text-dark">{selectedEleve.email}</p>
 
               <button
                 onClick={supprimerEleveDeClasse}
-                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition font-semibold"
               >
                 Supprimer cet élève de la classe
               </button>

@@ -1,3 +1,4 @@
+// src/components/users/ResultatsEleves.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
@@ -37,7 +38,7 @@ function convertToCSV(results: ResultatEleve[]): string {
       totalQuestions.toString(),
       totalTime.toString(),
       completedDate,
-    ].map((field) => `"${field.replace(/"/g, '""')}"`); // échappe guillemets
+    ].map((field) => `"${field.replace(/"/g, '""')}"`);
   });
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\r\n");
@@ -80,15 +81,19 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
   }, [professeur.id]);
 
   if (loading) {
-    return <p className="text-center text-gray-600">Chargement des résultats...</p>;
+    return (
+      <p className="text-center text-dark/70 font-semibold mt-6">Chargement des résultats...</p>
+    );
   }
 
   if (resultats.length === 0) {
-    return <p className="text-center text-gray-600">Aucun résultat d'élève trouvé.</p>;
+    return (
+      <p className="text-center text-dark/70 font-semibold mt-6">Aucun résultat d'élève trouvé.</p>
+    );
   }
 
   const resultatsParClasse = resultats
-    .filter(res => res.users_id !== professeur.id)
+    .filter((res) => res.users_id !== professeur.id)
     .reduce<Record<string, ResultatEleve[]>>((acc, res) => {
       if (!acc[res.eleve_classe]) acc[res.eleve_classe] = [];
       acc[res.eleve_classe].push(res);
@@ -96,8 +101,8 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
     }, {});
 
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center gap-2">
+    <div className="p-6 space-y-8 bg-light rounded-2xl shadow-md">
+      <h2 className="text-2xl font-bold font-heading text-primary mb-6 flex items-center gap-3">
         <BookOpen className="w-6 h-6" />
         Résultats des élèves
       </h2>
@@ -109,18 +114,21 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
         };
 
         return (
-          <section key={classe}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-green-600">Classe : {classe}</h3>
+          <section key={classe} className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold font-heading text-primary">
+                Classe : {classe}
+              </h3>
               <button
                 onClick={handleDownload}
-                className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition"
+                className="px-4 py-1 text-sm bg-primary text-white rounded-xl hover:bg-green-700 transition"
                 type="button"
               >
                 Télécharger CSV
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {resultatsClasse.map((res) => {
                 const reponses = res.reponses ?? {};
                 const totalQuestions = Object.keys(reponses).length;
@@ -140,21 +148,24 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
                 const averageTime = totalQuestions > 0 ? Math.round(totalTime / totalQuestions) : 0;
 
                 return (
-                  <div key={res.id} className="border rounded p-4 shadow-sm bg-white">
-                    <h4 className="text-lg font-semibold text-green-700 mb-1">
+                  <div
+                    key={res.id}
+                    className="border border-dark/20 rounded-2xl p-5 shadow-sm bg-white"
+                  >
+                    <h4 className="text-lg font-semibold font-heading text-primary mb-2">
                       {res.quiz_title}
                     </h4>
-                    <p className="text-gray-700">
+                    <p className="text-dark/80">
                       Élève : <strong>{res.eleve_prenom} {res.eleve_nom}</strong>
                     </p>
-                    <p className="text-gray-700">
+                    <p className="text-dark/80">
                       Note : <strong>{score} / {totalQuestions}</strong>
                     </p>
-                    <p className="text-gray-600 text-sm flex items-center gap-1">
+                    <p className="text-dark/60 text-sm flex items-center gap-1 mt-1">
                       <Timer className="w-4 h-4" />
                       Temps total : {minutes}m {seconds}s | Moyenne : {averageTime}s / question
                     </p>
-                    <p className="text-gray-600 text-sm flex items-center gap-1">
+                    <p className="text-dark/60 text-sm flex items-center gap-1">
                       <CalendarCheck className="w-4 h-4" />
                       Terminé le : {new Date(res.completed_at).toLocaleString()}
                     </p>

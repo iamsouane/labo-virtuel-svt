@@ -1,4 +1,4 @@
-//src/components/admin/ListeDemandesAcces.tsx
+//src/components/users/ListeDemandesAcces.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import {
@@ -80,88 +80,83 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
     loadDemandes();
   }, []);
 
-const handleDecision = async (
-  demande: Demande,
-  decision: "APPROUVE" | "REJETE"
-) => {
-  const { error: updateError } = await supabase
-    .from("simulation_access_requests")
-    .update({ statut: decision })
-    .eq("id", demande.id);
+  const handleDecision = async (demande: Demande, decision: "APPROUVE" | "REJETE") => {
+    const { error: updateError } = await supabase
+      .from("simulation_access_requests")
+      .update({ statut: decision })
+      .eq("id", demande.id);
 
-  if (updateError) {
-    notifyError("Erreur lors de la mise à jour de la demande.");
-    return;
-  }
+    if (updateError) {
+      notifyError("Erreur lors de la mise à jour de la demande.");
+      return;
+    }
 
-  if (decision === "APPROUVE") {
-    if (demande.role_demandeur === "PROFESSEUR") {
-      const { error: insertError } = await supabase
-        .from("simulations_professeurs")
-        .insert({
-          simulation_id: demande.simulation_id,
-          professeur_id: demande.demandeur_id,
-          est_autorisee: true,
-          demande_envoyee: false,
-          autorisee_at: new Date().toISOString(),
-        });
-
-      if (insertError) {
-        console.error("Erreur insertion simulation_professeur:", insertError);
-        notifyInfo("Demande approuvée, mais erreur lors de l'autorisation.");
-        return;
-      }
-
-    } else if (demande.role_demandeur === "ELEVE") {
-      // Cherche le professeur de l'élève
-      const { data: professeurData, error: profError } = await supabase.rpc("get_professeur_de_eleve", {
-        p_eleve_id: demande.demandeur_id,
-      });
-
-      if (profError || !professeurData) {
-        console.error("Erreur lors de la récupération du professeur :", profError);
-        notifyInfo("Demande approuvée, mais impossible de retrouver le professeur de l’élève.");
-        return;
-      }
-
-      // Vérifie si une autorisation existe déjà
-      const { data: existing, error: existError } = await supabase
-        .from("simulations_eleves")
-        .select("id")
-        .eq("eleve_id", demande.demandeur_id)
-        .eq("simulation_id", demande.simulation_id)
-        .maybeSingle();
-
-      if (existError) {
-        console.error("Erreur vérification existence:", existError);
-        notifyInfo("Demande approuvée, mais erreur lors de la vérification.");
-        return;
-      }
-
-      if (!existing) {
+    if (decision === "APPROUVE") {
+      if (demande.role_demandeur === "PROFESSEUR") {
         const { error: insertError } = await supabase
-          .from("simulations_eleves")
+          .from("simulations_professeurs")
           .insert({
             simulation_id: demande.simulation_id,
-            eleve_id: demande.demandeur_id,
-            professeur_id: professeurData,
+            professeur_id: demande.demandeur_id,
             est_autorisee: true,
-            autorisee_at: new Date().toISOString(),
             demande_envoyee: false,
+            autorisee_at: new Date().toISOString(),
           });
 
         if (insertError) {
-          console.error("Erreur insertion simulation_eleve:", insertError);
+          console.error("Erreur insertion simulation_professeur:", insertError);
           notifyInfo("Demande approuvée, mais erreur lors de l'autorisation.");
           return;
         }
+
+      } else if (demande.role_demandeur === "ELEVE") {
+        const { data: professeurData, error: profError } = await supabase.rpc("get_professeur_de_eleve", {
+          p_eleve_id: demande.demandeur_id,
+        });
+
+        if (profError || !professeurData) {
+          console.error("Erreur récupération prof :", profError);
+          notifyInfo("Demande approuvée, mais impossible de retrouver le professeur.");
+          return;
+        }
+
+        const { data: existing, error: existError } = await supabase
+          .from("simulations_eleves")
+          .select("id")
+          .eq("eleve_id", demande.demandeur_id)
+          .eq("simulation_id", demande.simulation_id)
+          .maybeSingle();
+
+        if (existError) {
+          console.error("Erreur vérification existence:", existError);
+          notifyInfo("Demande approuvée, mais erreur lors de la vérification.");
+          return;
+        }
+
+        if (!existing) {
+          const { error: insertError } = await supabase
+            .from("simulations_eleves")
+            .insert({
+              simulation_id: demande.simulation_id,
+              eleve_id: demande.demandeur_id,
+              professeur_id: professeurData,
+              est_autorisee: true,
+              autorisee_at: new Date().toISOString(),
+              demande_envoyee: false,
+            });
+
+          if (insertError) {
+            console.error("Erreur insertion simulation_eleve:", insertError);
+            notifyInfo("Demande approuvée, mais erreur lors de l'autorisation.");
+            return;
+          }
+        }
       }
     }
-  }
 
-  await loadDemandes();
-  notifySuccess(`Demande ${decision === "APPROUVE" ? "approuvée" : "rejetée"} avec succès.`);
-};
+    await loadDemandes();
+    notifySuccess(`Demande ${decision === "APPROUVE" ? "approuvée" : "rejetée"} avec succès.`);
+  };
 
   const renderDemande = (demande: Demande) => {
     let statutColor = "";
@@ -173,11 +168,11 @@ const handleDecision = async (
         StatutIcon = Clock;
         break;
       case "APPROUVE":
-        statutColor = "text-green-600";
+        statutColor = "text-primary";
         StatutIcon = CheckCircle;
         break;
       case "REJETE":
-        statutColor = "text-red-600";
+        statutColor = "text-secondary";
         StatutIcon = XCircle;
         break;
     }
@@ -185,17 +180,17 @@ const handleDecision = async (
     return (
       <div
         key={demande.id}
-        className="border border-gray-200 p-4 rounded-lg shadow-sm flex flex-col md:flex-row md:items-center md:justify-between"
+        className="border border-dark/10 p-4 rounded-2xl shadow-sm bg-light flex flex-col md:flex-row md:items-center md:justify-between"
       >
         <div className="mb-4 md:mb-0">
-          <p>
-            <span className="font-semibold">{demande.nom_demandeur}</span>{" "}
+          <p className="text-dark">
+            <span className="font-semibold text-primary">{demande.nom_demandeur}</span>{" "}
             demande l'accès à la simulation :{" "}
             <span className="italic">{demande.simulation_titre}</span>
           </p>
           {demande.message && (
-            <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-              <MessagesSquare className="w-4 h-4 text-gray-500" />
+            <p className="text-sm text-dark/70 mt-1 flex items-center gap-1">
+              <MessagesSquare className="w-4 h-4 text-dark/50" />
               {demande.message}
             </p>
           )}
@@ -208,13 +203,13 @@ const handleDecision = async (
           <div className="flex gap-2">
             <button
               onClick={() => handleDecision(demande, "APPROUVE")}
-              className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
+              className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl font-semibold transition"
             >
               <CheckCircle size={18} /> Approuver
             </button>
             <button
               onClick={() => handleDecision(demande, "REJETE")}
-              className="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition"
+              className="flex items-center gap-1 bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-xl font-semibold transition"
             >
               <XCircle size={18} /> Rejeter
             </button>
@@ -227,25 +222,25 @@ const handleDecision = async (
   return (
     <div className="space-y-10">
       {loading ? (
-        <div className="flex justify-center items-center text-gray-600">
+        <div className="flex justify-center items-center text-secondary">
           <Loader2 className="animate-spin mr-2" /> Chargement des demandes...
         </div>
       ) : demandes.length === 0 ? (
-        <p className="text-gray-500">Aucune demande trouvée.</p>
+        <p className="text-dark/60">Aucune demande trouvée.</p>
       ) : (
         <>
           <section>
-            <h3 className="text-xl font-semibold mb-4">Demandes en attente</h3>
+            <h3 className="text-xl font-heading font-bold text-primary mb-4">Demandes en attente</h3>
             {demandes.filter((d) => d.statut === "EN_ATTENTE").map(renderDemande)}
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold mb-4">Demandes approuvées</h3>
+            <h3 className="text-xl font-heading font-bold text-primary mb-4">Demandes approuvées</h3>
             {demandes.filter((d) => d.statut === "APPROUVE").map(renderDemande)}
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold mb-4">Demandes rejetées</h3>
+            <h3 className="text-xl font-heading font-bold text-primary mb-4">Demandes rejetées</h3>
             {demandes.filter((d) => d.statut === "REJETE").map(renderDemande)}
           </section>
         </>

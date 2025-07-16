@@ -1,3 +1,4 @@
+// src/components/dashboards/DashboardProfesseur.tsx
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
@@ -12,12 +13,13 @@ import {
   CheckCircle,
   UserCircle,
   FileCheck,
+  Menu,
 } from "lucide-react";
 import EtatDemandesSimulation from "../users/EtatDemandesSimulation";
 import CreateClasseForm from "../users/CreateClasseForm";
 import MesClasses from "../users/MesClasses";
 import CreateTPForm from "../users/CreateTPForm";
-import ListeDemandesAcces from "../views/ListeDemandesAcces";
+import ListeDemandesAcces from "../users/ListeDemandesAcces";
 import ResultatsEleves from "../users/ResultatsEleves";
 import ProfilEditor from "../users/ProfilEditor";
 
@@ -41,9 +43,9 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [currentSection, setCurrentSection] = useState<Section>("simulations");
   const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Recharge le profil complet au montage
   useEffect(() => {
     const fetchFullUserProfile = async () => {
       setIsLoadingUser(true);
@@ -55,7 +57,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
 
       if (error || !data) {
         console.error("Erreur chargement profil:", error?.message);
-        setLocalUser(user); // fallback
+        setLocalUser(user);
       } else {
         setLocalUser(data);
       }
@@ -66,7 +68,6 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
     fetchFullUserProfile();
   }, [user.id]);
 
-  // Met à jour l'URL publique de la photo de profil
   useEffect(() => {
     const fetchPublicUrl = () => {
       if (!localUser.photo_profil) {
@@ -87,13 +88,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
     fetchPublicUrl();
   }, [localUser.photo_profil]);
 
-  // Charger le nombre de demandes en attente adressées au prof connecté
   const fetchNbDemandes = async () => {
-    if (!localUser?.id) {
-      setNbDemandesEnAttente(0);
-      return;
-    }
-
     const { count, error } = await supabase
       .from("simulation_access_requests")
       .select("id", { count: "exact", head: true })
@@ -116,9 +111,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "simulation_access_requests" },
-        () => {
-          fetchNbDemandes();
-        }
+        () => fetchNbDemandes()
       )
       .subscribe();
 
@@ -137,198 +130,163 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
     switch (currentSection) {
       case "simulations":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Mes simulations</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">Mes simulations</h2>
             <Simulations user={localUser} />
           </div>
         );
-
       case "visualisations":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">
-              Visualisations interactives
-            </h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">Visualisations interactives</h2>
             <Visualisations />
           </div>
         );
-
       case "classes":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Mes classes</h2>
-            <CreateClasseForm
-              user={localUser}
-              onCreated={() => setCurrentSection("classes")}
-            />
+          <div className="space-y-8">
+            <h2 className="text-3xl font-heading font-bold text-primary">Mes classes</h2>
+            <CreateClasseForm user={localUser} onCreated={() => setCurrentSection("classes")} />
             <MesClasses user={localUser} />
           </div>
         );
-
       case "demandes":
         return (
-          <div className="mt-4 space-y-10">
+          <div className="space-y-12">
             <section>
-              <h2 className="text-2xl font-semibold mb-4">
-                Mes demandes d'accès (envoyées aux administrateurs)
-              </h2>
+              <h2 className="text-3xl font-heading font-bold text-primary mb-4">Mes demandes d'accès</h2>
               <EtatDemandesSimulation user={localUser} />
             </section>
             <section>
-              <h2 className="text-2xl font-semibold mb-4">
-                Demandes d'accès des élèves (à valider)
-              </h2>
+              <h2 className="text-3xl font-heading font-bold text-primary mb-4">Demandes des élèves</h2>
               <ListeDemandesAcces user={localUser} />
             </section>
           </div>
         );
-
       case "tps":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Créer un TP</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">Créer un TP</h2>
             <CreateTPForm user={localUser} />
           </div>
         );
-
       case "resultats":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Résultats des élèves</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">Résultats des élèves</h2>
             <ResultatsEleves professeur={localUser} />
           </div>
         );
-
       case "profil":
         return (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-4">Mon profil</h2>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-heading font-bold text-primary">Mon profil</h2>
             <ProfilEditor user={localUser} onUpdate={setLocalUser} />
           </div>
         );
-
       default:
         return null;
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
-      <aside className="md:w-64 w-full md:h-full h-auto bg-blue-700 text-white p-6 flex flex-col">
-        <div className="flex items-center gap-3 mb-8">
+    <div className="flex flex-col md:flex-row h-screen bg-light">
+      {/* Header mobile */}
+      <header className="md:hidden flex items-center justify-between bg-primary text-white px-5 py-3 shadow-md">
+        <div className="flex items-center gap-3 font-bold text-lg">
           {photoUrl ? (
             <img
               src={photoUrl}
-              alt="Photo de profil"
-              className="w-12 h-12 rounded-full object-cover border-2 border-white"
+              alt="Profil"
+              className="w-8 h-8 rounded-full object-cover border-2 border-white"
             />
           ) : (
-            <UserCircle className="w-10 h-10 text-white" />
+            <UserCircle size={28} />
           )}
-          <h1 className="text-2xl font-bold">
+          <span>{localUser.prenom} {localUser.nom}</span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Ouvrir le menu"
+          className="p-1 hover:bg-primary-dark rounded-md transition"
+        >
+          <Menu size={28} />
+        </button>
+      </header>
+
+      {/* Sidebar */}
+      <aside
+        className={`${sidebarOpen ? "block" : "hidden"
+          } md:flex md:flex-col md:w-72 w-full bg-primary text-white p-5 md:h-screen h-auto z-30 shadow-lg`}
+      >
+        <div className="flex flex-col items-center mb-10">
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt="Profil"
+              className="w-20 h-20 rounded-full object-cover border-2 border-white mb-3"
+            />
+          ) : (
+            <UserCircle className="w-20 h-20 text-white mb-3" />
+          )}
+          <h1 className="text-2xl font-heading font-bold text-center whitespace-normal">
             {localUser.prenom} {localUser.nom}
           </h1>
         </div>
 
-        <nav className="flex flex-col space-y-4 flex-grow">
-          <button
-            onClick={() => setCurrentSection("simulations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "simulations"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <Cpu size={18} /> Simulations
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("visualisations")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "visualisations"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <MonitorPlay size={18} /> Visualisations
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("classes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "classes"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <Users size={18} /> Classes
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("tps")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "tps"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <Cpu size={18} /> Créer un TP
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("demandes")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "demandes"
-                ? "bg-white text-green-700 font-bold"
-                : "hover:bg-green-600"
-            }`}
-          >
-            <CheckCircle size={18} /> Demandes
-            {nbDemandesEnAttente > 0 && (
-              <span className="ml-auto inline-block bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                {nbDemandesEnAttente}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("resultats")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "resultats"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <FileCheck size={18} /> Résultats élèves
-          </button>
-
-          <button
-            onClick={() => setCurrentSection("profil")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition ${
-              currentSection === "profil"
-                ? "bg-white text-blue-700 font-bold"
-                : "hover:bg-blue-600"
-            }`}
-          >
-            <UserCircle size={18} /> Mon profil
-          </button>
+        <nav className="flex flex-col space-y-3 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
+          {[
+            { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
+            { label: "Visualisations", icon: <MonitorPlay size={20} />, value: "visualisations" },
+            { label: "Classes", icon: <Users size={20} />, value: "classes" },
+            { label: "Créer un TP", icon: <Cpu size={20} />, value: "tps" },
+            {
+              label: "Demandes",
+              icon: <CheckCircle size={20} />,
+              value: "demandes",
+              badge: nbDemandesEnAttente,
+            },
+            { label: "Résultats élèves", icon: <FileCheck size={20} />, value: "resultats" },
+            { label: "Mon profil", icon: <UserCircle size={20} />, value: "profil" },
+          ].map((item) => (
+            <button
+              key={item.value}
+              onClick={() => {
+                setCurrentSection(item.value as Section);
+                setSidebarOpen(false);
+              }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-3xl transition text-base font-semibold select-none
+                ${currentSection === item.value
+                  ? "bg-light text-primary shadow-md"
+                  : "hover:bg-primary-dark/80"
+                }`}
+            >
+              {item.icon}
+              <span className="flex-grow text-left">{item.label}</span>
+              {item.badge && (
+                <span className="ml-auto bg-red-600 text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          ))}
         </nav>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 mt-auto bg-red-600 hover:bg-red-700 rounded-md transition"
+          className="flex items-center gap-3 px-5 py-3 mt-8 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-3xl shadow-md transition select-none"
         >
-          <LogOut size={18} /> Déconnexion
+          <LogOut size={20} /> Déconnexion
         </button>
       </aside>
 
-      {isLoadingUser ? (
-        <main className="flex-1 p-6 overflow-y-auto bg-white">
-          <p className="text-gray-600">Chargement du profil...</p>
-        </main>
-      ) : (
-        <main className="flex-1 p-6 overflow-y-auto bg-white">{renderContent()}</main>
-      )}
+      <main className="flex-1 p-6 overflow-y-auto bg-white">
+        {isLoadingUser ? (
+          <p className="text-gray-600 font-medium">Chargement du profil...</p>
+        ) : (
+          renderContent()
+        )}
+      </main>
     </div>
   );
 };

@@ -73,46 +73,49 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <ClipboardList className="w-5 h-5 text-blue-600" />
+      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-primary">
+        <ClipboardList className="w-5 h-5 text-secondary" />
         État de mes demandes d'accès
       </h3>
 
       {loading ? (
-        <p>Chargement...</p>
+        <p className="text-dark/60">Chargement...</p>
       ) : demandes.length === 0 ? (
-        <p className="text-gray-500">Aucune demande envoyée.</p>
+        <p className="text-dark/60">Aucune demande envoyée.</p>
       ) : (
         <ul className="space-y-4">
           {demandes.map((d) => (
             <li
               key={d.id}
-              className="p-4 border rounded-lg shadow-sm bg-gray-50 flex justify-between items-start"
+              className="bg-light p-4 border rounded-2xl shadow flex justify-between items-start"
             >
               <div className="flex-1">
-                <p className="font-semibold text-blue-800">
+                <p className="font-semibold text-primary">
                   Simulation : {d.simulation_titre}
                 </p>
+
                 {d.message && (
-                  <p className="text-sm text-gray-700 mt-1">{d.message}</p>
+                  <p className="text-sm text-dark mt-1">{d.message}</p>
                 )}
+
                 {d.destinataire_nom && (
-                  <p className="text-xs italic text-gray-500 mt-1">
+                  <p className="text-xs italic text-dark/60 mt-1">
                     Destinataire : {d.destinataire_nom}
                   </p>
                 )}
-                <p className="text-xs text-gray-400 mt-1">
+
+                <p className="text-xs text-dark/40 mt-1">
                   Envoyée le : {new Date(d.created_at).toLocaleString()}
                 </p>
               </div>
 
               <span
-                className={`px-3 py-1 rounded-full text-sm font-medium h-fit ml-4 self-center ${
+                className={`ml-4 px-3 py-1 rounded-full text-sm font-medium self-center ${
                   d.statut === "EN_ATTENTE"
                     ? "bg-yellow-100 text-yellow-700"
                     : d.statut === "APPROUVE"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-accent text-primary"
+                    : "bg-red-100 text-secondary"
                 }`}
               >
                 {formatStatut(d.statut)}

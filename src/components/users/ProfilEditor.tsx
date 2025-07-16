@@ -134,72 +134,72 @@ const ProfilEditor = ({ user, onUpdate }: ProfilEditorProps) => {
   };
 
   return (
-    <div className="p-4 border rounded shadow-sm max-w-md">
-      <h2 className="text-xl font-semibold mb-4">Modifier mon profil</h2>
+    <div className="p-6 max-w-md mx-auto bg-light rounded-2xl shadow-md">
+      <h2 className="text-2xl font-heading font-bold text-primary mb-6">Modifier mon profil</h2>
 
       {previewUrl ? (
-        <div className="relative inline-block mb-4">
+        <div className="relative inline-block mb-6">
           <img
             src={previewUrl}
             alt="Photo profil"
-            className="w-40 h-40 rounded-full object-cover"
+            className="w-40 h-40 rounded-full object-cover border-4 border-primary"
           />
           <button
             type="button"
             onClick={handleDeletePhoto}
             disabled={loading}
-            className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+            className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 transition-shadow shadow-md"
             title="Supprimer la photo"
           >
             ✕
           </button>
         </div>
       ) : (
-        <div className="w-40 h-40 rounded-full bg-gray-300 mb-4 flex items-center justify-center text-gray-600">
+        <div className="w-40 h-40 rounded-full bg-gray-300 mb-6 flex items-center justify-center text-gray-600 text-lg font-semibold border-4 border-gray-400">
           Aucune photo
         </div>
       )}
 
-      <label className="block mb-4">
+      <label className="block mb-5 font-semibold text-dark">
         Changer la photo de profil
         <input
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="mt-1"
+          className="mt-2 block w-full text-sm text-gray-700"
           disabled={loading}
         />
       </label>
 
-      <label className="block mb-2">
+      <label className="block mb-4 font-semibold text-dark">
         Prénom
         <input
           type="text"
           value={prenom}
           onChange={(e) => setPrenom(e.target.value)}
-          className="w-full border rounded px-3 py-2 mt-1"
+          className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
           disabled={loading}
         />
       </label>
 
-      <label className="block mb-2">
+      <label className="block mb-4 font-semibold text-dark">
         Nom
         <input
           type="text"
           value={nom}
           onChange={(e) => setNom(e.target.value)}
-          className="w-full border rounded px-3 py-2 mt-1"
+          className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
           disabled={loading}
         />
       </label>
 
-      <label className="block mb-4">
+      <label className="block mb-6 font-semibold text-dark">
         Email
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded px-3 py-2 mt-1"
+          className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
           disabled={loading}
         />
       </label>
@@ -207,34 +207,34 @@ const ProfilEditor = ({ user, onUpdate }: ProfilEditorProps) => {
       <button
         onClick={handleSave}
         disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="w-full bg-primary text-white font-semibold py-3 rounded-2xl hover:bg-green-700 transition disabled:opacity-50 mb-8"
       >
         {loading ? "Sauvegarde..." : "Enregistrer"}
       </button>
 
-      <hr className="my-6" />
+      <hr className="border-dark/20 mb-8" />
 
-      <h3 className="text-lg font-semibold mb-2">Changer le mot de passe</h3>
+      <h3 className="text-xl font-heading font-semibold text-primary mb-4">Changer le mot de passe</h3>
 
-      <div className="space-y-2 mb-4">
-        <label className="block">
+      <div className="space-y-5 mb-6">
+        <label className="block font-semibold text-dark">
           Nouveau mot de passe
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full border rounded px-3 py-2 mt-1"
+            className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
             disabled={loading}
           />
         </label>
 
-        <label className="block">
+        <label className="block font-semibold text-dark">
           Confirmer le mot de passe
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border rounded px-3 py-2 mt-1"
+            className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
             disabled={loading}
           />
         </label>
@@ -243,7 +243,7 @@ const ProfilEditor = ({ user, onUpdate }: ProfilEditorProps) => {
       <button
         onClick={handleChangePassword}
         disabled={loading}
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+        className="w-full bg-green-600 text-white font-semibold py-3 rounded-2xl hover:bg-green-700 transition disabled:opacity-50"
       >
         {loading ? "Mise à jour..." : "Changer le mot de passe"}
       </button>

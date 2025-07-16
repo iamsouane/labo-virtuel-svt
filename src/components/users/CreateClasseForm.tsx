@@ -10,10 +10,11 @@ interface CreateClasseFormProps {
   onCreated?: () => void;
 }
 
+// ...imports inchangés
+
 const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
   const [codeClasse, setCodeClasse] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message] = useState("");
   const [eleves, setEleves] = useState<any[]>([]);
   const [selectedEleves, setSelectedEleves] = useState<string[]>([]);
 
@@ -33,20 +34,24 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!user?.id) {
+      notifyInfo("Utilisateur non connecté.");
+      return;
+    }
+
+    if (!codeClasse.trim() || codeClasse.trim().length < 2) {
+      notifyError("Veuillez entrer un code de classe valide (au moins 2 caractères).");
+      return;
+    }
+
+    if (selectedEleves.length <= 3) {
+      notifyError("Veuillez sélectionner au moins trois élève pour créer la classe.");
+      return;
+    }
+
     try {
-      if (!user || !user.id) {
-        notifyInfo("Utilisateur non connecté.");
-        return;
-      }
-
-      if (!codeClasse.trim() || codeClasse.trim().length < 2) {
-        notifyError("Veuillez entrer un code de classe valide (au moins 2 caractères).");
-        return;
-      }
-
       setLoading(true);
 
-      // 1. Création de la classe
       const { data: classeData, error } = await supabase
         .from("classe")
         .insert({
@@ -58,43 +63,36 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
 
       if (error || !classeData) {
         notifyError("Erreur : " + error?.message);
-        setLoading(false);
         return;
       }
 
-      // 2. Ajout du professeur dans users_classe
       const { error: profInsertError } = await supabase
         .from("users_classe")
         .insert([{ users_id: user.id, classe_id: classeData.id }]);
 
       if (profInsertError) {
         notifyError("Erreur lors de l'ajout du professeur à la classe.");
-        setLoading(false);
         return;
       }
 
-      // 3. Ajout des élèves sélectionnés dans users_classe
-      if (selectedEleves.length > 0) {
-        const insertions = selectedEleves.map((eleveId) => ({
-          users_id: eleveId,
-          classe_id: classeData.id,
-        }));
+      const insertions = selectedEleves.map((eleveId) => ({
+        users_id: eleveId,
+        classe_id: classeData.id,
+      }));
 
-        const { error: insertError } = await supabase
-          .from("users_classe")
-          .insert(insertions);
+      const { error: insertError } = await supabase
+        .from("users_classe")
+        .insert(insertions);
 
-        if (insertError) {
-          notifyInfo("Classe créée, mais erreur lors de l'ajout des élèves.");
-          setLoading(false);
-          return;
-        }
+      if (insertError) {
+        notifyInfo("Classe créée, mais erreur lors de l'ajout des élèves.");
+        return;
       }
 
       notifySuccess("Classe et élèves ajoutés avec succès !");
       setCodeClasse("");
       setSelectedEleves([]);
-      if (onCreated) onCreated();
+      onCreated?.();
     } catch (err) {
       console.error("Erreur inattendue :", err);
       notifyInfo("Une erreur inattendue est survenue.");
@@ -110,24 +108,26 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
-      <h3 className="text-xl font-semibold mb-4">Créer une nouvelle classe</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="bg-light p-6 rounded-2xl shadow-md max-w-xl mx-auto">
+      <h3 className="text-2xl font-bold mb-6 text-primary font-heading">Créer une nouvelle classe</h3>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Code de la classe</label>
+          <label className="block text-sm font-semibold text-dark">Code de la classe</label>
           <input
             type="text"
             value={codeClasse}
             onChange={(e) => setCodeClasse(e.target.value)}
-            className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring focus:ring-blue-200"
+            className="mt-2 block w-full px-4 py-2 border border-dark/20 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+            placeholder="Ex : 2ndeA"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ajouter des élèves</label>
-          <div className="max-h-40 overflow-y-auto border rounded px-3 py-2">
+          <label className="block text-sm font-semibold text-dark mb-2">Ajouter des élèves</label>
+          <div className="max-h-40 overflow-y-auto border border-dark/10 rounded-xl px-4 py-2 space-y-1 bg-accent">
             {eleves.map((eleve) => (
-              <label key={eleve.id} className="block text-sm">
+              <label key={eleve.id} className="block text-sm font-medium text-dark">
                 <input
                   type="checkbox"
                   value={eleve.id}
@@ -143,13 +143,11 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 rounded-2xl shadow transition"
           disabled={loading}
         >
           {loading ? "Création en cours..." : "Créer la classe"}
         </button>
-
-        {message && <p className="text-sm mt-2 text-center text-blue-700">{message}</p>}
       </form>
     </div>
   );
