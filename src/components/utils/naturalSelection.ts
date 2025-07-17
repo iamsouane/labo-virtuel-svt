@@ -24,7 +24,15 @@ export function determineTraitFromAlleles<T extends "fur" | "ear" | "tooth">(
 }
 
 export const generateRabbitName = (): string => {
-  const names = ["Caramel", "Flocon", "Luna", "Simba", "Zoe", "Oscar", "Tulipe", "Coco", "Chloe", "Soleil", "Miel", "Ziggy"]
+const names = [
+  "Caramel", "Flocon", "Luna", "Simba", "Zoe", "Oscar", "Tulipe", "Coco", "Chloe", "Soleil", "Miel", "Ziggy",
+  "Nina", "Biscuit", "Plume", "Noisette", "Étoile", "Moka", "Perle", "Néo", "Roxy", "Gaufrette", "Saphir", "Pepper",
+  "Nala", "Poppy", "Mimosa", "Jazz", "Kiki", "Cookie", "Vénus", "Calypso", "Pistache", "Olive", "Pépite", "Gizmo",
+  "Lolly", "Bambi", "Snickers", "Nina", "Panda", "Chiffon", "Fleur", "Misty", "Jasmine", "Bounty", "Nino", "Dune",
+  "Câline", "Bulle", "Violette", "Raven", "Peluche", "Cactus", "Sushi", "Tango", "Nico", "Zelda", "Mango", "Tinker",
+  "Pixie", "Holly", "Sushi", "Litchi", "Banjo", "Zazie", "Echo", "Basilic", "Roux", "Mousse", "Foxy", "Pip",
+  "Bijou", "Nicolette", "Sirius", "Aloha", "Blossom", "Tulip", "Yuki", "Mimic", "Karma"
+]
   return names[Math.floor(Math.random() * names.length)]
 }
 
@@ -109,6 +117,7 @@ export const findDescendants = (
   allRabbits.filter(
     (r) => r.parents && (r.parents[0] === rabbitId || r.parents[1] === rabbitId)
   )
+
 
 export const findAncestors = (
   rabbit: RabbitGenetics,

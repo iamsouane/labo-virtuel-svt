@@ -38,7 +38,7 @@ const PollutionScene: React.FC<PollutionSceneProps> = ({
       {/* Conteneur principal de la simulation */}
       <div className="absolute inset-0 m-4 bg-black rounded-xl border-8 border-gray-800 shadow-2xl overflow-hidden">
         {/* Indicateurs d'état */}
-        <div className="absolute top-2 right-2 w-3 h-3 bg-green-400 rounded-full animate-pulse z-10"></div>
+        <div className="absolute top-2 right-2 w-3 h-3 bg-primary rounded-full animate-pulse z-10"></div>
         <div className="absolute top-2 left-2 w-2 h-2 bg-blue-400 rounded-full animate-ping z-10"></div>
         <div className="absolute bottom-2 left-2 text-xs text-white bg-black bg-opacity-70 px-2 py-1 rounded z-10 animate-pulse">
           SIMULATION LIVE • {new Date().toLocaleTimeString()}
@@ -217,11 +217,11 @@ const PollutionScene: React.FC<PollutionSceneProps> = ({
                     }}
                   >
                     {i % 2 === 0 ? (
-                      <Trees className="inline-block w-6 h-6 text-green-700" />
+                      <Trees className="inline-block w-6 h-6 text-primary" />
                     ) : i % 3 === 0 ? (
-                      <Trees className="inline-block w-6 h-6 text-green-600" />
+                      <Trees className="inline-block w-6 h-6 text-primary" />
                     ) : (
-                      <Trees className="inline-block w-6 h-6 text-green-600" />
+                      <Trees className="inline-block w-6 h-6 text-primary" />
                     )}
                   </div>
                 ))}
@@ -237,7 +237,7 @@ const PollutionScene: React.FC<PollutionSceneProps> = ({
                   filter: "drop-shadow(0 0 10px rgba(34, 197, 94, 0.5))",
                 }}
               >
-                <Wind className="w-10 h-10 text-green-500 animate-spin-slow" />
+                <Wind className="w-10 h-10 text-primary animate-spin-slow" />
               </div>
             )}
           </div>
@@ -263,27 +263,34 @@ const PollutionScene: React.FC<PollutionSceneProps> = ({
 
           {/* Effets d'analyse */}
           {isAnalyzing && (
-            <>
-              <div className="absolute inset-0 bg-blue-500 bg-opacity-20 animate-pulse">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="animate-spin" style={{ animationDuration: "1s" }}>
-                    <Microscope className="w-16 h-16 text-blue-600" />
-                  </div>
-                  {[...Array(3)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-2 border-blue-400 rounded-full animate-ping"
-                      style={{
-                        width: `${(i + 1) * 60}px`,
-                        height: `${(i + 1) * 60}px`,
-                        animationDelay: `${i * 0.2}s`,
-                        animationDuration: "2s",
-                      }}
-                    />
-                  ))}
+            <div
+              className="absolute inset-0 bg-secondary bg-opacity-25 motion-safe:animate-pulse rounded-lg shadow-inner"
+              aria-live="polite"
+              aria-label="Analyse en cours"
+            >
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div
+                  className="animate-spin motion-safe:animate-spin"
+                  style={{ animationDuration: "1.2s" }}
+                  aria-hidden="true"
+                >
+                  <Microscope className="w-16 h-16 text-secondary drop-shadow-md" />
                 </div>
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-secondary opacity-70 motion-safe:animate-ping"
+                    style={{
+                      width: `${(i + 1) * 60}px`,
+                      height: `${(i + 1) * 60}px`,
+                      animationDelay: `${i * 0.25}s`,
+                      animationDuration: "2.5s",
+                    }}
+                    aria-hidden="true"
+                  />
+                ))}
               </div>
-            </>
+            </div>
           )}
 
           {/* Indicateurs de qualité d'air */}
@@ -295,7 +302,7 @@ const PollutionScene: React.FC<PollutionSceneProps> = ({
             ].map((indicator, i) => (
               <div
                 key={indicator.label}
-                className="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs animate-pulse"
+                className="bg-gray-900 bg-opacity-80 text-gray-100 px-3 py-1 rounded-md text-sm font-medium shadow-sm animate-pulse"
                 style={{
                   animationDelay: `${i * 0.2}s`,
                   borderLeft: `3px solid ${indicator.color}`,

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import {
   Gamepad2,
   Keyboard,
@@ -10,34 +10,38 @@ import {
   Bike,
   Gauge,
   BarChart,
-} from "lucide-react"
+} from "lucide-react";
 
 interface GuideOverlayProps {
-  onClose: () => void
+  onClose: () => void;
 }
 
 const GuideOverlayEnergie: React.FC<GuideOverlayProps> = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState<'guide' | 'faq'>('guide')
+  const [activeTab, setActiveTab] = useState<"guide" | "faq">("guide");
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-blue-500 p-6">
+    <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4 font-sans">
+      <div className="bg-light rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-accent p-6">
 
-        {/* Close button */}
+        {/* Bouton fermer */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl font-bold"
+          className="absolute top-3 right-3 text-dark hover:text-secondary text-xl font-bold"
           aria-label="Fermer le guide"
           title="Fermer le guide"
         >
           ✕
         </button>
 
-        {/* Tab selector */}
-        <div className="flex border-b border-gray-200 mb-6">
+        {/* Sélecteur d'onglets */}
+        <div className="flex border-b border-accent mb-6">
           <button
-            onClick={() => setActiveTab('guide')}
-            className={`px-4 py-2 font-medium ${activeTab === 'guide' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab("guide")}
+            className={`px-4 py-2 font-semibold font-heading ${
+              activeTab === "guide"
+                ? "text-primary border-b-2 border-primary"
+                : "text-dark hover:text-secondary"
+            }`}
           >
             <span className="flex items-center gap-2">
               <Gamepad2 className="w-4 h-4" />
@@ -45,8 +49,12 @@ const GuideOverlayEnergie: React.FC<GuideOverlayProps> = ({ onClose }) => {
             </span>
           </button>
           <button
-            onClick={() => setActiveTab('faq')}
-            className={`px-4 py-2 font-medium ${activeTab === 'faq' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab("faq")}
+            className={`px-4 py-2 font-semibold font-heading ${
+              activeTab === "faq"
+                ? "text-primary border-b-2 border-primary"
+                : "text-dark hover:text-secondary"
+            }`}
           >
             <span className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4" />
@@ -55,87 +63,87 @@ const GuideOverlayEnergie: React.FC<GuideOverlayProps> = ({ onClose }) => {
           </button>
         </div>
 
-        {activeTab === 'guide' ? (
+        {activeTab === "guide" ? (
           <>
-            {/* Main title */}
-            <h3 className="text-xl font-bold mb-8 text-gray-800 flex items-center justify-center gap-2">
-              <BatteryCharging className="w-6 h-6 text-blue-600" />
+            {/* Titre principal */}
+            <h3 className="text-2xl font-bold mb-8 text-primary flex items-center justify-center gap-2 font-heading">
+              <BatteryCharging className="w-6 h-6 text-primary" />
               Guide d'utilisation rapide - Conversion d'Énergie
             </h3>
 
-            {/* Content grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700 leading-relaxed">
+            {/* Contenu grille */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-dark leading-relaxed">
 
-              {/* Block: Controls */}
+              {/* Bloc : Contrôles */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                  <MousePointerClick className="w-4 h-4 text-gray-700" />
+                <h4 className="font-semibold text-dark flex items-center gap-2 font-heading">
+                  <MousePointerClick className="w-4 h-4 text-dark" />
                   Contrôles
                 </h4>
-                <ul className="list-disc list-outside pl-4 space-y-1">
-                  <li><span className="ml-[-40px]"><strong>Source :</strong> Choisir entre vélo et soleil</span></li>
-                  <li><span className="ml-[-90px]"><strong>Curseur :</strong> Ajuster l'intensité</span></li>
-                  <li><span className="ml-[-50px]"><strong>Générateur :</strong> Sélectionner le type</span></li>
-                  <li><span className="ml-[-20px]"><strong>Appareil :</strong> Choisir l'appareil à alimenter</span></li>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>Source :</strong> Choisir entre vélo et soleil</li>
+                  <li><strong>Curseur :</strong> Ajuster l'intensité</li>
+                  <li><strong>Générateur :</strong> Sélectionner le type</li>
+                  <li><strong>Appareil :</strong> Choisir l'appareil à alimenter</li>
                 </ul>
               </div>
 
-              {/* Block: Keyboard shortcuts */}
+              {/* Bloc : Raccourcis clavier */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                  <Keyboard className="w-4 h-4 text-gray-700" />
+                <h4 className="font-semibold text-dark flex items-center gap-2 font-heading">
+                  <Keyboard className="w-4 h-4 text-dark" />
                   Raccourcis
                 </h4>
-                <ul className="list-disc list-outside pl-4 space-y-1">
-                  <li><span className="ml-[-120px]"><strong>Espace :</strong> Play/Pause</span></li>
-                  <li><span className="ml-[-150px]"><strong>R :</strong> Réinitialiser</span></li>
-                  <li><span className="ml-[-190px]"><strong>H :</strong> Aide</span></li>
-                  <li><span className="ml-[-170px]"><strong>T :</strong> Tutoriel</span></li>
-                  <li><span className="ml-[-185px]"><strong>Q :</strong> Quiz</span></li>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>Espace :</strong> Play/Pause</li>
+                  <li><strong>R :</strong> Réinitialiser</li>
+                  <li><strong>H :</strong> Aide</li>
+                  <li><strong>T :</strong> Tutoriel</li>
+                  <li><strong>Q :</strong> Quiz</li>
                 </ul>
               </div>
 
-              {/* Block: Tips */}
+              {/* Bloc : Conseils */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                <h4 className="font-semibold text-dark flex items-center gap-2 font-heading">
                   <Lightbulb className="w-4 h-4 text-yellow-500" />
                   Conseils
                 </h4>
-                <ul className="list-disc list-outside pl-4 space-y-1">
-                  <li><span className="ml-[-6px]">Observez les pertes à chaque conversion</span></li>
-                  <li><span className="ml-[-45px]">Comparez l'efficacité des appareils</span></li>
-                  <li><span className="ml-[-20px]">Notez les différences entre les sources</span></li>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Observez les pertes à chaque conversion</li>
+                  <li>Comparez l'efficacité des appareils</li>
+                  <li>Notez les différences entre les sources</li>
                 </ul>
               </div>
 
-              {/* Block: Energy types */}
+              {/* Bloc : Types d'énergie */}
               <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 text-sm">
                 <div className="space-y-1">
-                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                    <Bike className="w-4 h-4 text-blue-600" />
+                  <h4 className="font-semibold text-dark flex items-center gap-2">
+                    <Bike className="w-4 h-4 text-primary" />
                     Énergie Source
                   </h4>
-                  <p className="text-gray-700">
+                  <p>
                     Mécanique (vélo) ou Lumineuse (soleil) : énergie d'entrée.
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <h4 className="font-semibold text-dark flex items-center gap-2">
                     <Zap className="w-4 h-4 text-yellow-600" />
                     Énergie Électrique
                   </h4>
-                  <p className="text-gray-700">
+                  <p>
                     Produite par les générateurs : avec pertes à la conversion.
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                    <Home className="w-4 h-4 text-red-500" />
+                  <h4 className="font-semibold text-dark flex items-center gap-2">
+                    <Home className="w-4 h-4 text-secondary" />
                     Énergie Finale
                   </h4>
-                  <p className="text-gray-700">
+                  <p>
                     Utilisée par l'appareil : chaleur, lumière ou mouvement.
                   </p>
                 </div>
@@ -144,64 +152,76 @@ const GuideOverlayEnergie: React.FC<GuideOverlayProps> = ({ onClose }) => {
           </>
         ) : (
           <div className="space-y-6">
-            {/* FAQ Sections */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Gauge className="w-5 h-5 text-blue-600" />
+            {/* Sections FAQ */}
+            <div className="bg-accent/10 rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2 font-heading">
+                <Gauge className="w-5 h-5" />
                 Utilisation Générale
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Comment utiliser la simulation ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Sélectionnez une source d'énergie, un générateur et un appareil, puis observez les conversions et pertes d'énergie.</p>
+                  <p className="font-medium text-primary">Comment utiliser la simulation ?</p>
+                  <p className="text-sm text-primary/80 mt-1 pl-4">
+                    Sélectionnez une source d'énergie, un générateur et un appareil, puis observez les conversions et pertes d'énergie.
+                  </p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Comment mesurer l'efficacité ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Comparez l'énergie d'entrée avec l'énergie utile finale pour calculer le rendement global.</p>
+                  <p className="font-medium text-primary">Comment mesurer l'efficacité ?</p>
+                  <p className="text-sm text-primary/80 mt-1 pl-4">
+                    Comparez l'énergie d'entrée avec l'énergie utile finale pour calculer le rendement global.
+                  </p>
                 </li>
               </ul>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <BatteryCharging className="w-5 h-5 text-blue-600" />
+            <div className="bg-accent/10 rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2 font-heading">
+                <BatteryCharging className="w-5 h-5" />
                 Types d'Énergie
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Énergie mécanique (vélo)</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Un adulte peut produire environ 100W en pédalant (75W utiles après pertes mécaniques).</p>
+                  <p className="font-medium text-primary">Énergie mécanique (vélo)</p>
+                  <p className="text-sm text-primary/80 mt-1 pl-4">
+                    Un adulte peut produire environ 100W en pédalant (75W utiles après pertes mécaniques).
+                  </p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Énergie solaire</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">En plein soleil : ~1000W/m², mais panneaux typiques ont 15-20% de rendement.</p>
+                  <p className="font-medium text-primary">Énergie solaire</p>
+                  <p className="text-sm text-primary/80 mt-1 pl-4">
+                    En plein soleil : ~1000W/m², mais panneaux typiques ont 15-20% de rendement.
+                  </p>
                 </li>
               </ul>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-blue-600" />
+            <div className="bg-accent/10 rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2 font-heading">
+                <Zap className="w-5 h-5" />
                 Conversion et Pertes
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Pertes typiques</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Dynamo : 20-30% de perte, Panneau solaire : 80-85% de perte, Stockage batterie : 10-20% de perte.</p>
+                  <p className="font-medium text-primary">Pertes typiques</p>
+                  <p className="text-sm text-primary/80 mt-1 pl-4">
+                    Dynamo : 20-30% de perte, Panneau solaire : 80-85% de perte, Stockage batterie : 10-20% de perte.
+                  </p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Pourquoi ces pertes ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Chaleur dissipée, résistance des composants, limites physiques des matériaux.</p>
+                  <p className="font-medium text-primary">Pourquoi ces pertes ?</p>
+                  <p className="text-sm text-primary/80 mt-1 pl-4">
+                    Chaleur dissipée, résistance des composants, limites physiques des matériaux.
+                  </p>
                 </li>
               </ul>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+            <div className="bg-accent/20 rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-2 flex items-center gap-2 font-heading">
                 <BarChart className="w-5 h-5" />
                 Données Scientifiques
               </h4>
-              <div className="text-sm text-blue-700 space-y-1">
+              <div className="text-sm text-primary space-y-1">
                 <p>• Sources : Études en physique énergétique</p>
                 <p>• Rendement dynamo typique : 70-80%</p>
                 <p>• Rendement panneau solaire : 15-22%</p>
@@ -212,7 +232,7 @@ const GuideOverlayEnergie: React.FC<GuideOverlayProps> = ({ onClose }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GuideOverlayEnergie
+export default GuideOverlayEnergie;

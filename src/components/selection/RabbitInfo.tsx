@@ -39,7 +39,7 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
   const filteredAncestors = uniqueAncestorsByIdAcrossGenerations(ancestors)
 
   const RabbitMiniCard = ({ rabbit: miniRabbit, relationship }: { rabbit: RabbitGenetics; relationship: string }) => (
-    <div className="bg-gray-50 p-2 rounded text-xs">
+    <div className="bg-accent/10 p-3 rounded-xl text-xs border border-accent shadow-sm">
       <div className="flex items-center gap-2 mb-1">
         <div className="w-6 h-6">
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -66,8 +66,8 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
           </svg>
         </div>
         <div>
-          <p className="font-semibold text-blue-600">{miniRabbit.name}</p>
-          <p className="text-gray-500">{relationship}</p>
+          <p className="font-semibold text-primary">{miniRabbit.name}</p>
+          <p className="text-muted-foreground text-sm">{relationship}</p>
         </div>
       </div>
       <div className="space-y-1">
@@ -89,7 +89,7 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
   )
 
   const DeadParentCard = ({ relationship }: { relationship: string }) => (
-    <div className="bg-red-50 p-2 rounded text-xs border-2 border-red-200">
+    <div className="bg-destructive/10 p-2 rounded-lg text-xs border border-destructive/30">
       <div className="flex items-center gap-2 mb-1">
         <div className="w-6 h-6 flex items-center justify-center">
           <div className="text-red-600 text-lg font-bold">✕</div>
@@ -120,17 +120,18 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
     border-gray-200
     rounded-lg
   ">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">Pedigree Complet</CardTitle>
+      <CardHeader className="pb-2 border-b border-muted bg-muted/50 rounded-t-lg">
+        <div className="flex justify-between items-center px-4 py-2">
+          <CardTitle className="text-base text-foreground font-semibold">Pedigree Complet</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose} aria-label="Fermer">
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-muted-foreground" />
           </Button>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4 p-4">
         {/* Lapin sélectionné */}
-        <div className="text-center border-2 border-blue-300 rounded-lg p-3 bg-blue-50">
+        <div className="rounded-xl border border-primary bg-primary/10 p-4 shadow-sm text-center">
           <div className="w-16 h-16 mx-auto mb-2">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <circle cx="50" cy="40" r="20" fill={rabbit.furColor === "brown" ? "#8B4513" : "#FFFFFF"} stroke="#000" strokeWidth="2" />
@@ -155,39 +156,49 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
               )}
             </svg>
           </div>
-          <p className="font-bold text-lg text-blue-800">{rabbit.name}</p>
-          <p className="text-sm">Génération {rabbit.generation}</p>
+          <p className="text-primary text-xl font-semibold tracking-tight">{rabbit.name}</p>
+          <p className="text-muted-foreground text-sm font-medium">
+            Génération {rabbit.generation + 1}
+          </p>
           <div className="mt-2 text-xs">
-  <p className="flex items-center justify-center gap-4 text-gray-700">
-    <span className="flex items-center gap-1">
-      <Paintbrush className="w-4 h-4 text-pink-600" />
-      {getGenotypeString(rabbit.furAlleles)}
-    </span>
-    |
-    <span className="flex items-center gap-1">
-      <Ear className="w-4 h-4 text-yellow-600" />
-      {getGenotypeString(rabbit.earAlleles)}
-    </span>
-    |
-    <span className="flex items-center gap-1">
-      <Bone className="w-4 h-4 text-gray-700" />
-      {getGenotypeString(rabbit.toothAlleles)}
-    </span>
-  </p>
-</div>
+            <p className="flex items-center justify-center gap-4 text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Paintbrush className="w-4 h-4 text-pink-600" />
+                {getGenotypeString(rabbit.furAlleles)}
+              </span>
+              |
+              <span className="flex items-center gap-1">
+                <Ear className="w-4 h-4 text-yellow-600" />
+                {getGenotypeString(rabbit.earAlleles)}
+              </span>
+              |
+              <span className="flex items-center gap-1">
+                <Bone className="w-4 h-4 text-gray-700" />
+                {getGenotypeString(rabbit.toothAlleles)}
+              </span>
+            </p>
+          </div>
 
         </div>
 
         {/* Parents directs */}
         {parents && (
           <div className="space-y-2">
-           <h4 className="font-semibold text-sm text-purple-700 flex items-center justify-center gap-2">
-  <Network className="w-5 h-5" />
-  Parents
-</h4>       
-              <div className="grid grid-cols-2 gap-2">
-              {parents.parent1 && parents.parent1.isAlive ? <RabbitMiniCard rabbit={parents.parent1} relationship="Papa" /> : <DeadParentCard relationship="Papa" />}
-              {parents.parent2 && parents.parent2.isAlive ? <RabbitMiniCard rabbit={parents.parent2} relationship="Maman" /> : <DeadParentCard relationship="Maman" />}
+            <h4 className="font-semibold text-sm text-primary-600 flex items-center justify-center gap-2">
+              <Network className="w-5 h-5 text-primary-600" />
+              Parents
+            </h4>
+            <div className="grid grid-cols-2 gap-2">
+              {parents.parent1 && parents.parent1.isAlive ? (
+                <RabbitMiniCard rabbit={parents.parent1} relationship="Papa" />
+              ) : (
+                <DeadParentCard relationship="Papa" />
+              )}
+              {parents.parent2 && parents.parent2.isAlive ? (
+                <RabbitMiniCard rabbit={parents.parent2} relationship="Maman" />
+              ) : (
+                <DeadParentCard relationship="Maman" />
+              )}
             </div>
           </div>
         )}
@@ -217,10 +228,10 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
         {/* Descendants */}
         {descendants.length > 0 && (
           <div className="space-y-2">
-            <h4 className="font-semibold text-sm text-green-700 flex items-center justify-center gap-2">
-  <Baby className="w-5 h-5" />
-  Descendants ({descendants.filter((d) => d.isAlive).length} vivants / {descendants.length} total)
-</h4>
+            <h4 className="font-semibold text-sm text-primary flex items-center justify-center gap-2">
+              <Baby className="w-5 h-5" />
+              Descendants ({descendants.filter((d) => d.isAlive).length} vivants / {descendants.length} total)
+            </h4>
             <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded p-2 bg-gray-50">
               {descendants.map((descendant) =>
                 descendant.isAlive ? (
@@ -243,11 +254,12 @@ const RabbitInfo = ({ rabbit, allRabbits, onClose }: RabbitInfoProps) => {
 
         {/* Pas de famille */}
         {filteredAncestors.length === 0 && descendants.length === 0 && (
-          <div className="text-center text-gray-500 text-sm py-4">
-<p className="flex items-center gap-2 text-gray-700">
-  <Rabbit className="w-5 h-5 text-green-600" />
-  {rabbit.name} est un lapin fondateur
-</p>            <p>Pas encore de famille connue</p>
+          <div className="text-center text-gray-600 text-sm py-4">
+            <p className="flex items-center gap-2 text-gray-700">
+              <Rabbit className="w-5 h-5 text-primary-600" />
+              {rabbit.name} est un lapin fondateur
+            </p>
+            <p className="text-gray-600">Pas encore de famille connue</p>
           </div>
         )}
       </CardContent>

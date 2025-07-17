@@ -1,8 +1,6 @@
 // src/components/views/SimulationSelectionNaturelle.tsx
 import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { notifyInfo, notifyError, notifySuccess } from "../../lib/notifications";
 import { useSelectionNaturelleShortcuts } from "../../hooks/useSelectionNaturelleShortcuts";
 import GuideOverlaySelection from "../ui/GuideOverlaySelection";
@@ -31,6 +29,7 @@ import Food from "../selection/Food";
 import RabbitCreator from "../selection/RabbitCreator";
 import QuizSelectionOverlay from "../ui/QuizSelectionOverlay";
 import { supabase } from "../../lib/supabaseClient";
+import { Button } from "../ui/button";
 
 const DEFAULT_ENVIRONMENT: EnvironmentalFactors = {
   wolvesPresent: false,
@@ -427,26 +426,35 @@ const SimulationSelectionNaturelle = () => {
   const envStatus = getEnvironmentStatus();
 
   if (!isLoaded) {
-    return (
-      <section id="selection-naturelle" className="py-20 px-6 bg-gray-50 max-w-7xl mx-auto text-center rounded-xl shadow-lg">
-        <h2 className="text-3xl font-semibold mb-6 text-gray-800">Simulation de sélection naturelle</h2>
-        <div className="flex items-center justify-center h-96 bg-gradient-to-br from-green-50 via-blue-50 to-green-100 rounded-lg">
-          <div className="text-center">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200 border-t-green-600 mx-auto mb-4"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <SimpleRabbit size={32} className="text-green-600" />
-              </div>
+  return (
+    <section
+      id="selection-naturelle"
+      className="py-20 px-6 bg-light max-w-7xl mx-auto text-center rounded-2xl shadow-xl font-sans"
+    >
+      <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+        Simulation de sélection naturelle
+      </h2>
+
+      <div className="flex items-center justify-center h-96 bg-accent/20 rounded-xl">
+        <div className="text-center space-y-3">
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="animate-spin rounded-full h-full w-full border-4 border-accent border-t-primary" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <SimpleRabbit size={32} className="text-primary" />
             </div>
-            <p className="text-gray-700 font-medium">Préparation de l'environnement...</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Simulation limitée à {MAX_GENERATIONS} générations
-            </p>
           </div>
+
+          <p className="text-dark font-medium">
+            Préparation de l'environnement...
+          </p>
+          <p className="text-sm text-gray-500">
+            Simulation limitée à {MAX_GENERATIONS} générations
+          </p>
         </div>
-      </section>
-    );
-  }
+      </div>
+    </section>
+  );
+}
 
   return (
     <FullscreenContainer className="bg-gray-50 py-20 px-6 text-center rounded-xl shadow-lg">
@@ -473,39 +481,44 @@ const SimulationSelectionNaturelle = () => {
           onClose={closeQuiz}
           completed={quizCompleted}
           onRestart={restartQuiz}
-          simulationCode={"energie"}
+          simulationCode={"selection-naturelle"}
         />
       )}
 
       {/* En-tête amélioré */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold text-gray-800">Simulation de sélection naturelle</h2>
-        <div className="flex gap-2">
+      <div className="flex justify-between items-center mb-6 max-w-5xl mx-auto px-4 font-heading">
+        <h2 className="text-3xl font-semibold text-primary select-none">
+          Simulation de sélection naturelle
+        </h2>
+        <div className="flex gap-3">
           <button
             onClick={startTutorial}
-            className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center justify-center"
+            className="flex items-center justify-center px-3 py-2 rounded-lg bg-primary text-light hover:bg-accent transition-shadow shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent"
             title="Tutoriel (T)"
             aria-label="Tutoriel"
+            type="button"
           >
             <GraduationCap className="w-5 h-5" />
           </button>
           <button
             onClick={startQuiz}
-            className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex items-center justify-center"
+            className="flex items-center justify-center px-3 py-2 rounded-lg bg-secondary text-light hover:bg-accent transition-shadow shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent"
             title="Quiz (Q)"
             aria-label="Quiz"
+            type="button"
           >
             <Brain className="w-5 h-5" />
           </button>
           <button
             onClick={() => setShowGuide(true)}
-            className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
+            className="flex items-center justify-center px-3 py-2 rounded-lg bg-accent text-primary hover:bg-primary hover:text-light transition-shadow shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
             title="Aide (H)"
             aria-label="Aide"
+            type="button"
           >
             <HelpCircle className="w-5 h-5" />
           </button>
-          <FullscreenButton className="ml-2" />
+          <FullscreenButton className="ml-3" />
         </div>
       </div>
 
@@ -521,7 +534,8 @@ const SimulationSelectionNaturelle = () => {
 
       {/* Contrôles principaux */}
       <div className="mb-6 flex flex-wrap justify-center gap-4">
-        <button
+        {/* Bouton Démarrer / Pause */}
+        <Button
           onClick={() => {
             if (allLivingRabbits.length < 2) {
               notifyError("Il faut au moins deux lapins vivants pour lancer une simulation.");
@@ -535,13 +549,16 @@ const SimulationSelectionNaturelle = () => {
             setIsRunning(!isRunning);
           }}
           disabled={currentGeneration >= MAX_GENERATIONS || allLivingRabbits.length < 2}
-          className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg transform flex items-center justify-center gap-2
-            ${isRunning
-              ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:scale-105"
+          className={`
+      px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-md
+      flex items-center justify-center gap-2
+      ${isRunning
+              ? "bg-destructive text-white hover:bg-destructive/90"
               : currentGeneration >= MAX_GENERATIONS - 1 || allLivingRabbits.length < 2
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:scale-105"
-            }`}
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : "bg-primary text-white hover:bg-primary/90"
+            }
+    `}
           title={
             currentGeneration >= MAX_GENERATIONS - 1
               ? "Dernière génération atteinte"
@@ -552,34 +569,38 @@ const SimulationSelectionNaturelle = () => {
                   : "Démarrer la simulation"
           }
         >
-          {isRunning ? <Pause size={24} /> : <Play size={24} />}
+          {isRunning ? <Pause size={20} /> : <Play size={20} />}
           <span>{isRunning ? "Pause" : "Démarrer"}</span>
-        </button>
+        </Button>
 
-        <button
+        {/* Bouton Reset */}
+        <Button
           onClick={resetSimulation}
-          className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center"
+          className="bg-muted text-muted-foreground hover:bg-muted/80 px-6 py-3 rounded-2xl font-semibold shadow-md flex items-center justify-center gap-2"
           aria-label="Réinitialiser la simulation"
         >
-          <RotateCw className="w-5 h-5 mr-2" />
+          <RotateCw size={18} />
           Reset
-        </button>
+        </Button>
 
-        <div className="px-6 py-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl shadow-lg">
-          <span className="font-bold text-blue-800 flex items-center gap-1">
-            <Clock size={20} />
-            {formatTime(timeElapsed)}
-          </span>
+        {/* Bloc Timer */}
+        <div className="px-6 py-3 bg-muted/50 rounded-2xl shadow-sm flex items-center gap-2 text-primary font-semibold">
+          <Clock size={18} />
+          {formatTime(timeElapsed)}
         </div>
 
-        <button
+        {/* Bouton Génération suivante */}
+        <Button
           onClick={simulateNextGeneration}
           disabled={currentGeneration >= MAX_GENERATIONS - 1 || allLivingRabbits.length < 2}
-          className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg transform flex items-center justify-center
-            ${currentGeneration >= MAX_GENERATIONS - 1 || allLivingRabbits.length < 2
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white hover:scale-105"
-            }`}
+          className={`
+      px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-md
+      flex items-center justify-center gap-2
+      ${currentGeneration >= MAX_GENERATIONS - 1 || allLivingRabbits.length < 2
+              ? "bg-muted text-muted-foreground cursor-not-allowed"
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            }
+    `}
           title={
             currentGeneration >= MAX_GENERATIONS
               ? "Dernière génération atteinte"
@@ -589,7 +610,7 @@ const SimulationSelectionNaturelle = () => {
           }
         >
           Génération suivante
-        </button>
+        </Button>
       </div>
 
       {/* Facteurs environnementaux */}
@@ -600,45 +621,62 @@ const SimulationSelectionNaturelle = () => {
             label: "Prédateurs",
             description: "Favorise les lapins rapides et discrets",
             activeDescription: "Les loups chassent les lapins les plus lents",
-            icon: <Cat className="w-5 h-5 text-gray-700" />,
+            icon: <Cat className="w-6 h-6 text-gray-700" />,
           },
           {
             key: "foodHardness",
             label: "Nourriture dure",
             description: "Favorise les dents longues",
             activeDescription: "Seuls les lapins aux dents longues peuvent manger",
-            icon: <Bone className="w-5 h-5 text-gray-700" />,
+            icon: <Bone className="w-6 h-6 text-gray-700" />,
           },
           {
             key: "foodScarcity",
             label: "Nourriture rare",
             description: "Augmente la compétition",
             activeDescription: "Les lapins doivent lutter pour se nourrir",
-            icon: <Leaf className="w-5 h-5 text-gray-700" />,
+            icon: <Leaf className="w-6 h-6 text-gray-700" />,
           },
         ].map(({ key, label, description, activeDescription, icon }) => {
           const isActive = environment[key as keyof EnvironmentalFactors] as boolean;
           return (
-            <div key={key} className={`bg-white p-4 rounded-xl shadow border transition-all ${isActive ? "border-yellow-400 bg-yellow-50" : "border-gray-200"}`}>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl">{icon}</span>
-                <h3 className="font-semibold">{label}</h3>
+            <div
+              key={key}
+              className={`bg-white p-5 rounded-2xl shadow-md border transition-all duration-300
+          ${isActive ? "border-yellow-400 bg-yellow-50" : "border-gray-200"}
+        `}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">{icon}</span>
+                <h3 className="font-semibold text-lg text-gray-800">{label}</h3>
               </div>
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                 {isActive ? activeDescription : description}
               </p>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
                 <div className="relative">
                   <input
                     type="checkbox"
                     checked={isActive}
-                    onChange={(e) => setEnvironment(prev => ({ ...prev, [key]: e.target.checked }))}
+                    onChange={(e) =>
+                      setEnvironment((prev) => ({ ...prev, [key]: e.target.checked }))
+                    }
                     className="sr-only"
                   />
-                  <div className={`w-10 h-6 rounded-full transition ${isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                  <div className={`absolute left-1 top-1 w-4 h-4 rounded-full bg-white transition transform ${isActive ? 'translate-x-4' : ''}`}></div>
+                  <div
+                    className={`w-12 h-7 rounded-full transition-colors duration-300
+                ${isActive ? "bg-green-500" : "bg-gray-300"}
+              `}
+                  ></div>
+                  <div
+                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300
+                ${isActive ? "translate-x-5" : "translate-x-0"}
+              `}
+                  ></div>
                 </div>
-                <span className="text-sm font-medium">{isActive ? "Activé" : "Désactivé"}</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  {isActive ? "Activé" : "Désactivé"}
+                </span>
               </label>
             </div>
           );
@@ -665,7 +703,10 @@ const SimulationSelectionNaturelle = () => {
             {Array.from({ length: MAX_GENERATIONS }, (_, i) => i)
               .filter(gen => allLivingRabbits.some(r => r.generation === gen && r.isAlive))
               .map(generation => (
-                <div key={generation} className="flex items-center gap-1 bg-white/80 px-2 py-1 rounded-full">
+                <div
+                  key={generation}
+                  className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full text-sm text-muted-foreground"
+                >
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{
@@ -675,7 +716,7 @@ const SimulationSelectionNaturelle = () => {
                       ][generation]
                     }}
                   />
-                  <span className="text-xs">G{generation + 1}</span>
+                  <span className="text-sm text-muted-foreground">G{generation + 1}</span>
                 </div>
               ))}
           </div>
@@ -707,12 +748,12 @@ const SimulationSelectionNaturelle = () => {
 
       {/* Créateur de lapins */}
       {allLivingRabbits.length < 2 && (
-        <div className="bg-green-50 p-6 rounded-xl border border-green-200 mb-8 max-w-3xl mx-auto">
-          <h3 className="text-xl font-semibold text-green-800 mb-4 flex items-center justify-center gap-2">
-            <WandSparkles className="w-5 h-5 text-green-600" />
+        <div className="bg-muted/50 p-6 rounded-2xl border border-muted max-w-3xl mx-auto mb-8 shadow-sm">
+          <h3 className="text-xl font-semibold text-primary mb-4 flex items-center justify-center gap-2">
+            <WandSparkles className="w-5 h-5 text-primary" />
             Création de Lapins
           </h3>
-          <p className="text-sm text-gray-600 mb-4 text-center">
+          <p className="text-sm text-muted-foreground mb-4 text-center">
             Créez au moins 2 lapins pour commencer la simulation
           </p>
           <RabbitCreator
@@ -742,8 +783,11 @@ const SimulationSelectionNaturelle = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Bloc des traits hérités */}
-            <div className="bg-white p-4 rounded-lg border border-blue-100">
-              <h4 className="font-medium mb-3 text-blue-700 border-b pb-2">Traits hérités</h4>
+            <div className="bg-muted/50 p-4 rounded-xl border border-muted shadow-sm">
+              <h4 className="font-semibold mb-3 text-primary border-b border-muted pb-2 text-center">
+                Traits hérités
+              </h4>
+
               <ul className="space-y-3">
                 {Object.entries(lastExplanation.traitExplanations).map(
                   ([trait, explanation]) => {
@@ -752,19 +796,27 @@ const SimulationSelectionNaturelle = () => {
 
                     const phenotypeText = (() => {
                       switch (trait) {
-                        case "fur": return `${currentTraits.fur.brown} bruns, ${currentTraits.fur.white} blancs`;
-                        case "ear": return `${currentTraits.ears.straight} droites, ${currentTraits.ears.floppy} tombantes`;
-                        case "tooth": return `${currentTraits.teeth.long} longues, ${currentTraits.teeth.short} courtes`;
-                        default: return "";
+                        case "fur":
+                          return `${currentTraits.fur.brown} bruns, ${currentTraits.fur.white} blancs`;
+                        case "ear":
+                          return `${currentTraits.ears.straight} droites, ${currentTraits.ears.floppy} tombantes`;
+                        case "tooth":
+                          return `${currentTraits.teeth.long} longues, ${currentTraits.teeth.short} courtes`;
+                        default:
+                          return "";
                       }
                     })();
 
                     const traitName = (() => {
                       switch (trait) {
-                        case "fur": return "Fourrure";
-                        case "ear": return "Oreilles";
-                        case "tooth": return "Dents";
-                        default: return trait;
+                        case "fur":
+                          return "Fourrure";
+                        case "ear":
+                          return "Oreilles";
+                        case "tooth":
+                          return "Dents";
+                        default:
+                          return trait;
                       }
                     })();
 
@@ -776,14 +828,14 @@ const SimulationSelectionNaturelle = () => {
                           {trait === "tooth" && <Bone className="w-5 h-5 text-gray-700" />}
                         </div>
                         <div>
-                          <strong className="text-gray-800">{traitName}:</strong>
-                          <p className="text-gray-600 text-sm mt-1">
-                            Allèles: {explanation.alleles.join(", ")} <br />
-                            Phénotype: {phenotypeText}
+                          <strong className="text-sm text-muted-foreground">{traitName} :</strong>
+                          <p className="text-sm text-muted-foreground mt-1 leading-snug">
+                            Allèles : <span className="font-medium">{explanation.alleles.join(", ")}</span> <br />
+                            Phénotype : <span className="font-medium">{phenotypeText}</span>
                             {explanation.advantage && (
                               <>
                                 <br />
-                                Avantage: {explanation.advantage}
+                                Avantage : <span className="text-green-700 font-medium">{explanation.advantage}</span>
                               </>
                             )}
                           </p>
@@ -796,22 +848,23 @@ const SimulationSelectionNaturelle = () => {
             </div>
 
             {/* Bloc effets environnementaux */}
-            <div className="bg-white p-4 rounded-lg border border-blue-100">
-              <h4 className="font-medium mb-3 text-blue-700 border-b pb-2">
+            <div className="bg-muted/50 p-4 rounded-xl border border-muted shadow-sm">
+              <h4 className="font-semibold mb-3 text-primary border-b border-muted pb-2 text-center">
                 Effets environnementaux actifs
               </h4>
+
               {getActiveEnvironmentalEffects().length > 0 ? (
                 <ul className="space-y-2">
                   {getActiveEnvironmentalEffects().map((effect, i) => (
-                    <li key={i} className="flex items-start gap-2 p-2 bg-yellow-50 rounded-lg">
-                      <AlertTriangle className="flex-shrink-0 w-4 h-4 mt-1 text-yellow-600" />
-                      <span className="text-sm text-yellow-800">{effect}</span>
+                    <li key={i} className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                      <AlertTriangle className="flex-shrink-0 w-4 h-4 mt-1 text-amber-600" />
+                      <span className="text-sm text-amber-800">{effect}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-gray-500 italic">
+                  <p className="text-sm text-muted-foreground italic">
                     Aucun effet environnemental actif
                   </p>
                 </div>
@@ -820,19 +873,6 @@ const SimulationSelectionNaturelle = () => {
           </div>
         </div>
       )}
-
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
     </FullscreenContainer>
   );
 };

@@ -16,8 +16,6 @@ import {
   Clock, FlaskConical,
   BarChart3, Target,
 } from "lucide-react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { notifySuccess, notifyInfo, notifyError } from "../../lib/notifications";
 import PollutionScene from "../pollution/PollutionScene";
 import TooltipFloating from "../ui/TooltipFloating";
@@ -308,18 +306,26 @@ export default function SimulationPollution() {
 
   if (!isLoaded) {
     return (
-      <section id="pollution" className="py-20 px-6 bg-gray-50 max-w-7xl mx-auto text-center rounded-xl shadow-lg">
-        <h2 className="text-3xl font-semibold mb-6 text-gray-800">Simulation de Pollution Atmosphérique</h2>
-        <div className="flex items-center justify-center h-96 bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 rounded-lg">
-          <div className="text-center">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-red-600 mx-auto mb-4"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Factory size={32} className="text-red-600" />
-              </div>
+      <section
+        id="pollution"
+        className="py-20 px-8 max-w-5xl mx-auto bg-light rounded-xl shadow-lg text-center font-sans"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <h2 className="text-4xl font-heading font-semibold mb-8 text-primary">
+          Simulation de Pollution Atmosphérique
+        </h2>
+
+        <div className="flex flex-col items-center justify-center h-96 bg-white rounded-lg shadow-inner">
+          <div className="relative mb-6">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-light border-t-primary mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <Factory size={32} className="text-primary" aria-hidden="true" />
             </div>
-            <p className="text-gray-700 font-medium">Chargement de l'environnement...</p>
           </div>
+          <p className="text-lg font-medium text-dark">
+            Chargement de l'environnement...
+          </p>
         </div>
       </section>
     );
@@ -357,26 +363,48 @@ export default function SimulationPollution() {
 
       {/* En-tête */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold text-gray-800">Simulation de Pollution Atmosphérique</h2>
-        <div className="flex gap-2">
-          <button onClick={startTutorial} className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center justify-center">
+        <h2 className="text-3xl font-heading font-semibold text-primary">
+          Simulation de Pollution Atmosphérique
+        </h2>
+        <div className="flex gap-3">
+          <button
+            onClick={startTutorial}
+            className="px-4 py-2 bg-primary text-light rounded-lg hover:bg-primary/90 transition flex items-center justify-center"
+            aria-label="Démarrer le tutoriel"
+          >
             <GraduationCap className="w-5 h-5" />
           </button>
-          <button onClick={startQuiz} className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex items-center justify-center">
+
+          <button
+            onClick={startQuiz}
+            className="px-4 py-2 bg-secondary text-light rounded-lg hover:bg-secondary/90 transition flex items-center justify-center"
+            aria-label="Démarrer le quiz"
+          >
             <Brain className="w-5 h-5" />
           </button>
-          <button onClick={() => setShowHelp(true)} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
+
+          <button
+            onClick={() => setShowHelp(true)}
+            className="px-4 py-2 bg-accent text-dark rounded-lg hover:bg-accent/90 transition flex items-center justify-center"
+            aria-label="Afficher l’aide"
+          >
             <HelpCircle className="w-5 h-5" />
           </button>
-          <FullscreenButton className="ml-2" />
+
+          <FullscreenButton className="ml-3" />
         </div>
       </div>
 
       {/* Statut de la qualité de l'air */}
       <div className="mb-6">
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium ${aqiStatus.color === "green" ? "bg-green-500" : aqiStatus.color === "yellow" ? "bg-yellow-500" : "bg-red-500"}`}>
-          <span>{aqiStatus.icon}</span>
-          <span>Qualité de l'air: {aqiStatus.label}</span>
+        <div
+          className={`
+      inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold 
+      shadow-sm transition-all duration-300 ${aqiStatus.color} ${aqiStatus.textColor}
+    `}
+        >
+          {aqiStatus.icon}
+          <span className="text-white">Qualité de l'air : {aqiStatus.label}</span>
         </div>
       </div>
 
@@ -384,51 +412,82 @@ export default function SimulationPollution() {
       <div className="mb-6 flex flex-wrap justify-center gap-4">
         <button
           onClick={() => setIsRunning(!isRunning)}
-          className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center ${isRunning ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white" : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"}`}
+          aria-label={isRunning ? "Mettre en pause" : "Démarrer la simulation"}
+          className={`
+      px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg 
+      transform hover:scale-105 flex items-center justify-center
+      ${isRunning ? "bg-secondary text-white hover:bg-opacity-90" : "bg-primary text-white hover:bg-opacity-90"}
+    `}
         >
           {isRunning ? <Pause size={24} /> : <Play size={24} />}
           <span className="ml-2">{isRunning ? "Pause" : "Démarrer"}</span>
         </button>
 
-        <button onClick={handleAnalyze} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center">
+        <button
+          onClick={handleAnalyze}
+          aria-label="Analyser la qualité de l'air"
+          className="px-8 py-3 bg-accent text-dark hover:bg-green-200 rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center"
+        >
           <FlaskConical className="w-5 h-5 mr-2" />
           Analyser
         </button>
 
-        <button onClick={resetSimulation} className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center">
+        <button
+          onClick={resetSimulation}
+          aria-label="Réinitialiser la simulation"
+          className="px-8 py-3 bg-dark text-white hover:bg-black rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center"
+        >
           <RotateCw className="w-5 h-5 mr-2" />
           Reset
         </button>
 
-        <div className="px-6 py-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl shadow-lg">
-          <span className="font-bold text-blue-800 flex items-center gap-1">
+        <div className="px-6 py-3 bg-light rounded-xl shadow-lg">
+          <span className="font-bold text-dark flex items-center gap-1">
             <Clock size={20} />
             {formatTime(timeElapsed)}
           </span>
         </div>
-
-
       </div>
 
       {/* Sélecteur de source */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3 flex items-center justify-center gap-2">
+        <h3 className="text-lg font-semibold mb-3 flex items-center justify-center gap-2 text-dark">
           <Target size={20} />
           Source de pollution
         </h3>
+
         <div className="flex flex-wrap justify-center gap-3">
-          {sources.map((source) => (
-            <button
-              key={source.value}
-              onClick={() => setPollutionData(prev => ({ ...prev, source: source.value as "voiture" | "industrie" }))}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${pollutionData.source === source.value ? `bg-${source.value === "voiture" ? "red" : "gray"}-500 text-white shadow-lg` : `bg-${source.value === "voiture" ? "red" : "gray"}-100 text-${source.value === "voiture" ? "red" : "gray"}-700 hover:bg-${source.value === "voiture" ? "red" : "gray"}-200`}`}
-            >
-              <div className="flex items-center gap-2">
-                {source.value === "voiture" ? <Car size={20} /> : <Factory size={20} />}
+          {sources.map((source) => {
+            const isSelected = pollutionData.source === source.value
+            const isVoiture = source.value === "voiture"
+
+            const baseBg = isVoiture ? "bg-secondary" : "bg-dark"
+            const baseText = "text-white"
+            const inactiveBg = isVoiture ? "bg-secondary/10" : "bg-dark/10"
+            const inactiveText = isVoiture ? "text-secondary" : "text-dark"
+            const hoverBg = isVoiture ? "hover:bg-secondary/20" : "hover:bg-dark/20"
+
+            return (
+              <button
+                key={source.value}
+                onClick={() =>
+                  setPollutionData((prev) => ({
+                    ...prev,
+                    source: source.value as "voiture" | "industrie",
+                  }))
+                }
+                aria-label={`Choisir la source : ${source.label}`}
+                className={`
+            px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 
+            flex items-center gap-2
+            ${isSelected ? `${baseBg} ${baseText} shadow-lg` : `${inactiveBg} ${inactiveText} ${hoverBg}`}
+          `}
+              >
+                {isVoiture ? <Car size={20} /> : <Factory size={20} />}
                 <span>{source.label}</span>
-              </div>
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -477,33 +536,40 @@ export default function SimulationPollution() {
 
       <div className="flex flex-col lg:flex-row gap-8 mb-8 max-w-6xl mx-auto">
         {/* Solutions - Colonne de gauche */}
-        <div className="bg-white p-6 rounded-xl shadow-lg text-left border border-gray-100 flex-1">
-          <h3 className="font-bold text-xl mb-4 text-blue-700 flex items-center gap-2">
+        <div className="bg-light p-6 rounded-xl shadow-lg text-left border border-accent flex-1">
+          <h3 className="font-bold text-xl mb-4 text-primary flex items-center gap-2">
             <BarChart3 size={20} /> Solutions (-{solutionImpact}%)
           </h3>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {solutions.map((solution) => (
-              <div
-                key={solution.id}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${solution.active
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                  }`}
-                onClick={() => handleSolutionToggle(solution.id)}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{solution.icon}</span>
-                  <div>
-                    <h4 className="font-semibold">{solution.name}</h4>
-                    <p className="text-sm text-gray-600">{solution.description}</p>
-                    <p className={`text-xs mt-1 ${solution.active ? 'text-green-600' : 'text-gray-500'
-                      }`}>
-                      {solution.active ? 'Activée' : 'Désactivée'} - Impact: -{solution.impact}%
-                    </p>
+            {solutions.map((solution) => {
+              const isActive = solution.active
+
+              return (
+                <div
+                  key={solution.id}
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${isActive
+                    ? 'bg-accent/20 border-primary'
+                    : 'bg-light border-gray-200 hover:bg-accent/10'
+                    }`}
+                  onClick={() => handleSolutionToggle(solution.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl text-primary">{solution.icon}</span>
+                    <div>
+                      <h4 className="font-semibold text-dark">{solution.name}</h4>
+                      <p className="text-sm text-dark/70">{solution.description}</p>
+                      <p
+                        className={`text-xs mt-1 ${isActive ? 'text-primary font-medium' : 'text-gray-500'
+                          }`}
+                      >
+                        {isActive ? 'Activée' : 'Désactivée'} – Impact : -{solution.impact}%
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -514,18 +580,6 @@ export default function SimulationPollution() {
       {/* Tooltip */}
       <TooltipFloating tooltip={tooltip} />
 
-      <ToastContainer
-        position="top-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
     </FullscreenContainer>
   )
 

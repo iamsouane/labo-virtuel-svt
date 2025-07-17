@@ -115,7 +115,7 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
                     ? "bg-yellow-100 text-yellow-700"
                     : d.statut === "APPROUVE"
                     ? "bg-accent text-primary"
-                    : "bg-red-100 text-secondary"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {formatStatut(d.statut)}

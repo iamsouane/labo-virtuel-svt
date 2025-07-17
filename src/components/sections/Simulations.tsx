@@ -24,7 +24,7 @@ interface SimulationsProps {
 
 const iconMap: Record<string, JSX.Element> = {
   photosynthese: <Trees className="w-6 h-6 text-primary" />,
-  "selection-naturelle": <Rabbit className="w-6 h-6 text-secondary" />,
+  "selection-naturelle": <Rabbit className="w-6 h-6 text-amber-700" />,
   energie: <Zap className="w-6 h-6 text-yellow-500" />,
   pollution: <Factory className="w-6 h-6 text-dark" />,
 };

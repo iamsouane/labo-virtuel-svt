@@ -1,4 +1,4 @@
-// src/data/energieTutorial
+// src/data/energieTutorial.tsx
 import type { TutorialStep } from "../types/simulationEnergieTypes"
 import {
   Bolt,

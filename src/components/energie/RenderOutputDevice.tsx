@@ -1,4 +1,4 @@
-//src/components/energie/RenderOutputDevice
+// src/components/energie/RenderOutputDevice.tsx
 import React from "react"
 
 interface Props {
@@ -16,7 +16,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
   switch (selectedDevice) {
     case "ampoule":
       return (
-        <div className="relative">
+        <div className="relative font-sans text-dark">
           {/* Halo lumineux */}
           {intensity > 5 && (
             <div
@@ -29,7 +29,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
           )}
           {/* Ampoule */}
           <div
-            className="relative w-16 h-20 rounded-full border-2 border-gray-300 transition-all duration-500"
+            className="relative w-16 h-20 rounded-full border-2 border-accent transition-all duration-500"
             style={{
               backgroundColor: `rgba(255, 255, ${100 + intensity}, ${0.3 + intensity / 150})`,
               boxShadow: `0 0 ${intensity}px rgba(255, 255, 0, 0.8)`,
@@ -43,7 +43,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
               }}
             />
             {/* Culot */}
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-6 bg-gray-400 rounded-b-lg" />
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-6 bg-secondary rounded-b-lg" />
           </div>
           {/* Rayons */}
           {intensity > 20 && (
@@ -51,7 +51,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
               {[...Array(8)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute w-0.5 bg-yellow-400 origin-bottom animate-pulse transition-all duration-500"
+                  className="absolute w-0.5 bg-accent origin-bottom animate-pulse transition-all duration-500"
                   style={{
                     height: `${15 + intensity / 8}px`,
                     left: "50%",
@@ -69,9 +69,9 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
 
     case "ventilateur":
       return (
-        <div className="relative">
-          <div className="w-4 h-12 bg-gray-600 mx-auto rounded-b-lg" />
-          <div className="w-8 h-8 bg-gray-700 rounded-full mx-auto -mt-2 relative z-10" />
+        <div className="relative font-sans text-dark">
+          <div className="w-4 h-12 bg-primary mx-auto rounded-b-lg" />
+          <div className="w-8 h-8 bg-primary-dark rounded-full mx-auto -mt-2 relative z-10" />
           <div
             className="absolute top-4 left-1/2 transform transition-all duration-100"
             style={{
@@ -81,7 +81,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-16 h-2 bg-gray-400 rounded-full origin-left transition-all duration-300"
+                className="absolute w-16 h-2 bg-accent rounded-full origin-left transition-all duration-300"
                 style={{
                   transform: `rotate(${i * 120}deg)`,
                   opacity: 0.8 + intensity / 500,
@@ -94,7 +94,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
               {[...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="w-6 h-0.5 bg-blue-300 rounded animate-pulse"
+                  className="w-6 h-0.5 bg-secondary rounded animate-pulse"
                   style={{
                     animationDelay: `${i * 0.2}s`,
                     opacity: intensity / 150,
@@ -108,9 +108,9 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
 
     case "chauffe-eau":
       return (
-        <div className="relative">
+        <div className="relative font-sans text-dark">
           <div
-            className="w-12 h-20 rounded-lg border-2 border-gray-400 transition-all duration-500"
+            className="w-12 h-20 rounded-lg border-2 border-accent transition-all duration-500"
             style={{
               backgroundColor: `rgb(${Math.min(255, 100 + intensity * 1.5)}, ${Math.max(
                 100,
@@ -119,15 +119,15 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
             }}
           >
             <div
-              className="absolute bottom-2 left-1 right-1 bg-red-500 rounded transition-all duration-500"
+              className="absolute bottom-2 left-1 right-1 bg-primary rounded transition-all duration-500"
               style={{
                 height: `${(intensity / 100) * 70}%`,
                 opacity: intensity / 100,
               }}
             />
-            <div className="absolute -right-6 top-2 w-2 h-16 bg-gray-300 rounded-full">
+            <div className="absolute -right-6 top-2 w-2 h-16 bg-accent rounded-full">
               <div
-                className="absolute bottom-0 w-full bg-red-500 rounded-full transition-all duration-500"
+                className="absolute bottom-0 w-full bg-primary rounded-full transition-all duration-500"
                 style={{ height: `${intensity}%` }}
               />
             </div>
@@ -137,7 +137,7 @@ const RenderOutputDevice: React.FC<Props> = ({ selectedDevice, energyData, fanRo
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute w-2 h-2 bg-gray-300 rounded-full animate-bounce opacity-60"
+                  className="absolute w-2 h-2 bg-accent rounded-full animate-bounce opacity-60"
                   style={{
                     left: `${i * 8 - 8}px`,
                     animationDelay: `${i * 0.3}s`,

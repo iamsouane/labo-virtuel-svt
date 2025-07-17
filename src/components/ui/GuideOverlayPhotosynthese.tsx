@@ -1,5 +1,5 @@
-// src/components/ui/GuideOverlayPhotosynthese.tsx
-import React, { useState } from "react"
+//src/components/ui/GuideOverlayPhotosynthese.tsx
+import React, { useState } from "react";
 import {
   Gamepad2,
   Keyboard,
@@ -9,34 +9,38 @@ import {
   LeafyGreen,
   Droplets,
   BarChart,
-} from "lucide-react"
+} from "lucide-react";
 
 interface GuideOverlayProps {
-  onClose: () => void
+  onClose: () => void;
 }
 
 const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState<'guide' | 'faq'>('guide')
+  const [activeTab, setActiveTab] = useState<'guide' | 'faq'>('guide');
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-blue-500 p-6">
+    <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4 font-sans">
+      <div className="bg-light rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative border-2 border-accent p-6">
 
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl font-bold"
+          className="absolute top-3 right-3 text-dark hover:text-secondary text-xl font-bold"
           aria-label="Fermer le guide"
           title="Fermer le guide"
         >
           ✕
         </button>
 
-        {/* Tab selector */}
-        <div className="flex border-b border-gray-200 mb-6">
+        {/* Tabs */}
+        <div className="flex border-b border-accent mb-6">
           <button
             onClick={() => setActiveTab('guide')}
-            className={`px-4 py-2 font-medium ${activeTab === 'guide' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 font-semibold font-heading ${
+              activeTab === 'guide'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-dark hover:text-secondary'
+            }`}
           >
             <span className="flex items-center gap-2">
               <Gamepad2 className="w-4 h-4" />
@@ -45,7 +49,11 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
           </button>
           <button
             onClick={() => setActiveTab('faq')}
-            className={`px-4 py-2 font-medium ${activeTab === 'faq' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 font-semibold font-heading ${
+              activeTab === 'faq'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-dark hover:text-secondary'
+            }`}
           >
             <span className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4" />
@@ -56,140 +64,142 @@ const GuideOverlayPhotosynthese: React.FC<GuideOverlayProps> = ({ onClose }) => 
 
         {activeTab === 'guide' ? (
           <>
-            {/* Main title */}
-            <h3 className="text-xl font-bold mb-8 text-gray-800 flex items-center justify-center gap-2">
-              <LeafyGreen className="w-6 h-6 text-blue-600" />
+            <h3 className="text-2xl font-bold mb-8 text-primary flex items-center justify-center gap-2 font-heading">
+              <LeafyGreen className="w-6 h-6 text-primary" />
               Guide d'utilisation rapide - Photosynthèse
             </h3>
 
-            {/* Content grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700 leading-relaxed">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-dark leading-relaxed">
 
-              {/* Block: 3D Navigation */}
+              {/* Navigation 3D */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                  <MousePointerClick className="w-4 h-4 text-gray-700" />
+                <h4 className="font-semibold text-dark flex items-center gap-2 font-heading">
+                  <MousePointerClick className="w-4 h-4 text-dark" />
                   Navigation 3D
                 </h4>
-                <ul className="list-disc list-outside pl-4 text-sm text-gray-700 space-y-1">
-                  <li>
-                    <span className="ml-[-100px]">
-                      <span className="font-semibold">Clic + glisser :</span> Rotation
-                    </span>
-                  </li>
-                  <li>
-                    <span className="ml-[-145px]">
-                      <span className="font-semibold">Molette :</span> Zoom
-                    </span>
-                  </li>
-                  <li>
-                    <span className="ml-[-110px]">
-                      <span className="font-semibold">Survol :</span> Informations
-                    </span>
-                  </li>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>Clic + glisser :</strong> Rotation</li>
+                  <li><strong>Molette :</strong> Zoom</li>
+                  <li><strong>Survol :</strong> Informations</li>
                 </ul>
               </div>
 
-              {/* Block: Keyboard shortcuts */}
+              {/* Raccourcis */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                  <Keyboard className="w-4 h-4 text-gray-700" />
+                <h4 className="font-semibold text-dark flex items-center gap-2 font-heading">
+                  <Keyboard className="w-4 h-4 text-dark" />
                   Raccourcis
                 </h4>
-                <ul className="list-disc list-outside pl-4 space-y-1 text-gray-700 text-sm">
-                  <li><span className="ml-[-120px]"><strong>Espace :</strong> Play/Pause</span></li>
-                  <li><span className="ml-[-150px]"><strong>R :</strong> Réinitialiser</span></li>
-                  <li><span className="ml-[-190px]"><strong>H :</strong> Aide</span></li>
-                  <li><span className="ml-[-170px]"><strong>T :</strong> Tutoriel</span></li>
-                  <li><span className="ml-[-185px]"><strong>Q :</strong> Quiz</span></li>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>Espace :</strong> Play/Pause</li>
+                  <li><strong>R :</strong> Réinitialiser</li>
+                  <li><strong>H :</strong> Aide</li>
+                  <li><strong>T :</strong> Tutoriel</li>
+                  <li><strong>Q :</strong> Quiz</li>
                 </ul>
               </div>
 
-              {/* Block: Tips */}
+              {/* Conseils */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-yellow-500" />
+                <h4 className="font-semibold text-dark flex items-center gap-2 font-heading">
+                  <Lightbulb className="w-4 h-4 text-dark" />
                   Conseils
                 </h4>
-                <ul className="list-disc list-outside pl-4 space-y-1 text-gray-700 text-sm">
-                  <li><span className="ml-[-6px]">Utilisez les presets pour gagner du temps</span></li>
-                  <li><span className="ml-[-50px]">Visez la zone optimale d'efficacité</span></li>
-                  <li><span className="ml-[-35px]">Observez l'évolution des indicateurs</span></li>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Utilisez les presets pour gagner du temps</li>
+                  <li>Visez la zone optimale d'efficacité</li>
+                  <li>Observez l'évolution des indicateurs</li>
                 </ul>
               </div>
             </div>
           </>
         ) : (
           <div className="space-y-6">
-            {/* FAQ Sections */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Sun className="w-5 h-5 text-blue-600" />
+
+            {/* FAQ Block */}
+            <div className="bg-light rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2 font-heading">
+                <Sun className="w-5 h-5" />
                 Utilisation Générale
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Comment utiliser la simulation ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Ajustez l'intensité lumineuse, la concentration en CO₂ et la température pour observer leur impact sur le taux de photosynthèse.</p>
+                  <p className="font-medium text-dark">Comment utiliser la simulation ?</p>
+                  <p className="text-sm text-dark/80 mt-1 pl-4">
+                    Ajustez l'intensité lumineuse, la concentration en CO₂ et la température pour observer leur impact.
+                  </p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Comment utiliser les presets ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Sélectionnez un environnement prédéfini (forêt, désert, serre) pour voir les conditions optimales pour chaque cas.</p>
+                  <p className="font-medium text-dark">Comment utiliser les presets ?</p>
+                  <p className="text-sm text-dark/80 mt-1 pl-4">
+                    Choisissez un environnement prédéfini (faible limunosité, hiver, serre chaude) pour tester différents contextes.
+                  </p>
                 </li>
               </ul>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <LeafyGreen className="w-5 h-5 text-blue-600" />
+            {/* FAQ Block */}
+            <div className="bg-light rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2 font-heading">
+                <LeafyGreen className="w-5 h-5" />
                 Facteurs Clés
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Qu'est-ce que le point de compensation ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Niveau de lumière où photosynthèse = respiration (environ 20-100 µmol/m²/s).</p>
+                  <p className="font-medium text-dark">Qu'est-ce que le point de compensation ?</p>
+                  <p className="text-sm text-dark/80 mt-1 pl-4">
+                    Niveau de lumière où photosynthèse = respiration (env. 20-100 µmol/m²/s).
+                  </p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Quel est l'impact de la température ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Optimum généralement entre 20-30°C pour les plantes C3, plus élevé pour les C4.</p>
+                  <p className="font-medium text-dark">Quel est l'impact de la température ?</p>
+                  <p className="text-sm text-dark/80 mt-1 pl-4">
+                    Optimum entre 20-30°C pour les plantes C3, plus pour les C4.
+                  </p>
                 </li>
               </ul>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Droplets className="w-5 h-5 text-blue-600" />
+            {/* Plantes et environnement */}
+            <div className="bg-light rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2 font-heading">
+                <Droplets className="w-5 h-5" />
                 Plantes et Environnements
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <p className="font-medium text-gray-700">Différence C3/C4/CAM ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">C3: climat tempéré, C4: chaud/ensoleillé, CAM: désertique (efficacité différente).</p>
+                  <p className="font-medium text-dark">Différence C3/C4/CAM ?</p>
+                  <p className="text-sm text-dark/80 mt-1 pl-4">
+                    C3: climat tempéré, C4: chaud/ensoleillé, CAM: désertique.
+                  </p>
                 </li>
                 <li>
-                  <p className="font-medium text-gray-700">Impact de l'eau ?</p>
-                  <p className="text-sm text-gray-600 mt-1 pl-4">Le stress hydrique ferme les stomates, limitant le CO₂ disponible.</p>
+                  <p className="font-medium text-dark">Impact de l'eau ?</p>
+                  <p className="text-sm text-dark/80 mt-1 pl-4">
+                    Le stress hydrique ferme les stomates, réduisant le CO₂ absorbé.
+                  </p>
                 </li>
               </ul>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+            {/* Données scientifiques */}
+            <div className="bg-accent/10 rounded-xl p-4 border border-accent">
+              <h4 className="font-semibold text-primary mb-2 flex items-center gap-2 font-heading">
                 <BarChart className="w-5 h-5" />
                 Données Scientifiques
               </h4>
-              <div className="text-sm text-blue-700 space-y-1">
+              <div className="text-sm text-primary space-y-1">
                 <p>• Sources : Recherches en physiologie végétale</p>
-                <p>• Intensité lumineuse optimale : 500-1000 µmol/m²/s</p>
-                <p>• CO₂ atmosphérique : 400-1000 ppm optimal</p>
-                <p>• Rendement quantique maximum : ~8-9 photons/CO₂ fixé</p>
+                <p>• Lumière optimale : 500-1000 µmol/m²/s</p>
+                <p>• CO₂ optimal : 400-1000 ppm</p>
+                <p>• Rendement quantique max : ~8-9 photons/CO₂</p>
               </div>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GuideOverlayPhotosynthese
+export default GuideOverlayPhotosynthese;

@@ -31,10 +31,10 @@ const EnvironmentControlCard = ({
 
   return (
     <div
-      className="bg-white p-5 rounded-xl shadow-lg border border-gray-100"
+      className="bg-white p-5 rounded-2xl shadow border border-gray-100"
       data-tutorial={tutorialId}
     >
-      {/* Label et Valeur alignés */}
+      {/* Label + Valeur */}
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
           {label}
@@ -44,7 +44,7 @@ const EnvironmentControlCard = ({
           <span className="text-xs">{unit}</span>
           <div
             className={`w-3 h-3 rounded-full ml-2 ${
-              isOptimal ? "bg-green-400" : "bg-red-400"
+              isOptimal ? "bg-green-500" : "bg-red-500"
             }`}
           />
         </div>
@@ -57,10 +57,10 @@ const EnvironmentControlCard = ({
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className={`w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-${color}`}
+        className={`w-full h-3 rounded-lg appearance-none cursor-pointer bg-${color}-200`}
       />
 
-      {/* Bornes + plage optimale */}
+      {/* Plage optimale */}
       <div className="flex justify-between text-xs text-gray-500 mt-2">
         <span>{min}{unit}</span>
         <span className="text-green-600 font-medium">
@@ -71,22 +71,22 @@ const EnvironmentControlCard = ({
 
       {/* Contrôles avancés */}
       {showAdvanced && (
-        <div className="mt-2 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <button
             onClick={() => onChange(Math.max(min, value - 5))}
-            className="px-2 py-1 bg-gray-200 rounded text-xs hover:bg-gray-300"
+            className="px-3 py-1 text-xs rounded-xl bg-gray-200 hover:bg-gray-300 transition shadow"
           >
             -5
           </button>
           <button
             onClick={() => onChange(Math.min(max, value + 5))}
-            className="px-2 py-1 bg-gray-200 rounded text-xs hover:bg-gray-300"
+            className="px-3 py-1 text-xs rounded-xl bg-gray-200 hover:bg-gray-300 transition shadow"
           >
             +5
           </button>
           <button
             onClick={() => onChange(Math.floor((optMin + optMax) / 2))}
-            className="px-2 py-1 bg-green-200 rounded text-xs hover:bg-green-300"
+            className="px-3 py-1 text-xs rounded-xl bg-gradient-to-r from-green-400 to-green-500 text-white hover:to-green-600 transition shadow"
           >
             Optimal
           </button>

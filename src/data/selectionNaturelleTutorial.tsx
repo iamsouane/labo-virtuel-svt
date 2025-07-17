@@ -14,7 +14,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 1,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <Rabbit size={20} /> Simulation de Sélection Naturelle
       </span>
     ),
@@ -32,7 +32,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 2,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <Thermometer size={20} /> Facteurs de l’Environnement
       </span>
     ),
@@ -50,7 +50,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 3,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <Dna size={20} /> Génétique et Hérédité
       </span>
     ),
@@ -68,7 +68,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 4,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <HeartPulse size={20} /> Survie et Reproduction
       </span>
     ),
@@ -86,7 +86,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 5,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <RefreshCw size={20} /> Expérimentez !
       </span>
     ),
@@ -103,7 +103,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 6,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <Search size={20} /> Mode Observation
       </span>
     ),
@@ -121,7 +121,7 @@ export const SELECTION_NATURELLE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 7,
     title: (
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 text-dark">
         <GraduationCap size={20} /> À vous de jouer !
       </span>
     ),

@@ -172,7 +172,7 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
         StatutIcon = CheckCircle;
         break;
       case "REJETE":
-        statutColor = "text-secondary";
+        statutColor = "text-red-600";
         StatutIcon = XCircle;
         break;
     }

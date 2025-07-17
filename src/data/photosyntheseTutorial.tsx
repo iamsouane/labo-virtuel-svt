@@ -1,4 +1,4 @@
-// src/data/photosyntheseTutorial.tsx
+// src/data/photosyntheseTutorial.ts
 import type { TutorialStep } from "../types/simulationPhotosyntheseTypes"
 import {
   Leaf,
@@ -15,8 +15,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 1,
     title: (
-      <span className="flex items-center gap-2">
-        <Leaf size={20} /> Laboratoire de photosynthèse !
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <Leaf size={20} />
+        Laboratoire de photosynthèse !
       </span>
     ),
     content:
@@ -33,8 +34,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 2,
     title: (
-      <span className="flex items-center gap-2">
-        <Microscope size={20} /> Votre espace expérimental 3D
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <Microscope size={20} />
+        Votre espace expérimental 3D
       </span>
     ),
     content:
@@ -51,8 +53,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 3,
     title: (
-      <span className="flex items-center gap-2">
-        <Settings size={20} /> Contrôles expérimentaux
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <Settings size={20} />
+        Contrôles expérimentaux
       </span>
     ),
     content:
@@ -69,8 +72,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 4,
     title: (
-      <span className="flex items-center gap-2">
-        <Sun size={20} /> Le rôle crucial de la lumière
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <Sun size={20} />
+        Le rôle crucial de la lumière
       </span>
     ),
     content:
@@ -89,8 +93,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 5,
     title: (
-      <span className="flex items-center gap-2">
-        <Cloud size={20} /> Le dioxyde de carbone (CO₂)
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <Cloud size={20} />
+        Le dioxyde de carbone (CO₂)
       </span>
     ),
     content:
@@ -107,8 +112,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 6,
     title: (
-      <span className="flex items-center gap-2">
-        <ThermometerSun size={20} /> L'impact de la température
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <ThermometerSun size={20} />
+        L'impact de la température
       </span>
     ),
     content:
@@ -125,8 +131,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 7,
     title: (
-      <span className="flex items-center gap-2">
-        <FlaskConical size={20} /> L'équation fondamentale
+      <span className="flex items-center gap-2 text-green-700 font-semibold">
+        <FlaskConical size={20} />
+        L'équation fondamentale
       </span>
     ),
     content:
@@ -143,8 +150,9 @@ export const PHOTOSYNTHESE_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 8,
     title: (
-      <span className="flex items-center gap-2">
-        <GraduationCap size={20} /> À vous d'expérimenter !
+      <span className="flex items-center gap-2 text-pgreen-700 font-semibold">
+        <GraduationCap size={20} />
+        À vous d'expérimenter !
       </span>
     ),
     content:

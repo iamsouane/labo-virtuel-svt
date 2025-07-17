@@ -11,8 +11,6 @@ import type {
 import { PHOTOSYNTHESE_TUTORIAL_STEPS } from "../../data/photosyntheseTutorial"
 import { TutorialOverlayPhotosynthese } from "../ui/TutorialOverlayPhotosynthese"
 import QuizOverlay from "../ui/QuizPhotosyntheseOverlay"
-import { ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
 import { notifySuccess, notifyInfo } from "../../lib/notifications"
 import { usePhotosyntheseShortcuts } from "../../hooks/usePhotosyntheseShortcuts"
 import GuideOverlayPhotosynthese from "../ui/GuideOverlayPhotosynthese"
@@ -75,7 +73,7 @@ const SimulationPhotosynthese = () => {
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [, setQuizResult] = useState<QuizResult | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [simulationCode] = useState("photosynthese") // code fixe ici
+  const [simulationCode] = useState("photosynthese")
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([])
 
   const [resetKey, setResetKey] = useState(0)
@@ -240,28 +238,31 @@ const SimulationPhotosynthese = () => {
   })
 
   if (!isLoaded) {
-    return (
-      <section
-        id="photosynthese"
-        className="py-20 px-6 bg-gray-50 max-w-7xl mx-auto text-center rounded-xl shadow-lg"
-      >
-        <h2 className="text-3xl font-semibold mb-6 text-gray-800">
-          Expérience sur la photosynthèse
-        </h2>
-        <div className="flex items-center justify-center h-96 bg-gradient-to-br from-green-50 via-blue-50 to-green-100 rounded-lg">
-          <div className="text-center">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200 border-t-green-600 mx-auto mb-4"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Leaf size={32} className="text-green-600" />
-              </div>
+  return (
+    <section
+      id="photosynthese"
+      className="py-20 px-6 bg-light max-w-5xl mx-auto text-center rounded-2xl shadow-xl border border-accent font-sans"
+    >
+      <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+        Chargement de l’expérience
+      </h2>
+
+      <div className="flex items-center justify-center h-80 bg-accent/20 rounded-xl">
+        <div className="text-center space-y-4">
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="animate-spin rounded-full h-full w-full border-4 border-accent border-t-primary"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Leaf size={28} className="text-primary" />
             </div>
-            <p className="text-gray-700 font-medium">Préparation du laboratoire...</p>
           </div>
+          <p className="text-sm text-dark font-medium">
+            Préparation du laboratoire virtuel...
+          </p>
         </div>
-      </section>
-    )
-  }
+      </div>
+    </section>
+  );
+}
 
   return (
     <FullscreenContainer className="bg-gray-50 py-20 px-6 text-center rounded-xl shadow-lg">
@@ -295,107 +296,114 @@ const SimulationPhotosynthese = () => {
       {/* Aide contextuelle */}
       {showHelp && <GuideOverlayPhotosynthese onClose={() => setShowHelp(false)} />}
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-semibold text-gray-800">
-          Expérience sur la photosynthèse
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h2 className="text-3xl font-bold text-green-700">
+          Expérience sur la Photosynthèse
         </h2>
-        <div className="flex gap-2">
+
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={startTutorial}
-            className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center justify-center"
+            className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow transition"
             title="Tutoriel (T)"
             aria-label="Tutoriel"
           >
             <GraduationCap className="w-5 h-5" />
           </button>
+
           <button
             onClick={startQuiz}
-            className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex items-center justify-center"
+            className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow transition"
             title="Quiz (Q)"
             aria-label="Quiz"
           >
             <Brain className="w-5 h-5" />
           </button>
+
           <button
             onClick={() => setShowHelp(true)}
-            className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
+            className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow transition"
             title="Aide (H)"
             aria-label="Aide"
           >
             <HelpCircle className="w-5 h-5" />
           </button>
+
           <FullscreenButton className="ml-2" />
         </div>
       </div>
 
       {/* Statut de l'environnement */}
-      <div
-        className="mb-6"
-        data-tutorial="env-status"
-      >
+      <div className="mb-6" data-tutorial="env-status">
         <div
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium ${
-            envStatus.color === "green"
-              ? "bg-green-500"
+          className={`
+      inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl font-semibold text-white shadow transition
+      ${envStatus.color === "green"
+              ? "bg-green-600"
               : envStatus.color === "yellow"
-              ? "bg-yellow-500"
-              : "bg-red-500"
-          }`}
+                ? "bg-yellow-500"
+                : "bg-red-600"
+            }
+    `}
         >
           <span>{envStatus.icon}</span>
-          <span>Conditions: {envStatus.status}</span>
+          <span>Conditions : {envStatus.status}</span>
         </div>
       </div>
 
       {/* Contrôles principaux */}
       <div
-        className="mb-6 flex flex-wrap justify-center gap-4"
+        className="mb-8 flex flex-wrap justify-center gap-4"
         data-tutorial="controls"
       >
         <button
           onClick={() => setIsRunning(!isRunning)}
-          className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center ${
-            isRunning
-              ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
-              : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-          }`}
+          className={`
+      px-6 py-3 rounded-2xl font-semibold shadow-lg transition-all transform hover:scale-105 flex items-center gap-2
+      ${isRunning
+              ? "bg-gradient-to-r from-red-500 to-red-600 hover:to-red-700 text-white"
+              : "bg-gradient-to-r from-green-500 to-green-600 hover:to-green-700 text-white"
+            }
+    `}
           aria-label={isRunning ? "Pause" : "Démarrer"}
         >
-          {isRunning ? <Pause size={24} /> : <Play size={24} />}
-          <span className="ml-2">{isRunning ? "Pause" : "Démarrer"}</span>
+          {isRunning ? <Pause size={20} /> : <Play size={20} />}
+          <span>{isRunning ? "Pause" : "Démarrer"}</span>
         </button>
 
         <button
           onClick={resetSimulation}
-          className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center justify-center"
+          className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:to-gray-700 text-white rounded-2xl font-semibold shadow-lg transition-all transform hover:scale-105 flex items-center gap-2"
           aria-label="Réinitialiser la simulation"
         >
-          <RotateCw className="w-5 h-5 mr-2" />
+          <RotateCw className="w-5 h-5" />
           Reset
         </button>
+
         <div
-          className="px-6 py-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl shadow-lg"
+          className="px-6 py-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl shadow"
           data-tutorial="timer"
         >
-          <span className="font-bold text-blue-800 flex items-center gap-1">
+          <span className="font-bold text-blue-800 flex items-center gap-2">
             <Clock size={20} />
             {formatTime(timeElapsed)}
           </span>
         </div>
+
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg flex items-center justify-center"
+          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg transition-all flex items-center gap-2"
           data-tutorial="advanced-btn"
           aria-label={showAdvanced ? "Mode Simple" : "Mode Avancé"}
         >
-          <Settings className="w-5 h-5 mr-2" />
-          {showAdvanced ? "Simple" : "Avancé"}
+          <Settings className="w-5 h-5" />
+          {showAdvanced ? "Mode Simple" : "Mode Avancé"}
         </button>
       </div>
 
       {/* Presets */}
-      <div className="mb-6" data-tutorial="presets">
-        <h3 className="text-lg font-semibold mb-3 flex items-center justify-center gap-2">
+      <div className="mb-8" data-tutorial="presets">
+        <h3 className="text-xl font-semibold text-center text-gray-800 mb-4 flex items-center justify-center gap-2">
           <Target size={20} />
           Scénarios prédéfinis
         </h3>
@@ -405,32 +413,28 @@ const SimulationPhotosynthese = () => {
             <button
               key={preset.name}
               onClick={() => applyPreset(preset)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${
-                selectedPreset === preset.name
-                  ? `bg-${preset.color}-500 text-white shadow-lg`
-                  : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
-              }`}
+              className={`px-4 py-2 rounded-2xl font-medium transition transform hover:scale-105 shadow ${selectedPreset === preset.name
+                ? `bg-${preset.color}-600 text-white`
+                : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
+                }`}
               title={preset.description}
               data-tutorial={
                 preset.name === "Conditions Optimales" ? "preset-optimal" : undefined
               }
             >
-              <div className="flex items-center gap-2">
-                {preset.icon}
-                <span>{preset.name}</span>
-              </div>
+              <div className="flex items-center gap-2">{preset.icon}<span>{preset.name}</span></div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Contrôles environnementaux */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
         {[
           {
             key: "lightIntensity",
             label: (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-2">
                 <SunMedium size={18} /> Intensité Lumineuse
               </span>
             ),
@@ -444,7 +448,7 @@ const SimulationPhotosynthese = () => {
           {
             key: "co2Level",
             label: (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-2">
                 <CloudDrizzle size={18} /> Niveau CO₂
               </span>
             ),
@@ -458,7 +462,7 @@ const SimulationPhotosynthese = () => {
           {
             key: "temperature",
             label: (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-2">
                 <ThermometerSun size={18} /> Température
               </span>
             ),
@@ -472,7 +476,7 @@ const SimulationPhotosynthese = () => {
           {
             key: "humidity",
             label: (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-2">
                 <Droplets size={18} /> Humidité
               </span>
             ),
@@ -484,7 +488,7 @@ const SimulationPhotosynthese = () => {
             tutorial: "humidity-control",
           },
         ].map(({ key, label, unit, min, max, color, optimal, tutorial }) => {
-          const value = environment[key as keyof LabEnvironment]
+          const value = environment[key as keyof LabEnvironment];
           return (
             <EnvironmentControlCard
               key={key}
@@ -501,15 +505,14 @@ const SimulationPhotosynthese = () => {
               }
               tutorialId={tutorial}
             />
-          )
+          );
         })}
       </div>
 
       {/* Scène 3D */}
       <div
-        className={`rounded-xl border-2 border-gray-200 overflow-hidden bg-gradient-to-br from-blue-50 via-green-50 to-blue-100 mb-8 shadow-xl ${
-          isFullscreen ? "h-[calc(100vh-300px)]" : "h-[500px]"
-        }`}
+        className={`rounded-xl border-2 border-gray-200 overflow-hidden bg-gradient-to-br from-blue-50 via-green-50 to-blue-100 mb-8 shadow-xl ${isFullscreen ? "h-[calc(100vh-300px)]" : "h-[500px]"
+          }`}
         data-tutorial="canvas"
       >
         <Canvas camera={{ position: [0, 2, 6], fov: 60 }}>
@@ -527,7 +530,7 @@ const SimulationPhotosynthese = () => {
       <PhotosyntheseInfos />
 
       <p
-        className="mt-8 text-gray-700 max-w-3xl mx-auto leading-relaxed text-center"
+        className="mt-8 text-dark max-w-3xl mx-auto leading-relaxed text-center font-sans"
         data-tutorial="completion"
       >
         Cette simulation interactive vous permet d'expérimenter avec les facteurs qui influencent la photosynthèse.
@@ -537,7 +540,7 @@ const SimulationPhotosynthese = () => {
             Cliquez sur le bouton
             <button
               onClick={startTutorial}
-              className="inline-flex items-center gap-1 px-2 py-1 ml-2 mr-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition"
+              className="inline-flex items-center gap-1 px-2 py-1 ml-2 mr-2 bg-primary text-light text-sm font-medium rounded-md hover:bg-primary/90 transition"
               title="Lancer le tutoriel (T)"
             >
               <GraduationCap className="w-4 h-4" />
@@ -546,20 +549,6 @@ const SimulationPhotosynthese = () => {
           </>
         )}
       </p>
-
-      {/* Toastify notifications */}
-      <ToastContainer
-        position="top-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
     </FullscreenContainer>
   )
 }

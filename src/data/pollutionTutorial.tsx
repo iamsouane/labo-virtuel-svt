@@ -1,5 +1,5 @@
 // src/data/pollutionTutorial.ts
-import type { TutorialStep } from "../types/simulationPollutionTypes";
+import type { TutorialStep } from "../types/simulationPollutionTypes"
 import {
   CloudDrizzle,
   Car,
@@ -8,22 +8,23 @@ import {
   Leaf,
   HeartPulse,
   GraduationCap,
-} from "lucide-react";
+} from "lucide-react"
 
 export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 1,
     title: (
-      <span className="flex items-center gap-2">
-        <CloudDrizzle size={20} /> Bienvenue
+      <span className="flex items-center gap-2 text-dark">
+        <CloudDrizzle className="text-primary" size={20} />
+        Bienvenue
       </span>
     ),
     content:
-      "Cette simulation vous permet d'explorer les causes et effets de la pollution atmosphérique. Vous pouvez ajuster les sources polluantes et observer leur impact en temps réel.",
+      "Bienvenue dans la simulation sur la pollution de l'air.\n\nVous allez découvrir comment les transports et les industries influencent la qualité de l'air, et comment certaines actions peuvent réduire ces effets.",
     tips: [
-      "Utilisez les contrôles pour modifier le nombre de voitures ou d'industries",
-      "Observez les changements dans l'atmosphère et les données",
-      "Testez différentes solutions pour réduire la pollution",
+      "Utilisez les curseurs pour modifier les sources de pollution",
+      "Observez les indicateurs et leur évolution",
+      "Appliquez différentes solutions pour améliorer l'air",
     ],
     position: "center",
     autoAdvance: 7000,
@@ -32,16 +33,17 @@ export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 2,
     title: (
-      <span className="flex items-center gap-2">
-        <Car size={20} /> Sources de Pollution : Transport
+      <span className="flex items-center gap-2 text-dark">
+        <Car className="text-primary" size={20} />
+        Transports et pollution
       </span>
     ),
     content:
-      "Le transport routier est une source majeure de pollution urbaine. Chaque voiture émet environ 120g de CO₂/km, plus du NOx et des PM2.5.",
+      "Les véhicules à moteur thermique émettent du dioxyde de carbone (CO₂), des oxydes d'azote (NOx) et des particules fines (PM2.5).\n\nChaque voiture rejette en moyenne 120g de CO₂/km parcouru.",
     tips: [
-      "Une voiture émet ~32 ppm de CO₂ par jour",
-      "Les NOx causent l'asthme et les pluies acides",
-      "Les PM2.5 pénètrent dans le sang et causent des maladies",
+      "Une voiture émet ~32 ppm de CO₂/jour",
+      "Le NOx aggrave les problèmes respiratoires",
+      "Les PM2.5 pénètrent dans le sang",
     ],
     target: "car-control",
     position: "top",
@@ -50,16 +52,17 @@ export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 3,
     title: (
-      <span className="flex items-center gap-2">
-        <Factory size={20} /> Sources de Pollution : Industrie
+      <span className="flex items-center gap-2 text-dark">
+        <Factory className="text-primary" size={20} />
+        Industries polluantes
       </span>
     ),
     content:
-      "Les industries émettent des quantités massives de CO₂, NOx et particules. Une usine moyenne produit autant de CO₂ que 400 voitures.",
+      "Les usines émettent beaucoup de CO₂, de NOx et de particules.\n\nUne usine peut produire autant de CO₂ que 400 voitures !",
     tips: [
-      "Une industrie émet ~85 ppm de CO₂ par jour",
-      "Impact 3x supérieur à celui d’une voiture",
-      "Les filtres industriels réduisent jusqu’à 80% des émissions",
+      "Émission moyenne : 85 ppm de CO₂/jour",
+      "Impact 3× plus élevé qu’une voiture",
+      "Les filtres peuvent réduire 80% des émissions",
     ],
     target: "industry-control",
     position: "top",
@@ -68,16 +71,17 @@ export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 4,
     title: (
-      <span className="flex items-center gap-2">
-        <CircleAlert size={20} /> Comprendre les Polluants
+      <span className="flex items-center gap-2 text-dark">
+        <CircleAlert className="text-primary" size={20} />
+        Comprendre les polluants
       </span>
     ),
     content:
-      "Quatre indicateurs mesurent la qualité de l'air :\n- CO₂ (effet de serre)\n- NOx (toxique respiratoire)\n- PM2.5 (particules fines)\n- AQI (indice global 0-500).",
+      "La qualité de l’air est mesurée par plusieurs indicateurs :\n\n- CO₂ : gaz à effet de serre\n- NOx : toxique pour le système respiratoire\n- PM2.5 : fines particules cancérigènes\n- AQI : indice global de 0 à 500",
     tips: [
-      "CO₂ normal: 350-420 ppm, dangereux > 500 ppm",
-      "NOx seuil OMS : 40 µg/m³, toxique > 100 µg/m³",
-      "PM2.5 seuil OMS : 15 µg/m³, cancérigène > 50 µg/m³",
+      "CO₂ acceptable : 350–420 ppm",
+      "NOx dangereux > 100 µg/m³",
+      "PM2.5 cancérigènes > 50 µg/m³",
     ],
     target: "pollution-indicators",
     position: "bottom",
@@ -86,15 +90,16 @@ export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 5,
     title: (
-      <span className="flex items-center gap-2">
-        <Leaf size={20} /> Solutions Anti-Pollution
+      <span className="flex items-center gap-2 text-dark">
+        <Leaf className="text-primary" size={20} />
+        Solutions efficaces
       </span>
     ),
     content:
-      "Des solutions existent : véhicules électriques, filtres industriels, pistes cyclables, énergies renouvelables, arbres. Chacune réduit la pollution de façon mesurable.",
+      "Plusieurs actions permettent de réduire la pollution :\n\nVoitures électriques, filtres industriels, pistes cyclables, panneaux solaires, plantation d’arbres.\n\nCes solutions réduisent l’AQI et améliorent la santé.",
     tips: [
-      "Voitures électriques : -20% d’émissions",
-      "Filtres industriels : -25% d’émissions",
+      "Voiture électrique : -20% d’émissions",
+      "Filtre industriel : -25% d’émissions",
       "Les arbres absorbent naturellement le CO₂",
     ],
     target: "solutions-panel",
@@ -104,16 +109,17 @@ export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 6,
     title: (
-      <span className="flex items-center gap-2">
-        <HeartPulse size={20} /> Impact sur la Santé
+      <span className="flex items-center gap-2 text-dark">
+        <HeartPulse className="text-primary" size={20} />
+        Effets sur la santé
       </span>
     ),
     content:
-      "La pollution cause 7 millions de morts prématurées par an. L'AQI indique le niveau de danger : Bon (0-50), Modéré (51-100), Mauvais (101-150), Dangereux (200+).",
+      "La pollution atmosphérique cause 7 millions de décès prématurés chaque année.\n\nL’AQI vous informe sur le niveau de danger :\n- Bon : 0–50\n- Modéré : 51–100\n- Mauvais : 101–150\n- Dangereux : 200+",
     tips: [
-      "AQI > 100 : éviter le sport extérieur",
-      "AQI > 150 : porter un masque",
-      "AQI > 200 : rester à l'intérieur",
+      "AQI > 100 : évitez les efforts physiques",
+      "AQI > 150 : portez un masque",
+      "AQI > 200 : restez à l’intérieur",
     ],
     target: "health-info",
     position: "bottom",
@@ -122,17 +128,18 @@ export const POLLUTION_TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 7,
     title: (
-      <span className="flex items-center gap-2">
-        <GraduationCap size={20} /> À vous de jouer !
+      <span className="flex items-center gap-2 text-dark">
+        <GraduationCap className="text-primary" size={20} />
+        À vous de jouer !
       </span>
     ),
     content:
-      "Expérimentez avec les réglages et trouvez les solutions les plus efficaces. Observez les impacts sur l'air et la santé.",
+      "C’est à vous de tester les réglages :\n\nChangez les sources de pollution, appliquez les solutions et observez les résultats.\n\nVotre objectif : un AQI inférieur à 50 !",
     tips: [
-      "Essayez différentes combinaisons de sources et solutions",
-      "Analysez les résultats via les indicateurs",
-      "Optimisez pour atteindre un AQI inférieur à 50",
+      "Combinez les solutions pour plus d'efficacité",
+      "Analysez les indicateurs",
+      "Trouvez la configuration optimale",
     ],
     position: "center",
   },
-];
+]

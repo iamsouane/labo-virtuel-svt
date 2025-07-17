@@ -36,7 +36,7 @@ export const Button = ({
     <button
       className={`
         rounded-2xl font-semibold transition-all duration-200
-        focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-primary/60
+        focus:outline-none focus:ring-offset-2 focus:ring-primary/60
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantClasses} ${sizeClasses} ${className || ""}
       `}

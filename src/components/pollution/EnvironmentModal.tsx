@@ -68,7 +68,7 @@ export default function EnvironmentModal({
       icon: <Cloud size={18} />,
       unit: "ppm",
       value: pollutionData.co2,
-      color: "bg-gray-100 text-gray-700 border-gray-300",
+      color: "bg-light text-dark border-accent",
     },
     {
       key: "nox",
@@ -76,7 +76,7 @@ export default function EnvironmentModal({
       icon: <AlertCircle size={18} />,
       unit: "µg/m³",
       value: pollutionData.nox,
-      color: "bg-orange-100 text-orange-800 border-orange-300",
+      color: "bg-secondary/10 text-secondary border-secondary/30",
     },
     {
       key: "pm25",
@@ -92,23 +92,18 @@ export default function EnvironmentModal({
       icon: <Thermometer size={18} />,
       unit: "",
       value: pollutionData.aqi,
-      color:
-        aqiStatus.color === "green"
-          ? "bg-green-100 text-green-800 border-green-300"
-          : aqiStatus.color === "yellow"
-            ? "bg-yellow-100 text-yellow-800 border-yellow-300"
-            : "bg-red-100 text-red-800 border-red-300",
+      color: `${aqiStatus.color} ${aqiStatus.textColor} border-accent`,
     },
-  ];
+  ]
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Analyse de la qualité de l’air">
       {!showResults ? (
-        <div className="flex flex-col items-center justify-center h-48 text-lg text-gray-700 animate-pulse">
+        <div className="flex flex-col items-center justify-center h-48 text-lg text-dark animate-pulse">
           <div className="mb-4 text-3xl">
-              <Microscope className="w-16 h-16 text-blue-600" />
+            <Microscope className="w-16 h-16 text-primary" />
           </div>
-          <p className="font-semibold">Analyse en cours...</p>
+          <p className="font-semibold text-dark">Analyse en cours...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -117,18 +112,20 @@ export default function EnvironmentModal({
               key={key}
               className={`p-4 border rounded-xl shadow-sm flex flex-col items-center text-center ${color}`}
             >
-              <div className="flex items-center gap-2 text-sm font-medium mb-1">
+              <div className="flex items-center gap-2 text-sm font-semibold mb-1">
                 {icon}
                 <span>{label}</span>
               </div>
               <div className="text-2xl font-bold mb-2">
                 {value} {unit}
               </div>
-              <p className="text-sm text-gray-600">{getExplanation(key, value)}</p>
+              <p className="text-sm text-dark/70 leading-snug">
+                {getExplanation(key, value)}
+              </p>
             </div>
           ))}
         </div>
       )}
     </Modal>
-  );
+  )
 }
