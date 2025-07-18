@@ -1,18 +1,18 @@
-//src/data/presetsPhotosynthese
-import type { Preset } from "../types/simulationPhotosyntheseTypes"
+// src/data/presetsPhotosynthese.ts
+import type { Preset } from "../types/simulationPhotosyntheseTypes";
 import {
   Sparkles,
   CloudSun,
   ThermometerSun,
   Snowflake,
-} from "lucide-react"
+} from "lucide-react";
 
 export const PRESETS: Preset[] = [
   {
     id: "preset1",
     name: "Conditions Optimales",
     description: "Lumière forte, CO₂ élevé, température idéale",
-    icon: <Sparkles className="w-4 h-4" />,
+    icon: <Sparkles className="w-5 h-5 text-green-600" />, 
     environment: { 
       lightIntensity: 85, 
       co2Level: 60, 
@@ -26,7 +26,7 @@ export const PRESETS: Preset[] = [
     id: "preset2",
     name: "Faible Luminosité",
     description: "Simulation d'un jour nuageux",
-    icon: <CloudSun className="w-4 h-4" />,
+    icon: <CloudSun className="w-5 h-5 text-gray-600" />,  // gris plus marqué
     environment: { 
       lightIntensity: 30, 
       co2Level: 40, 
@@ -40,7 +40,7 @@ export const PRESETS: Preset[] = [
     id: "preset3",
     name: "Serre Chaude",
     description: "Température élevée, humidité forte",
-    icon: <ThermometerSun className="w-4 h-4" />,
+    icon: <ThermometerSun className="w-5 h-5 text-red-600" />, // rouge vif
     environment: { 
       lightIntensity: 70, 
       co2Level: 50, 
@@ -54,7 +54,7 @@ export const PRESETS: Preset[] = [
     id: "preset4",
     name: "Hiver",
     description: "Conditions hivernales difficiles",
-    icon: <Snowflake className="w-4 h-4" />,
+    icon: <Snowflake className="w-5 h-5 text-blue-600" />,  // bleu vif
     environment: { 
       lightIntensity: 25, 
       co2Level: 30, 
@@ -64,4 +64,4 @@ export const PRESETS: Preset[] = [
     },
     color: "blue",
   },
-]
+];

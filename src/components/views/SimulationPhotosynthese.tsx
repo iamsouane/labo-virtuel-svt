@@ -238,31 +238,31 @@ const SimulationPhotosynthese = () => {
   })
 
   if (!isLoaded) {
-  return (
-    <section
-      id="photosynthese"
-      className="py-20 px-6 bg-light max-w-5xl mx-auto text-center rounded-2xl shadow-xl border border-accent font-sans"
-    >
-      <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-        Chargement de l’expérience
-      </h2>
+    return (
+      <section
+        id="photosynthese"
+        className="py-20 px-6 bg-light max-w-5xl mx-auto text-center rounded-2xl shadow-xl border border-accent font-sans"
+      >
+        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+          Chargement de l’expérience
+        </h2>
 
-      <div className="flex items-center justify-center h-80 bg-accent/20 rounded-xl">
-        <div className="text-center space-y-4">
-          <div className="relative w-16 h-16 mx-auto">
-            <div className="animate-spin rounded-full h-full w-full border-4 border-accent border-t-primary"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Leaf size={28} className="text-primary" />
+        <div className="flex items-center justify-center h-80 bg-accent/20 rounded-xl">
+          <div className="text-center space-y-4">
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="animate-spin rounded-full h-full w-full border-4 border-accent border-t-primary"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Leaf size={28} className="text-primary" />
+              </div>
             </div>
+            <p className="text-sm text-dark font-medium">
+              Préparation du laboratoire virtuel...
+            </p>
           </div>
-          <p className="text-sm text-dark font-medium">
-            Préparation du laboratoire virtuel...
-          </p>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
+    );
+  }
 
   return (
     <FullscreenContainer className="bg-gray-50 py-20 px-6 text-center rounded-xl shadow-lg">
@@ -337,17 +337,20 @@ const SimulationPhotosynthese = () => {
       <div className="mb-6" data-tutorial="env-status">
         <div
           className={`
-      inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl font-semibold text-white shadow transition
+      inline-flex items-center gap-3 px-6 py-3 rounded-3xl font-semibold text-white shadow-lg transition
       ${envStatus.color === "green"
-              ? "bg-green-600"
+              ? "bg-green-600 hover:bg-green-700"
               : envStatus.color === "yellow"
-                ? "bg-yellow-500"
-                : "bg-red-600"
+                ? "bg-yellow-500 hover:bg-yellow-600"
+                : "bg-red-600 hover:bg-red-700"
             }
+      select-none
     `}
+          role="status"
+          aria-live="polite"
         >
-          <span>{envStatus.icon}</span>
-          <span>Conditions : {envStatus.status}</span>
+          <span className="text-lg">{envStatus.icon}</span>
+          <span className="text-lg tracking-wide">{`Conditions : ${envStatus.status}`}</span>
         </div>
       </div>
 
@@ -359,10 +362,10 @@ const SimulationPhotosynthese = () => {
         <button
           onClick={() => setIsRunning(!isRunning)}
           className={`
-      px-6 py-3 rounded-2xl font-semibold shadow-lg transition-all transform hover:scale-105 flex items-center gap-2
+      px-6 py-3 rounded-2xl font-heading font-semibold shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2
       ${isRunning
-              ? "bg-gradient-to-r from-red-500 to-red-600 hover:to-red-700 text-white"
-              : "bg-gradient-to-r from-green-500 to-green-600 hover:to-green-700 text-white"
+              ? "bg-gradient-to-r from-red-600 to-red-700 hover:to-red-800 text-light"
+              : "bg-gradient-to-r from-primary to-primary/90 hover:to-primary/80 text-light"
             }
     `}
           aria-label={isRunning ? "Pause" : "Démarrer"}
@@ -373,7 +376,7 @@ const SimulationPhotosynthese = () => {
 
         <button
           onClick={resetSimulation}
-          className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:to-gray-700 text-white rounded-2xl font-semibold shadow-lg transition-all transform hover:scale-105 flex items-center gap-2"
+          className="px-6 py-3 bg-dark rounded-2xl font-heading font-semibold shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2 text-light hover:bg-gray-800"
           aria-label="Réinitialiser la simulation"
         >
           <RotateCw className="w-5 h-5" />
@@ -381,18 +384,16 @@ const SimulationPhotosynthese = () => {
         </button>
 
         <div
-          className="px-6 py-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl shadow"
+          className="px-6 py-3 bg-accent rounded-2xl shadow-md font-heading font-semibold text-primary flex items-center gap-2 select-none"
           data-tutorial="timer"
         >
-          <span className="font-bold text-blue-800 flex items-center gap-2">
-            <Clock size={20} />
-            {formatTime(timeElapsed)}
-          </span>
+          <Clock size={20} />
+          {formatTime(timeElapsed)}
         </div>
 
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg transition-all flex items-center gap-2"
+          className="px-6 py-3 bg-secondary rounded-2xl font-heading font-semibold shadow-lg transition-colors flex items-center gap-2 text-light hover:bg-secondary/90"
           data-tutorial="advanced-btn"
           aria-label={showAdvanced ? "Mode Simple" : "Mode Avancé"}
         >
@@ -403,7 +404,7 @@ const SimulationPhotosynthese = () => {
 
       {/* Presets */}
       <div className="mb-8" data-tutorial="presets">
-        <h3 className="text-xl font-semibold text-center text-gray-800 mb-4 flex items-center justify-center gap-2">
+        <h3 className="text-xl font-heading font-semibold text-primary text-center mb-4 flex items-center justify-center gap-2">
           <Target size={20} />
           Scénarios prédéfinis
         </h3>
@@ -413,16 +414,20 @@ const SimulationPhotosynthese = () => {
             <button
               key={preset.name}
               onClick={() => applyPreset(preset)}
-              className={`px-4 py-2 rounded-2xl font-medium transition transform hover:scale-105 shadow ${selectedPreset === preset.name
-                ? `bg-${preset.color}-600 text-white`
-                : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
+              className={`px-4 py-2 rounded-2xl font-heading font-medium transition-transform transform hover:scale-105 shadow-md
+          ${selectedPreset === preset.name
+                  ? `bg-${preset.color}-600 text-light shadow-lg`
+                  : `bg-${preset.color}-100 text-${preset.color}-700 hover:bg-${preset.color}-200`
                 }`}
               title={preset.description}
               data-tutorial={
                 preset.name === "Conditions Optimales" ? "preset-optimal" : undefined
               }
             >
-              <div className="flex items-center gap-2">{preset.icon}<span>{preset.name}</span></div>
+              <div className="flex items-center gap-2">
+                {preset.icon}
+                <span>{preset.name}</span>
+              </div>
             </button>
           ))}
         </div>
@@ -434,8 +439,9 @@ const SimulationPhotosynthese = () => {
           {
             key: "lightIntensity",
             label: (
-              <span className="flex items-center gap-2">
-                <SunMedium size={18} /> Intensité Lumineuse
+              <span className="flex items-center gap-2 text-yellow-700 font-heading font-semibold">
+                <SunMedium size={18} />
+                Intensité Lumineuse
               </span>
             ),
             unit: "%",
@@ -448,8 +454,9 @@ const SimulationPhotosynthese = () => {
           {
             key: "co2Level",
             label: (
-              <span className="flex items-center gap-2">
-                <CloudDrizzle size={18} /> Niveau CO₂
+              <span className="flex items-center gap-2 text-dark font-heading font-semibold">
+                <CloudDrizzle size={18} />
+                Niveau CO₂
               </span>
             ),
             unit: "%",
@@ -462,8 +469,9 @@ const SimulationPhotosynthese = () => {
           {
             key: "temperature",
             label: (
-              <span className="flex items-center gap-2">
-                <ThermometerSun size={18} /> Température
+              <span className="flex items-center gap-2 text-red-600 font-heading font-semibold">
+                <ThermometerSun size={18} />
+                Température
               </span>
             ),
             unit: "°C",
@@ -476,8 +484,9 @@ const SimulationPhotosynthese = () => {
           {
             key: "humidity",
             label: (
-              <span className="flex items-center gap-2">
-                <Droplets size={18} /> Humidité
+              <span className="flex items-center gap-2 text-blue-700 font-heading font-semibold">
+                <Droplets size={18} />
+                Humidité
               </span>
             ),
             unit: "%",

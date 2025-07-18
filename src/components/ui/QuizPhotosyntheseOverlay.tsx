@@ -20,6 +20,7 @@ import {
   ArrowRight,
 } from "lucide-react"
 import { saveQuizResult, transformLocalToQuizResult } from "../../lib/quizService"
+import { notifyError, notifySuccess } from "../../lib/notifications"
 
 interface QuizOverlayProps {
   questions: QuizQuestion[]
@@ -49,159 +50,161 @@ function QuizResults({
   const minutes = Math.floor(result.timeSpent / 60)
   const seconds = result.timeSpent % 60
 
-  const getScoreColor = (pct: number) => {
-    if (pct >= 80) return "text-green-600"
-    if (pct >= 60) return "text-yellow-600"
-    return "text-red-600"
-  }
-
   const getScoreMessage = (pct: number) => {
     if (pct >= 90) {
       return (
-        <span className="flex items-center gap-2 text-yellow-600">
-          <Trophy className="w-5 h-5" />
+        <span className="flex items-center gap-2 text-primary">
+          <Trophy className="w-5 h-5 text-primary" />
           Excellent ! Vous maîtrisez parfaitement la photosynthèse !
         </span>
-      )
+      );
     }
     if (pct >= 80) {
       return (
-        <span className="flex items-center gap-2 text-green-600">
-          <Star className="w-5 h-5" />
+        <span className="flex items-center gap-2 text-secondary">
+          <Star className="w-5 h-5 text-secondary" />
           Très bien ! Vous avez de bonnes connaissances.
         </span>
-      )
+      );
     }
     if (pct >= 60) {
       return (
-        <span className="flex items-center gap-2 text-blue-600">
-          <ThumbsUp className="w-5 h-5" />
+        <span className="flex items-center gap-2 text-dark">
+          <ThumbsUp className="w-5 h-5 text-dark" />
           Pas mal ! Quelques révisions seraient utiles.
         </span>
-      )
+      );
     }
     if (pct >= 40) {
       return (
-        <span className="flex items-center gap-2 text-orange-600">
-          <BookOpen className="w-5 h-5" />
+        <span className="flex items-center gap-2 text-orange-500">
+          <BookOpen className="w-5 h-5 text-orange-500" />
           Il faut réviser les bases de la photosynthèse.
         </span>
-      )
+      );
     }
     return (
-      <span className="flex items-center gap-2 text-red-600">
-        <RotateCcw className="w-5 h-5" />
+      <span className="flex items-center gap-2 text-red-500">
+        <RotateCcw className="w-5 h-5 text-red-500" />
         Recommencez après avoir revu le cours !
       </span>
-    )
-  }
+    );
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border-2 border-green-500">
+    <div className="fixed inset-0 z-50 bg-dark/50 flex items-center justify-center p-4">
+      <div className="bg-light rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border-2 border-primary">
         {/* Header résultats */}
-        <div className="p-6 border-b border-gray-200 text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2 flex justify-center items-center gap-2">
-            <Leaf className="w-7 h-7 text-green-600" />
+        <div className="p-6 border-b border-accent text-center bg-light rounded-t-xl">
+          <h2 className="text-3xl font-bold text-primary mb-2 flex justify-center items-center gap-2 font-heading">
+            <Leaf className="w-7 h-7 text-primary" />
             Résultats du Quiz Photosynthèse
           </h2>
-          <div className={`text-4xl font-bold mb-2 ${getScoreColor(percentage)}`}>
+          <div className={`text-4xl font-bold mb-2 text-primary`}>
             {result.score} / {result.totalQuestions}
           </div>
-          <div className={`text-xl font-semibold ${getScoreColor(percentage)}`}>{percentage}%</div>
-          <p className="text-gray-600 mt-2">
-            Temps: {minutes}m {seconds}s
+          <div className={`text-xl font-semibold text-secondary`}>{percentage}%</div>
+          <p className="text-dark/70 mt-2 text-sm font-medium">
+            Temps : {minutes}m {seconds}s
           </p>
         </div>
 
         {/* Message performance */}
         <div className="p-6 text-center">
-          <div className="bg-green-50 rounded-lg p-4 mb-6 border border-green-200 flex justify-center items-center min-h-[80px]">
-            <p className="text-green-800 font-medium">{getScoreMessage(percentage)}</p>
+          <div className="bg-accent/30 rounded-lg p-4 mb-6 border border-accent flex justify-center items-center min-h-[80px]">
+            <p className="text-primary font-medium">{getScoreMessage(percentage)}</p>
           </div>
 
           {/* Statistiques */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <div className="text-2xl font-bold text-green-600">{result.answers.filter((a) => a.correct).length}</div>
-              <div className="text-sm text-green-700">Réponses correctes</div>
+            <div className="bg-accent/50 p-4 rounded-lg border border-primary/30">
+              <div className="text-2xl font-bold text-primary">
+                {result.answers.filter((a) => a.correct).length}
+              </div>
+              <div className="text-sm text-dark font-medium">Réponses correctes</div>
             </div>
-            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-              <div className="text-2xl font-bold text-red-600">{result.answers.filter((a) => !a.correct).length}</div>
-              <div className="text-sm text-red-700">Réponses incorrectes</div>
+            <div className="bg-red-50 p-4 rounded-lg border border-red-300">
+              <div className="text-2xl font-bold text-secondary">
+                {result.answers.filter((a) => !a.correct).length}
+              </div>
+              <div className="text-sm text-secondary font-medium">Réponses incorrectes</div>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="bg-light p-4 rounded-lg border border-primary/20">
+              <div className="text-2xl font-bold text-primary">
                 {minutes}m{seconds}s
               </div>
-              <div className="text-sm text-blue-700">Temps total</div>
+              <div className="text-sm text-dark font-medium">Temps total</div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-              <div className="text-2xl font-bold text-purple-600">
+            <div className="bg-accent/20 p-4 rounded-lg border border-secondary/30">
+              <div className="text-2xl font-bold text-secondary">
                 {Math.round(result.timeSpent / result.totalQuestions)}s
               </div>
-              <div className="text-sm text-purple-700">Par question</div>
+              <div className="text-sm text-secondary font-medium">Par question</div>
             </div>
           </div>
         </div>
 
         {/* Révision détaillée */}
-        <div className="p-6 border-t border-gray-200">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Search className="w-5 h-5 text-gray-700" />
+        <div className="p-6 border-t border-accent/50">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-primary font-heading">
+            <Search className="w-5 h-5 text-primary" />
             Détail des réponses
           </h3>
           <div className="space-y-4 max-h-60 overflow-y-auto">
             {result.answers.map((answer, index) => {
-              const question = questions[index]
+              const question = questions[index];
               return (
                 <div
                   key={index}
-                  className={`p-3 rounded-lg border ${answer.correct ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+                  className={`p-3 rounded-lg border ${answer.correct
+                    ? "bg-accent/30 border-primary/50"
+                    : "bg-secondary/20 border-secondary/50"
                     }`}
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${answer.correct ? "bg-green-500" : "bg-red-500"
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${answer.correct ? "bg-primary" : "bg-secondary"
                         }`}
                     >
                       {answer.correct ? "✓" : "✗"}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-800 mb-1">
+                      <p className="font-medium text-dark mb-1 font-heading">
                         Q{index + 1}: {question.question}
                       </p>
-                      <p className="text-sm text-gray-600">Votre réponse: {question.options[answer.userAnswer]}</p>
+                      <p className="text-sm text-primary/80">
+                        Votre réponse: {question.options[answer.userAnswer]}
+                      </p>
                       {!answer.correct && (
-                        <p className="text-sm text-green-600 font-medium mt-1">
+                        <p className="text-sm text-primary font-medium mt-1">
                           <span className="font-semibold">Réponse correcte:</span> {question.reponse_correcte}
                         </p>
                       )}
-                      <p className="text-sm text-gray-700 mt-2 italic">{question.explication}</p>
+                      <p className="text-sm text-dark mt-2 italic font-sans">{question.explication}</p>
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
 
         {/* Actions */}
-        <div className="p-6 border-t border-gray-200 flex gap-4 justify-center">
+        <div className="p-6 border-t border-accent/50 flex gap-4 justify-center">
           <button
             onClick={onRestart}
-            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium flex items-center gap-2"
+            className="px-6 py-2 bg-primary text-light rounded-lg hover:bg-primary/90 transition-colors font-heading flex items-center gap-2 shadow-md"
             aria-label="Recommencer le quiz"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-5 h-5 text-light" />
             Recommencer
           </button>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-medium flex items-center gap-2"
+            className="px-6 py-2 bg-secondary text-light rounded-lg hover:bg-secondary/90 transition-colors font-heading flex items-center gap-2 shadow-md"
             aria-label="Terminer et fermer le quiz"
           >
-            <Check className="w-5 h-5" />
+            <Check className="w-5 h-5 text-light" />
             Terminer
           </button>
         </div>
@@ -296,9 +299,13 @@ export default function QuizOverlay({
 
       if (saveRes.success) {
         setQuizResult(quizResultToSave)
+          notifySuccess(`Quiz terminé ! Score: ${quizResultToSave.score}/${quizResultToSave.totalQuestions}`);
+
         setIsCompleted(true)
       } else {
         alert("Erreur lors de la sauvegarde du résultat.")
+          notifyError("Erreur lors de la sauvegarde du résultat.");
+
       }
       setIsSaving(false)
     }
@@ -413,8 +420,8 @@ export default function QuizOverlay({
                 key={index}
                 onClick={() => setLocalSelectedAnswer(index)}
                 className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${localSelectedAnswer === index
-                    ? "border-green-500 bg-green-50 text-green-800"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  ? "border-green-500 bg-green-50 text-green-800"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 aria-pressed={localSelectedAnswer === index}
               >
@@ -476,8 +483,8 @@ export default function QuizOverlay({
               onClick={handleNext}
               disabled={localSelectedAnswer === null || isSaving}
               className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${localSelectedAnswer !== null && !isSaving
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               aria-disabled={localSelectedAnswer === null || isSaving}
             >
