@@ -14,6 +14,7 @@ import {
   UserCircle,
   FileCheck,
   Menu,
+  Home,
 } from "lucide-react";
 import EtatDemandesSimulation from "../users/EtatDemandesSimulation";
 import CreateClasseForm from "../users/CreateClasseForm";
@@ -22,6 +23,7 @@ import CreateTPForm from "../users/CreateTPForm";
 import ListeDemandesAcces from "../users/ListeDemandesAcces";
 import ResultatsEleves from "../users/ResultatsEleves";
 import ProfilEditor from "../users/ProfilEditor";
+import AccueilProfesseur from "./AccueilProfesseur";
 
 interface DashboardProfesseurProps {
   user: Profil;
@@ -29,6 +31,7 @@ interface DashboardProfesseurProps {
 }
 
 type Section =
+  | "accueil"
   | "simulations"
   | "visualisations"
   | "classes"
@@ -41,7 +44,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   const [localUser, setLocalUser] = useState<Profil>(user);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [currentSection, setCurrentSection] = useState<Section>("simulations");
+  const [currentSection, setCurrentSection] = useState<Section>("accueil");
   const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -128,59 +131,61 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
 
   const renderContent = () => {
     switch (currentSection) {
+      case "accueil":
+        return <AccueilProfesseur />;
       case "simulations":
         return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-heading font-bold text-primary">Mes simulations</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-heading font-bold text-primary">Mes simulations</h2>
             <Simulations user={localUser} />
           </div>
         );
       case "visualisations":
         return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-heading font-bold text-primary">Visualisations interactives</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-heading font-bold text-primary">Visualisations interactives</h2>
             <Visualisations />
           </div>
         );
       case "classes":
         return (
-          <div className="space-y-8">
-            <h2 className="text-3xl font-heading font-bold text-primary">Mes classes</h2>
+          <div className="space-y-5">
+            <h2 className="text-2xl font-heading font-bold text-primary">Mes classes</h2>
             <CreateClasseForm user={localUser} onCreated={() => setCurrentSection("classes")} />
             <MesClasses user={localUser} />
           </div>
         );
       case "demandes":
         return (
-          <div className="space-y-12">
+          <div className="space-y-8">
             <section>
-              <h2 className="text-3xl font-heading font-bold text-primary mb-4">Mes demandes d'accès</h2>
+              <h2 className="text-2xl font-heading font-bold text-primary mb-2">Mes demandes d'accès</h2>
               <EtatDemandesSimulation user={localUser} />
             </section>
             <section>
-              <h2 className="text-3xl font-heading font-bold text-primary mb-4">Demandes des élèves</h2>
+              <h2 className="text-2xl font-heading font-bold text-primary mb-2">Demandes des élèves</h2>
               <ListeDemandesAcces user={localUser} />
             </section>
           </div>
         );
       case "tps":
         return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-heading font-bold text-primary">Créer un TP</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-heading font-bold text-primary">Créer un TP</h2>
             <CreateTPForm user={localUser} />
           </div>
         );
       case "resultats":
         return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-heading font-bold text-primary">Résultats des élèves</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-heading font-bold text-primary">Résultats des élèves</h2>
             <ResultatsEleves professeur={localUser} />
           </div>
         );
       case "profil":
         return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-heading font-bold text-primary">Mon profil</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-heading font-bold text-primary">Mon profil</h2>
             <ProfilEditor user={localUser} onUpdate={setLocalUser} />
           </div>
         );
@@ -192,8 +197,8 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   return (
     <div className="flex flex-col md:flex-row h-screen bg-light">
       {/* Header mobile */}
-      <header className="md:hidden flex items-center justify-between bg-primary text-white px-5 py-3 shadow-md">
-        <div className="flex items-center gap-3 font-bold text-lg">
+      <header className="md:hidden flex items-center justify-between bg-primary text-white px-4 py-2 shadow-md">
+        <div className="flex items-center gap-2 font-bold text-base">
           {photoUrl ? (
             <img
               src={photoUrl}
@@ -201,7 +206,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
               className="w-8 h-8 rounded-full object-cover border-2 border-white"
             />
           ) : (
-            <UserCircle size={28} />
+            <UserCircle size={24} />
           )}
           <span>{localUser.prenom} {localUser.nom}</span>
         </div>
@@ -210,44 +215,42 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
           aria-label="Ouvrir le menu"
           className="p-1 hover:bg-primary-dark rounded-md transition"
         >
-          <Menu size={28} />
+          <Menu size={24} />
         </button>
       </header>
 
       {/* Sidebar */}
-      <aside
-        className={`${sidebarOpen ? "block" : "hidden"
-          } md:flex md:flex-col md:w-72 w-full bg-primary text-white p-5 md:h-screen h-auto z-30 shadow-lg`}
-      >
+      <aside className={`${sidebarOpen ? "block" : "hidden"} md:flex md:flex-col md:w-64 w-full bg-primary text-white p-4 md:h-screen h-auto z-30 shadow-lg`}>
         <div className="flex flex-col items-center mb-10">
           {photoUrl ? (
             <img
               src={photoUrl}
               alt="Profil"
-              className="w-20 h-20 rounded-full object-cover border-2 border-white mb-3"
+              className="w-16 h-16 rounded-full object-cover border-2 border-white mb-3"
             />
           ) : (
-            <UserCircle className="w-20 h-20 text-white mb-3" />
+            <UserCircle className="w-16 h-16 text-white mb-2" />
           )}
-          <h1 className="text-2xl font-heading font-bold text-center whitespace-normal">
+          <h1 className="text-xl font-heading font-bold text-center whitespace-normal">
             {localUser.prenom} {localUser.nom}
           </h1>
         </div>
 
-        <nav className="flex flex-col space-y-3 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
+        <nav className="flex flex-col space-y-3 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-transparent">
           {[
-            { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
-            { label: "Visualisations", icon: <MonitorPlay size={20} />, value: "visualisations" },
-            { label: "Classes", icon: <Users size={20} />, value: "classes" },
-            { label: "Créer un TP", icon: <Cpu size={20} />, value: "tps" },
+            { label: "Accueil", icon: <Home size={18} />, value: "accueil" },
+            { label: "Simulations", icon: <Cpu size={18} />, value: "simulations" },
+            { label: "Visualisations", icon: <MonitorPlay size={18} />, value: "visualisations" },
+            { label: "Classes", icon: <Users size={18} />, value: "classes" },
+            { label: "Créer un TP", icon: <Cpu size={18} />, value: "tps" },
             {
               label: "Demandes",
-              icon: <CheckCircle size={20} />,
+              icon: <CheckCircle size={18} />,
               value: "demandes",
               badge: nbDemandesEnAttente,
             },
-            { label: "Résultats élèves", icon: <FileCheck size={20} />, value: "resultats" },
-            { label: "Mon profil", icon: <UserCircle size={20} />, value: "profil" },
+            { label: "Résultats élèves", icon: <FileCheck size={18} />, value: "resultats" },
+            { label: "Mon profil", icon: <UserCircle size={18} />, value: "profil" },
           ].map((item) => (
             <button
               key={item.value}
@@ -255,16 +258,16 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
                 setCurrentSection(item.value as Section);
                 setSidebarOpen(false);
               }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-3xl transition text-base font-semibold select-none
-                ${currentSection === item.value
-                  ? "bg-light text-primary shadow-md"
+              className={`flex items-center gap-2 px-4 py-3 rounded-2xl transition text-sm font-semibold select-none ${
+                currentSection === item.value
+                  ? "bg-light text-primary shadow"
                   : "hover:bg-primary-dark/80"
-                }`}
+              }`}
             >
               {item.icon}
               <span className="flex-grow text-left">{item.label}</span>
               {item.badge && (
-                <span className="ml-auto bg-red-600 text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
+                <span className="ml-auto bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {item.badge}
                 </span>
               )}
@@ -274,9 +277,9 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-5 py-3 mt-8 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-3xl shadow-md transition select-none"
+          className="flex items-center gap-2 px-4 py-2 mt-4 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl shadow transition"
         >
-          <LogOut size={20} /> Déconnexion
+          <LogOut size={18} /> Déconnexion
         </button>
       </aside>
 

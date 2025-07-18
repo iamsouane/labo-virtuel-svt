@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
 import "react-toastify/dist/ReactToastify.css";
 import { notifyError, notifyInfo, notifySuccess } from "../../lib/notifications";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 interface CreateClasseFormProps {
   user: Profil;
@@ -17,6 +18,7 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
   const [loading, setLoading] = useState(false);
   const [eleves, setEleves] = useState<any[]>([]);
   const [selectedEleves, setSelectedEleves] = useState<string[]>([]);
+  const logActivity = useActivityLogger();
 
   useEffect(() => {
     const fetchEleves = async () => {
@@ -88,7 +90,7 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
         notifyInfo("Classe créée, mais erreur lors de l'ajout des élèves.");
         return;
       }
-
+      await logActivity(user.id, "Création", "classe");
       notifySuccess("Classe et élèves ajoutés avec succès !");
       setCodeClasse("");
       setSelectedEleves([]);

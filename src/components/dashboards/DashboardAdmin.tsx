@@ -1,3 +1,4 @@
+//src/components/dashboards/DashboardAdmin
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
@@ -16,7 +17,7 @@ import {
 } from "lucide-react";
 import SimulationForm from "../admin/SimulationForm";
 import ListeDemandesAcces from "../users/ListeDemandesAcces";
-import { AccueilAdmin } from "../admin/AccueilAdmin";
+import { AccueilAdmin } from "./AccueilAdmin";
 
 interface DashboardAdminProps {
   user: Profil;

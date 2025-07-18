@@ -1,3 +1,4 @@
+// src/components/dashboards/DashboardEleve.tsx
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
@@ -16,8 +17,9 @@ import {
   UserCircle,
   Menu,
 } from "lucide-react";
+import AccueilEleve from "./AccueilEleve";
 
-type Section = "simulations" | "visualisations" | "tps" | "demandes" | "profil";
+type Section = "accueil" | "simulations" | "visualisations" | "tps" | "demandes" | "profil";
 
 interface DashboardEleveProps {
   user: Profil;
@@ -113,6 +115,8 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
 
   const renderContent = () => {
     switch (currentSection) {
+      case "accueil":
+      return <AccueilEleve />;
       case "simulations":
         return (
           <div className="mt-6">
@@ -213,6 +217,8 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
 
         <nav className="flex flex-col space-y-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
           {[
+                { label: "Accueil", icon: <Cpu size={20} />, value: "accueil" }, // Tu peux changer l'icône
+
             { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
             {
               label: "Visualisations",
@@ -261,11 +267,13 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
       </aside>
 
       {/* Contenu principal */}
-      <main className="flex-1 p-6 bg-white overflow-y-auto">{isLoadingUser ? (
-        <p className="text-gray-600">Chargement du profil...</p>
-      ) : (
-        renderContent()
-      )}</main>
+      <main className="flex-1 p-6 bg-white overflow-y-auto">
+        {isLoadingUser ? (
+          <p className="text-gray-600">Chargement du profil...</p>
+        ) : (
+          renderContent()
+        )}
+      </main>
     </div>
   );
 };

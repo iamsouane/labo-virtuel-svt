@@ -7,6 +7,7 @@ import { QUIZ_QUESTIONS_PHOTOSYNTHESE } from "../../data/quizPhotosynthese";
 import { QUIZ_QUESTIONS_SELECTION } from "../../data/quizSelection";
 import { QUIZ_QUESTIONS_ENERGIE } from "../../data/quizEnergie";
 import { QUIZ_QUESTIONS_POLLUTION } from "../../data/quizPollution";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 const CreateTPForm = ({ user }: { user: Profil }) => {
   const [classes, setClasses] = useState<any[]>([]);
@@ -16,6 +17,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [quizTitle, setQuizTitle] = useState("");
   const [availableQuestions, setAvailableQuestions] = useState<any[]>([]);
+  const logActivity = useActivityLogger();
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -173,6 +175,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
     }
 
     notifySuccess("TP créé avec succès !");
+    await logActivity(user.id, "Création", "tp_quiz");
     resetForm();
   };
 

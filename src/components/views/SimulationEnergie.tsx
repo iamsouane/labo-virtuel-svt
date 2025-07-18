@@ -1,7 +1,5 @@
 //src/components/views/SimulationEnergie.tsx
 import { useState, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useEnergyShortcuts } from "../../hooks/useEnergyShortcuts";
 import GuideOverlayEnergie from "../ui/GuideOverlayEnergie";
 import { TutorialOverlayEnergie } from "../ui/TutorialOverlayEnergie";
@@ -30,6 +28,7 @@ import RenderEnergySymbolsLegend from "../energie/RenderEnergySymbolsLegend";
 import Tooltip from "../ui/Tooltip";
 import { supabase } from "../../lib/supabaseClient";
 import { notifyError, notifySuccess } from "../../lib/notifications";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 const SimulationEnergie = () => {
   // États principaux
@@ -61,7 +60,7 @@ const SimulationEnergie = () => {
   const [, setQuizResult] = useState<QuizResult | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
-
+  const logActivity = useActivityLogger();
 
   // Fonctions du tutoriel
   const nextTutorialStep = () => {
@@ -188,7 +187,7 @@ useEffect(() => {
     }
   };
 
-   const completeQuiz = (answers: number[]) => {
+   const completeQuiz = async (answers: number[]) => {
      const timeSpent = Math.floor((Date.now() - quizStartTime) / 1000)
      // Utilisation de quizQuestions dynamiques (pas de constante dure)
      const results = answers.map((answer, index) => {
@@ -217,6 +216,17 @@ useEffect(() => {
  
      const percentage = Math.round((score / quizQuestions.length) * 100)
      notifySuccess(`Quiz terminé ! Score: ${score}/${quizQuestions.length} (${percentage}%)`)
+     // Récupération user connectée (nouvelle API)
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (user) {
+    try {
+      await logActivity(user.id, "quiz_termine", "simulation_energie");
+    } catch (error) {
+      console.error("Erreur lors du log d'activité:", error);
+    }
+  }
    }
 
   const restartQuiz = () => startQuiz();
@@ -765,19 +775,6 @@ useEffect(() => {
           </div>
         </div>
       </div>
-
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
     </FullscreenContainer>
   );
 };
