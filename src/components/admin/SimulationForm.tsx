@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Simulation } from "../../types";
 import { notifySuccess, notifyError } from "../../lib/notifications";
-import "react-toastify/dist/ReactToastify.css";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 interface SimulationFormProps {
   onSimulationAdded?: (simulation: Simulation) => void;
@@ -25,6 +25,7 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
   const [objectifs, setObjectifs] = useState("");
   const [resultats, setResultats] = useState("");
   const [loading, setLoading] = useState(false);
+  const logActivity = useActivityLogger();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +61,8 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
       setObjectifs("");
       setResultats("");
       onSimulationAdded?.(data);
+      await logActivity(createdBy, `Ajout de la simulation "${titre}"`, "SimulationForm");
+
     }
   };
 
@@ -137,9 +140,8 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 rounded-xl font-semibold transition text-white ${
-          loading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-green-700"
-        }`}
+        className={`w-full py-3 rounded-xl font-semibold transition text-white ${loading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-green-700"
+          }`}
       >
         {loading ? "Ajout en cours..." : "Ajouter la simulation"}
       </button>

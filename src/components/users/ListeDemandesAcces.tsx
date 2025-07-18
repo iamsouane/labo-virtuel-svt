@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { notifySuccess, notifyError, notifyInfo } from "../../lib/notifications";
 import type { Profil } from "../../types";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 interface Demande {
   id: string;
@@ -29,6 +30,7 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
 
   const isAdmin = user.role === "ADMIN";
   const isProf = user.role === "PROFESSEUR";
+  const logActivity = useActivityLogger();
 
   const loadDemandes = async () => {
     setLoading(true);
@@ -156,6 +158,11 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
 
     await loadDemandes();
     notifySuccess(`Demande ${decision === "APPROUVE" ? "approuvée" : "rejetée"} avec succès.`);
+    await logActivity(
+      user.id,
+      `Demande d'accès à la simulation "${demande.simulation_titre}" ${decision === "APPROUVE" ? "approuvée" : "rejetée"} par ${user.role.toLowerCase()}`,
+      "ListeDemandesAcces"
+    );
   };
 
   const renderDemande = (demande: Demande) => {

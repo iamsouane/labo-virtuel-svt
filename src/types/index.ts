@@ -140,6 +140,15 @@ export interface ActivityLog {
   created_at: string;
 }
 
+// Ajout facultatif pour la jointure "users" dans les logs
+export interface ActivityLogWithUser extends ActivityLog {
+  users?: {
+    nom: string;
+    prenom: string;
+    role: Role;
+  };
+}
+
 export interface ResultatEleve {
   id: string;
   users_id: string;

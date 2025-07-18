@@ -5,6 +5,7 @@ import type { Profil } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../lib/notifications";
 import { Eye, EyeOff } from "lucide-react";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 interface AuthFormProps {
   onAuthSuccess?: () => void;
@@ -17,6 +18,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const logActivity = useActivityLogger();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,6 +52,11 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
       if (formData.password.length < 6) {
         notifyError("Le mot de passe doit contenir au moins 6 caractères.");
+        setIsLoading(false);
+        return;
+      }
+      if (/\d/.test(formData.name)) {
+        notifyError("Le nom ne doit pas contenir de chiffres.");
         setIsLoading(false);
         return;
       }
@@ -93,9 +100,11 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
 
         if (profil.must_change_password) {
           notifySuccess("Connexion réussie. Veuillez changer votre mot de passe.");
+          await logActivity(profil.id, "Connexion", "AuthForm");
           navigate("/changer-mot-de-passe");
         } else {
           notifySuccess("Connexion réussie !");
+          await logActivity(profil.id, "Connexion", "AuthForm");
           navigate("/dashboard");
         }
 
@@ -146,7 +155,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           setIsLoading(false);
           return;
         }
-
+        await logActivity(user.id, "Inscription", "AuthForm");
         notifySuccess("Inscription réussie ! Vérifiez votre e-mail pour confirmer.");
         setIsPendingConfirmation(true);
       }
@@ -175,8 +184,8 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             setIsPendingConfirmation(false);
           }}
           className={`pb-2 border-b-4 font-semibold transition ${isLogin
-              ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-secondary"
+            ? "border-primary text-primary"
+            : "border-transparent text-gray-500 hover:text-secondary"
             }`}
         >
           Connexion
@@ -188,8 +197,8 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
             setIsPendingConfirmation(false);
           }}
           className={`pb-2 border-b-4 font-semibold transition ${!isLogin
-              ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-secondary"
+            ? "border-primary text-primary"
+            : "border-transparent text-gray-500 hover:text-secondary"
             }`}
         >
           Inscription
@@ -279,8 +288,8 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           type="submit"
           disabled={isPendingConfirmation || isLoading}
           className={`w-full ${isPendingConfirmation || isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary hover:bg-secondary"
+            ? "bg-secondary cursor-not-allowed"
+            : "bg-primary hover:bg-green-800"
             } text-light font-semibold py-3 rounded-xl shadow transition`}
         >
           {isLoading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}

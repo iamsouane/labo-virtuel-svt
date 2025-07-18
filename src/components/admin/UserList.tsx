@@ -4,12 +4,14 @@ import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
 import { notifyError, notifySuccess } from "../../lib/notifications";
 import { Loader2 } from "lucide-react";
+import { useActivityLogger } from "../../hooks/useActivityLogger";
 
 const UserList = () => {
   const [users, setUsers] = useState<Profil[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const logActivity = useActivityLogger();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -59,13 +61,16 @@ const UserList = () => {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, role: newRole as Profil["role"] } : u))
       );
+      if (currentUserId) {
+        await logActivity(currentUserId, `Modification du rôle en ${newRole}`, "UserList");
+      }
     }
   };
 
   if (loading) {
     return <div className="flex justify-center items-center text-secondary">
-          <Loader2 className="animate-spin mr-2" /> Chargement des demandes...
-        </div>
+      <Loader2 className="animate-spin mr-2" /> Chargement des demandes...
+    </div>
   }
 
   return (

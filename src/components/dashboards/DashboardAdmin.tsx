@@ -16,17 +16,18 @@ import {
 } from "lucide-react";
 import SimulationForm from "../admin/SimulationForm";
 import ListeDemandesAcces from "../users/ListeDemandesAcces";
+import { AccueilAdmin } from "../admin/AccueilAdmin";
 
 interface DashboardAdminProps {
   user: Profil;
   onLogout: () => void;
 }
 
-type Section = "users" | "simulations" | "visualisations" | "demandes";
+type Section = "accueil" | "users" | "simulations" | "visualisations" | "demandes";
 
 const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
   const [localUser] = useState(user);
-  const [currentSection, setCurrentSection] = useState<Section>("users");
+  const [currentSection, setCurrentSection] = useState<Section>("accueil");
   const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -70,6 +71,8 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
 
   const renderContent = () => {
     switch (currentSection) {
+      case "accueil":
+        return <AccueilAdmin />;
       case "users":
         return (
           <div className="space-y-6">
@@ -145,6 +148,7 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
 
         <nav className="flex flex-col space-y-3 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
           {[
+            { label: "Accueil", icon: <UserCircle size={20} />, value: "accueil" },
             { label: "Utilisateurs", icon: <Users size={20} />, value: "users" },
             { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
             { label: "Visualisations", icon: <MonitorPlay size={20} />, value: "visualisations" },
