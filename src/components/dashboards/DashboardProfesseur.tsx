@@ -20,7 +20,6 @@ import EtatDemandesSimulation from "../users/EtatDemandesSimulation";
 import CreateClasseForm from "../users/CreateClasseForm";
 import MesClasses from "../users/MesClasses";
 import CreateTPForm from "../users/CreateTPForm";
-import ListeDemandesAcces from "../users/ListeDemandesAcces";
 import ResultatsEleves from "../users/ResultatsEleves";
 import ProfilEditor from "../users/ProfilEditor";
 import AccueilProfesseur from "./AccueilProfesseur";
@@ -161,10 +160,6 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
             <section>
               <h2 className="text-2xl font-heading font-bold text-primary mb-2">Mes demandes d'accès</h2>
               <EtatDemandesSimulation user={localUser} />
-            </section>
-            <section>
-              <h2 className="text-2xl font-heading font-bold text-primary mb-2">Demandes des élèves</h2>
-              <ListeDemandesAcces user={localUser} />
             </section>
           </div>
         );

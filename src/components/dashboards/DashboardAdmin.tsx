@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
-import Simulations from "../sections/Simulations";
 import Visualisations from "../sections/Visualisations";
 import UserList from "../admin/UserList";
 import {
@@ -90,7 +89,6 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
               Simulations disponibles
             </h2>
             <SimulationForm createdBy={localUser.id} />
-            <Simulations user={localUser} />
           </div>
         );
       case "visualisations":

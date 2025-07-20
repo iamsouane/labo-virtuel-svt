@@ -18,19 +18,19 @@ const visualisationsData = [
     id: 2,
     title: "Cycle de l'eau",
     description: "Observe les différentes étapes du cycle de l'eau dans la nature.",
-    icon: <Droplets className="w-10 h-10 text-secondary" />,
+    icon: <Droplets className="w-10 h-10 text-primary" />,
   },
   {
     id: 3,
     title: "Collision de plaques tectoniques",
     description: "Visualise le mouvement des plaques terrestres et leurs collisions.",
-    icon: <Globe className="w-10 h-10 text-accent" />,
+    icon: <Globe className="w-10 h-10 text-primary" />,
   },
   {
     id: 4,
     title: "Visualisation du cœur humain",
     description: "Explore le cœur humain en 3D et découvre son anatomie.",
-    icon: <Heart className="w-10 h-10 text-secondary" />,
+    icon: <Heart className="w-10 h-10 text-primary" />,
   },
   {
     id: 5,
@@ -42,7 +42,7 @@ const visualisationsData = [
     id: 6,
     title: "Formation d’un volcan",
     description: "Observe les différentes étapes de formation d’un volcan.",
-    icon: <Flame className="w-10 h-10 text-secondary" />,
+    icon: <Flame className="w-10 h-10 text-primary" />,
   },
 ];
 

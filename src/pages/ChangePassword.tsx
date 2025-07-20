@@ -1,3 +1,4 @@
+//src/pages/ChangePassword
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
@@ -63,15 +64,22 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6 mx-auto mt-10"
+      className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6 mx-auto mt-10 font-sans"
     >
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-primary mb-2">Changer le mot de passe</h2>
-        <p className="text-sm text-gray-600">Entrez un nouveau mot de passe sécurisé.</p>
+        <h2 className="text-2xl font-heading font-bold text-primary mb-2">
+          Changer le mot de passe
+        </h2>
+        <p className="text-sm text-secondary">
+          Entrez un nouveau mot de passe sécurisé.
+        </p>
       </div>
 
       <div className="relative">
-        <label htmlFor="password" className="block text-left font-semibold text-primary mb-1">
+        <label
+          htmlFor="password"
+          className="block text-left font-semibold text-primary mb-1"
+        >
           Nouveau mot de passe
         </label>
         <input
@@ -81,13 +89,13 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
           onChange={(e) => setNewPassword(e.target.value)}
           placeholder="******"
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
+          className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary pr-10 transition"
         />
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute top-9 right-3 text-gray-600 hover:text-primary"
-          aria-label="Afficher le mot de passe"
+          className="absolute top-9 right-3 text-secondary hover:text-primary transition"
+          aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
         >
           {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
         </button>
@@ -96,7 +104,7 @@ const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 rounded-xl text-white font-semibold transition ${
+        className={`w-full py-3 rounded-2xl text-white font-semibold transition ${
           loading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-green-700"
         }`}
       >

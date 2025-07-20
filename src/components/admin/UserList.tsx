@@ -1,16 +1,19 @@
-// src/components/admin/UserList.tsx
+//src/components/admin/UserList
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
 import { notifyError, notifySuccess } from "../../lib/notifications";
 import { Loader2 } from "lucide-react";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 const UserList = () => {
   const [users, setUsers] = useState<Profil[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<Profil | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const logActivity = useActivityLogger();
 
   useEffect(() => {
@@ -67,10 +70,39 @@ const UserList = () => {
     }
   };
 
+  const confirmDeleteUser = (user: Profil) => {
+    setUserToDelete(user);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+
+    const { error } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", userToDelete.id);
+
+    if (error) {
+      notifyError("Erreur lors de la suppression de l'utilisateur.");
+    } else {
+      notifySuccess("Utilisateur supprimé avec succès.");
+      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      if (currentUserId) {
+        await logActivity(currentUserId, "Suppression d’un utilisateur", "UserList", userToDelete.id);
+      }
+    }
+
+    setConfirmOpen(false);
+    setUserToDelete(null);
+  };
+
   if (loading) {
-    return <div className="flex justify-center items-center text-secondary">
-      <Loader2 className="animate-spin mr-2" /> Chargement des demandes...
-    </div>
+    return (
+      <div className="flex justify-center items-center text-secondary">
+        <Loader2 className="animate-spin mr-2" /> Chargement des utilisateurs...
+      </div>
+    );
   }
 
   return (
@@ -106,6 +138,7 @@ const UserList = () => {
                 <th className="px-4 py-3 border-b">Prénom</th>
                 <th className="px-4 py-3 border-b">Email</th>
                 <th className="px-4 py-3 border-b">Rôle</th>
+                <th className="px-4 py-3 border-b">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -128,12 +161,35 @@ const UserList = () => {
                       </select>
                     )}
                   </td>
+                  <td className="px-4 py-2">
+                    {user.id === currentUserId ? (
+                      <span className="text-gray-400 italic">Vous</span>
+                    ) : (
+                      <button
+                        onClick={() => confirmDeleteUser(user)}
+                        className="text-red-600 hover:underline text-sm"
+                      >
+                        Supprimer
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Confirmer la suppression"
+        message={`Voulez-vous vraiment supprimer l'utilisateur "${userToDelete?.prenom} ${userToDelete?.nom}" ?`}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </section>
   );
 };

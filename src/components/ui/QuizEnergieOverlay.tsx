@@ -103,7 +103,7 @@ function QuizResults({
         <div className="p-6 border-b border-gray-200 text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-2 flex justify-center items-center gap-2">
             <Leaf className="w-7 h-7 text-green-600" />
-            Résultats du Quiz Photosynthèse
+            Résultats du Quiz Energie
           </h2>
           <div className={`text-4xl font-bold mb-2 ${getScoreColor(percentage)}`}>
             {result.score} / {result.totalQuestions}

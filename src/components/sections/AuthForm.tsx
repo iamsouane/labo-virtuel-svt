@@ -289,7 +289,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           disabled={isPendingConfirmation || isLoading}
           className={`w-full ${isPendingConfirmation || isLoading
             ? "bg-secondary cursor-not-allowed"
-            : "bg-primary hover:bg-green-800"
+            : "bg-primary hover:bg-secondary"
             } text-light font-semibold py-3 rounded-xl shadow transition`}
         >
           {isLoading ? "Chargement..." : isLogin ? "Se connecter" : "S'inscrire"}

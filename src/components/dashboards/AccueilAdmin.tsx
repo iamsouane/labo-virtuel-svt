@@ -1,8 +1,10 @@
+//src/components/dashboards/AccueilAdmin
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { ActivityLogWithUser } from "../../types";
 import StatsChart from "../admin/StatsChart";
 import UpcomingSimulations from "../admin/UpcomingSimulations";
+import { Loader2 } from "lucide-react";
 
 export const AccueilAdmin = () => {
   const [stats, setStats] = useState({
@@ -14,6 +16,7 @@ export const AccueilAdmin = () => {
 
   const [recentActivities, setRecentActivities] = useState<ActivityLogWithUser[]>([]);
   const [userStatsByDay, setUserStatsByDay] = useState<{ jour: string; utilisateurs: number }[]>([]);
+  const [loading, setLoading] = useState(true); // Nouveau
 
   useEffect(() => {
     const fetchStatsAndActivities = async () => {
@@ -69,18 +72,26 @@ export const AccueilAdmin = () => {
       });
 
       setRecentActivities(logs || []);
+      setLoading(false); // Fin du chargement
     };
 
     fetchStatsAndActivities();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center text-secondary">
+        <Loader2 className="animate-spin mr-2" /> Chargement des donnees du tableau de bord...
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto font-sans space-y-8">
       <h1 className="text-3xl font-bold text-dark mb-6">Tableau de bord administrateur</h1>
 
-      {/* Grille principale 2x2 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Colonne 1, ligne 1 : Cartes 2x2 */}
+        {/* Statistiques */}
         <div className="grid grid-cols-2 gap-6">
           <StatCard label="Professeurs" value={stats.professeurs} />
           <StatCard label="Élèves" value={stats.eleves} />
@@ -88,10 +99,10 @@ export const AccueilAdmin = () => {
           <StatCard label="Simulations" value={stats.simulations} />
         </div>
 
-        {/* Colonne 2, ligne 1 : Diagramme */}
+        {/* Graphique */}
         <StatsChart data={userStatsByDay} />
 
-        {/* Colonne 1, ligne 2 : Activités récentes */}
+        {/* Activités récentes */}
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 max-h-[450px] overflow-auto">
           <h2 className="text-2xl font-semibold text-dark mb-4">Activités récentes</h2>
           {recentActivities.length === 0 ? (
@@ -115,14 +126,13 @@ export const AccueilAdmin = () => {
           )}
         </div>
 
-        {/* Colonne 2, ligne 2 : Simulations à venir */}
+        {/* Simulations à venir */}
         <UpcomingSimulations />
       </div>
     </div>
   );
 };
 
-// ✅ StatCard avec contenu centré
 const StatCard = ({ label, value }: { label: string; value: number }) => (
   <div className="bg-accent/30 p-6 rounded-xl shadow-sm border border-accent flex flex-col items-center justify-center text-center min-h-[120px] hover:scale-[1.02] transition-transform duration-200 ease-in-out">
     <div className="text-sm font-medium text-dark mb-1 uppercase tracking-wide">

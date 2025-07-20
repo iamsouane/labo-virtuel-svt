@@ -1,3 +1,4 @@
+//src/components/views/AccueilUtilisateur
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Profil } from "../../types";
@@ -9,7 +10,7 @@ import DashboardAdmin from "../dashboards/DashboardAdmin";
 import DashboardProfesseur from "../dashboards/DashboardProfesseur";
 import DashboardEleve from "../dashboards/DashboardEleve";
 
-// Formulaire de changement de mot de passe intégré
+// Formulaire de changement de mot de passe stylé avec ta charte
 const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,7 +58,7 @@ const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 font-sans">
       <div>
         <label htmlFor="password" className="block font-semibold text-primary mb-1">
           Nouveau mot de passe
@@ -72,13 +73,13 @@ const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
             minLength={6}
             required
             disabled={loading}
-            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary transition"
           />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute top-2.5 right-3 text-gray-500 hover:text-primary"
-            aria-label="Afficher/Masquer le mot de passe"
+            className="absolute top-2.5 right-3 text-primary hover:text-primary transition"
+            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -88,8 +89,8 @@ const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 rounded-xl text-white font-semibold transition ${
-          loading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-green-700"
+        className={`w-full py-3 rounded-2xl text-white font-semibold transition ${
+          loading ? "bg-secondary/50 cursor-not-allowed" : "bg-primary hover:bg-secondary"
         }`}
       >
         {loading ? "Mise à jour..." : "Mettre à jour"}
@@ -144,7 +145,7 @@ const AccueilUtilisateur = ({ user, onLogout }: AccueilUtilisateurProps) => {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-auto bg-light">
+    <div className="relative w-screen h-screen overflow-auto bg-light font-sans">
       <div
         className={`transition-all duration-300 ${
           localUser.must_change_password
@@ -161,7 +162,7 @@ const AccueilUtilisateur = ({ user, onLogout }: AccueilUtilisateurProps) => {
 
       {localUser.must_change_password && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-auto">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-auto">
             <p className="mb-4 text-red-600 font-semibold text-center">
               Vous devez changer votre mot de passe avant de continuer.
             </p>

@@ -5,13 +5,11 @@ import { useNavigate } from "react-router-dom";
 import type { Profil } from "../../types";
 import Simulations from "../sections/Simulations";
 import MesTPs from "../users/MesTPs";
-import EtatDemandesSimulation from "../users/EtatDemandesSimulation";
 import Visualisations from "../sections/Visualisations";
 import ProfilEditor from "../users/ProfilEditor";
 import {
   Cpu,
   BookOpenCheck,
-  CheckCircle,
   MonitorPlay,
   LogOut,
   UserCircle,
@@ -19,7 +17,7 @@ import {
 } from "lucide-react";
 import AccueilEleve from "./AccueilEleve";
 
-type Section = "accueil" | "simulations" | "visualisations" | "tps" | "demandes" | "profil";
+type Section = "accueil" | "simulations" | "visualisations" | "tps" | "profil";
 
 interface DashboardEleveProps {
   user: Profil;
@@ -31,7 +29,6 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [currentSection, setCurrentSection] = useState<Section>("simulations");
-  const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -73,40 +70,6 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
     updatePhotoUrl();
   }, [localUser.photo_profil]);
 
-  const fetchNbDemandes = async () => {
-    const { count, error } = await supabase
-      .from("simulation_access_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("statut", "EN_ATTENTE")
-      .eq("demandeur_id", localUser.id);
-
-    if (error) {
-      console.error("Erreur chargement demandes en attente:", error.message);
-      setNbDemandesEnAttente(0);
-    } else {
-      setNbDemandesEnAttente(count || 0);
-    }
-  };
-
-  useEffect(() => {
-    fetchNbDemandes();
-
-    const subscription = supabase
-      .channel("public:simulation_access_requests")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "simulation_access_requests" },
-        () => {
-          fetchNbDemandes();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, [localUser.id]);
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     onLogout();
@@ -116,7 +79,7 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
   const renderContent = () => {
     switch (currentSection) {
       case "accueil":
-      return <AccueilEleve />;
+        return <AccueilEleve />;
       case "simulations":
         return (
           <div className="mt-6">
@@ -142,15 +105,6 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
               Mes Travaux Pratiques
             </h2>
             <MesTPs />
-          </div>
-        );
-      case "demandes":
-        return (
-          <div className="mt-6">
-            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
-              Mes demandes d’accès
-            </h2>
-            <EtatDemandesSimulation user={localUser} />
           </div>
         );
       case "profil":
@@ -217,8 +171,7 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
 
         <nav className="flex flex-col space-y-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
           {[
-                { label: "Accueil", icon: <Cpu size={20} />, value: "accueil" }, // Tu peux changer l'icône
-
+            { label: "Accueil", icon: <Cpu size={20} />, value: "accueil" },
             { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
             {
               label: "Visualisations",
@@ -226,12 +179,6 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
               value: "visualisations",
             },
             { label: "Mes TPs", icon: <BookOpenCheck size={20} />, value: "tps" },
-            {
-              label: "Demandes",
-              icon: <CheckCircle size={20} />,
-              value: "demandes",
-              badge: nbDemandesEnAttente,
-            },
             { label: "Mon profil", icon: <UserCircle size={20} />, value: "profil" },
           ].map((item) => (
             <button
@@ -249,11 +196,6 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
             >
               {item.icon}
               <span className="flex-grow text-left">{item.label}</span>
-              {item.badge && (
-                <span className="ml-auto bg-red-600 text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
-                  {item.badge}
-                </span>
-              )}
             </button>
           ))}
         </nav>

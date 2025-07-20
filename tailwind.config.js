@@ -12,9 +12,11 @@ export default {
         light: '#f7f7f7',
         dark: '#1a1a1a',
         accent: '#bce5bc',
+        danger: '#dc2626',       // 🔴 Rouge vif pour suppression, annulation, etc.
+        dangerHover: '#b91c1c',  // 🔴 Variante au survol
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'], // Appliqué par défaut si tu utilises `font-sans`
+        sans: ['Poppins', 'sans-serif'],
         heading: ['Poppins', 'sans-serif'],
       },
     },
