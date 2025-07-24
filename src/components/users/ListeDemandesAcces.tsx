@@ -216,7 +216,7 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
             </button>
             <button
               onClick={() => handleDecision(demande, "REJETE")}
-              className="flex items-center gap-1 bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-xl font-semibold transition"
+              className="flex items-center gap-1 bg-danger hover:bg-danger/90 text-white px-4 py-2 rounded-xl font-semibold transition"
             >
               <XCircle size={18} /> Rejeter
             </button>

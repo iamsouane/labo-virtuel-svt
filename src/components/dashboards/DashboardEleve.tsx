@@ -28,7 +28,7 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
   const [localUser, setLocalUser] = useState<Profil>(user);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [currentSection, setCurrentSection] = useState<Section>("simulations");
+  const [currentSection, setCurrentSection] = useState<Section>("accueil");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 

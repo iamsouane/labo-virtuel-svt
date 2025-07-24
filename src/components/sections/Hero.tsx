@@ -22,7 +22,7 @@ const Hero = () => (
         to="auth-form"
         smooth={true}
         duration={500}
-        className="inline-block bg-primary hover:bg-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer"
+        className="inline-block bg-primary hover:bg-secondary text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition cursor-pointer"
       >
         Accéder au labo
       </Link>

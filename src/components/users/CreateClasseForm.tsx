@@ -11,8 +11,6 @@ interface CreateClasseFormProps {
   onCreated?: () => void;
 }
 
-// ...imports inchangés
-
 const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
   const [codeClasse, setCodeClasse] = useState("");
   const [loading, setLoading] = useState(false);

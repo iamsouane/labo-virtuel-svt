@@ -27,8 +27,17 @@ import RenderEnergyParticles from "../energie/RenderEnergyParticles";
 import RenderEnergySymbolsLegend from "../energie/RenderEnergySymbolsLegend";
 import Tooltip from "../ui/Tooltip";
 import { supabase } from "../../lib/supabaseClient";
-import { notifyError, notifySuccess } from "../../lib/notifications";
+import { notifyError, notifyInfo, notifySuccess } from "../../lib/notifications";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
+
+interface Classe {
+  id: string;
+  created_by: string;
+}
+
+interface UserClasseData {
+  classe: Classe | null;
+}
 
 const SimulationEnergie = () => {
   // États principaux
@@ -100,58 +109,112 @@ const SimulationEnergie = () => {
   // Fonctions du quiz
 useEffect(() => {
   const fetchQuizQuestions = async () => {
-    try {
-      // 1. Récupérer l'ID de la simulation à partir de son code
-      const { data: simulation, error: simError } = await supabase
-        .from("simulation")
-        .select("id")
-        .eq("code", "energie") 
-        .single();
-
-      if (simError || !simulation) {
-        notifyError("Erreur lors de la récupération de la simulation.");
-        console.error("Erreur simulation:", simError);
-        return;
-      }
-
-      const simulationId = simulation.id;
-
-      // 2. Récupérer le dernier quiz associé à cette simulation
-      const { data: latestQuiz, error: quizError } = await supabase
-        .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId });
-
-      if (quizError || !latestQuiz || latestQuiz.length === 0) {
-        notifyError("Aucun quiz disponible pour cette simulation.");
-        console.warn("Aucun quiz lié à cette simulation.", quizError);
-        return;
-      }
-
-      const quizId = latestQuiz[0].quiz_id;
-
-      // 3. Récupérer les questions du quiz
-      const { data: questions, error: questionsError } = await supabase
-        .from("question")
-        .select("*")
-        .eq("quiz_id", quizId)
-        .order("created_at", { ascending: true });
-
-      if (questionsError) {
-        notifyError("Erreur lors du chargement des questions.");
-        console.error("Erreur questions:", questionsError);
-        return;
-      }
-
-      if (!questions || questions.length === 0) {
-        notifyError("Aucune question disponible pour ce quiz.");
-        return;
-      }
-
-      // 4. Mise à jour de l'état local
-      setQuizQuestions(questions as QuizQuestion[]);
-    } catch (error) {
-      notifyError("Erreur inattendue lors du chargement du quiz.");
-      console.error("Erreur globale :", error);
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) {
+      notifyError("Utilisateur non authentifié");
+      return;
     }
+    const userId = user.id;
+
+    // 1. Obtenir toutes les classes de l’élève
+    const { data: userClassesData, error: ucError } = await supabase
+      .from("users_classe")
+      .select("classe:classe_id(id, created_by)")
+      .eq("users_id", userId);
+
+    const userClasses = userClassesData as UserClasseData[] | null;
+
+    if (ucError || !userClasses || userClasses.length === 0) {
+      notifyError("Vous n'appartenez à aucune classe.");
+      return;
+    }
+
+    const classIds = userClasses
+      .map((uc) => uc.classe?.id)
+      .filter((id): id is string => !!id);
+
+    const profIds = userClasses
+      .map((uc) => uc.classe?.created_by)
+      .filter((id): id is string => !!id);
+
+    // 2. Récupérer la simulation "energie"
+    const { data: simulation, error: simError } = await supabase
+      .from("simulation")
+      .select("id")
+      .eq("code", "energie")
+      .single();
+
+    if (simError || !simulation) {
+      notifyError("Simulation introuvable.");
+      return;
+    }
+
+    const simulationId = simulation.id;
+
+    // 3. Trouver le quiz assigné à la simulation ET à une classe de l’élève
+    const { data: simQuizClasseData, error: simQuizClasseError } = await supabase
+      .from("simulation_quiz")
+      .select("quiz_id")
+      .eq("simulation_id", simulationId);
+
+    if (simQuizClasseError || !simQuizClasseData) {
+      notifyError("Aucun quiz associé à cette simulation.");
+      return;
+    }
+
+    // Chercher le premier quiz qui correspond à une classe de l’élève
+    let quizId: string | null = null;
+
+    for (const simQuiz of simQuizClasseData) {
+      const quizIdCandidate = simQuiz.quiz_id;
+
+      const { data: classeQuiz, error: cqError } = await supabase
+        .from("classe_quiz")
+        .select("classe_id")
+        .eq("quiz_id", quizIdCandidate);
+
+      if (!cqError && classeQuiz?.some((cq) => classIds.includes(cq.classe_id))) {
+        quizId = quizIdCandidate;
+        break;
+      }
+    }
+
+    if (!quizId) {
+      notifyError("Ce quiz n’est pas assigné à votre classe.");
+      return;
+    }
+
+    // 4. Vérifier que le créateur du quiz est bien un prof de la classe
+    const { data: quiz, error: quizError } = await supabase
+      .from("quiz")
+      .select("id, created_by")
+      .eq("id", quizId)
+      .single();
+
+    if (quizError || !quiz) {
+      notifyError("Quiz introuvable.");
+      return;
+    }
+
+    if (!profIds.includes(quiz.created_by)) {
+      notifyInfo("Ce quiz n’a pas été créé par le professeur de votre classe.");
+      return;
+    }
+
+    // 5. Charger les questions du quiz
+    const { data: questions, error: questionsError } = await supabase
+      .from("question")
+      .select("*")
+      .eq("quiz_id", quizId)
+      .order("created_at", { ascending: true });
+
+    if (questionsError || !questions) {
+      notifyError("Erreur lors du chargement des questions.");
+      return;
+    }
+
+    setQuizQuestions(questions as QuizQuestion[]);
   };
 
   fetchQuizQuestions();

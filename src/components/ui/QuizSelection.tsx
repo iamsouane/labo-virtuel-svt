@@ -16,39 +16,99 @@ export default function QuizzSelection({
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [answers, setAnswers] = useState<QuizAnswer[]>([])
   const [completed, setCompleted] = useState(false)
-  const [result, setResult] = useState<QuizResult | null>(null)
+  const [, setResult] = useState<QuizResult | null>(null)
   const [startTime, setStartTime] = useState(Date.now())
   const [questionStartTime, setQuestionStartTime] = useState(Date.now())
+  const [accessDenied, setAccessDenied] = useState(false)
 
-  useEffect(() => {
-    const fetchQuizQuestions = async () => {
+ useEffect(() => {
+  const fetchQuizQuestions = async () => {
+    try {
+      // 1. Récupérer la simulation correspondant au code passé en prop
       const { data: simulation, error: simError } = await supabase
         .from("simulation")
-        .select("quiz_id")
+        .select("id, quiz_id")
         .eq("code", simulationCode)
-        .single()
+        .single();
 
       if (simError || !simulation?.quiz_id) {
-        console.error("Erreur récupération quiz_id :", simError)
-        return
+        console.error("Erreur récupération quiz_id :", simError);
+        setAccessDenied(true);
+        return;
       }
 
+      // 2. Récupérer l'utilisateur connecté
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const user = userData?.user;
+
+      if (userError || !user) {
+        console.error("Utilisateur non connecté");
+        setAccessDenied(true);
+        return;
+      }
+
+      const eleveId = user.id;
+
+      // 3. Récupérer les classes auxquelles appartient l'élève
+      const { data: classesEleve, error: errClasse } = await supabase
+        .from("users_classe")
+        .select("classe_id")
+        .eq("users_id", eleveId);
+
+      if (errClasse) {
+        console.error("Erreur chargement des classes :", errClasse);
+        setAccessDenied(true);
+        return;
+      }
+
+      const classeIds = classesEleve?.map(c => c.classe_id) || [];
+
+      if (classeIds.length === 0) {
+        console.error("L'élève n'appartient à aucune classe.");
+        setAccessDenied(true);
+        return;
+      }
+
+      // 4. Vérifier que le quiz lié à la simulation est assigné à une des classes de l'élève
+      const { data: quizAssocies, error: errQuiz } = await supabase
+        .from("classe_quiz")
+        .select("quiz_id")
+        .in("classe_id", classeIds);
+
+      if (errQuiz) {
+        console.error("Erreur récupération des quiz assignés aux classes :", errQuiz);
+        setAccessDenied(true);
+        return;
+      }
+
+      const quizIds = quizAssocies?.map(q => q.quiz_id) || [];
+
+      if (!quizIds.includes(simulation.quiz_id)) {
+        setAccessDenied(true);
+        return;
+      }
+
+      // 5. Charger les questions du quiz
       const { data: questionData, error: questionError } = await supabase
         .from("question")
         .select("*")
-        .eq("quiz_id", simulation.quiz_id)
+        .eq("quiz_id", simulation.quiz_id);
 
       if (questionError) {
-        console.error("Erreur récupération questions :", questionError)
+        console.error("Erreur récupération questions :", questionError);
       } else if (questionData) {
-        setQuestions(questionData as QuizQuestion[])
-        setStartTime(Date.now())
-        setQuestionStartTime(Date.now())
+        setQuestions(questionData);
+        setStartTime(Date.now());
+        setQuestionStartTime(Date.now());
       }
+    } catch (err) {
+      console.error("Erreur inattendue :", err);
+      setAccessDenied(true);
     }
+  };
 
-    fetchQuizQuestions()
-  }, [simulationCode])
+  fetchQuizQuestions();
+}, [simulationCode]);
 
   const handleAnswerSelect = (index: number) => {
     setSelectedAnswer(index)
@@ -62,7 +122,7 @@ export default function QuizzSelection({
     const isCorrect = question.options[selectedAnswer] === question.reponse_correcte
 
     const newAnswer: QuizAnswer = {
-      questionId: question.id, // number
+      questionId: question.id,
       userAnswer: selectedAnswer,
       correct: isCorrect,
       timeSpent: Math.floor((now - questionStartTime) / 1000),
@@ -101,6 +161,14 @@ export default function QuizzSelection({
     setResult(null)
     setStartTime(Date.now())
     setQuestionStartTime(Date.now())
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="p-6 text-center text-red-600 font-semibold bg-white shadow rounded-md border border-red-300 max-w-xl mx-auto mt-10">
+        Ce quiz n’est pas disponible pour votre classe.
+      </div>
+    )
   }
 
   if (questions.length === 0) {

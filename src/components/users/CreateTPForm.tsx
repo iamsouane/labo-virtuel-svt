@@ -1,4 +1,3 @@
-//src/components/users/CreateTPForm.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { notifySuccess, notifyError } from "../../lib/notifications";
@@ -8,6 +7,13 @@ import { QUIZ_QUESTIONS_SELECTION } from "../../data/quizSelection";
 import { QUIZ_QUESTIONS_ENERGIE } from "../../data/quizEnergie";
 import { QUIZ_QUESTIONS_POLLUTION } from "../../data/quizPollution";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
+
+const QUIZ_BANK: Record<string, any[]> = {
+  "photosynthese": QUIZ_QUESTIONS_PHOTOSYNTHESE,
+  "selection-naturelle": QUIZ_QUESTIONS_SELECTION,
+  "energie": QUIZ_QUESTIONS_ENERGIE,
+  "pollution": QUIZ_QUESTIONS_POLLUTION,
+};
 
 const CreateTPForm = ({ user }: { user: Profil }) => {
   const [classes, setClasses] = useState<any[]>([]);
@@ -21,14 +27,14 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
 
   useEffect(() => {
     const fetchClasses = async () => {
-      const { data: classeData, error } = await supabase
+      const { data, error } = await supabase
         .from("classe")
         .select("id, code_classe")
         .eq("created_by", user.id);
       if (error) {
         notifyError("Erreur chargement classes : " + error.message);
       } else {
-        setClasses(classeData || []);
+        setClasses(data || []);
       }
     };
     fetchClasses();
@@ -36,13 +42,16 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
 
   useEffect(() => {
     const fetchSimulations = async () => {
-      const { data, error } = await supabase.rpc("get_simulations_autorisees_ou_creees", {
-        user_id: user.id,
-      });
+      const { data, error } = await supabase
+        .from("simulations_professeurs")
+        .select("simulation:simulation_id (id, titre, code)")
+        .eq("professeur_id", user.id);
+
       if (error) {
         notifyError("Erreur chargement simulations : " + error.message);
       } else {
-        setSimulations(data || []);
+        const simulationsList = (data || []).map((row) => row.simulation);
+        setSimulations(simulationsList);
       }
     };
     fetchSimulations();
@@ -55,63 +64,18 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
         return;
       }
 
-      const { data: simulation, error: simError } = await supabase
-        .from("simulation")
-        .select("*")
-        .eq("id", selectedSimulation)
-        .single();
+      const sim = simulations.find((s) => s.id === selectedSimulation);
+      const code = sim?.code?.toLowerCase();
 
-      if (simError || !simulation) {
+      if (code && QUIZ_BANK[code]) {
+        setAvailableQuestions(QUIZ_BANK[code]);
+      } else {
         setAvailableQuestions([]);
-        return;
       }
-
-      const code = simulation.code?.toLowerCase();
-
-      if (code === "photosynthese") {
-        setAvailableQuestions(QUIZ_QUESTIONS_PHOTOSYNTHESE);
-        return;
-      } else if (code === "selection-naturelle") {
-        setAvailableQuestions(QUIZ_QUESTIONS_SELECTION);
-        return;
-      } else if (code === "energie") {
-        setAvailableQuestions(QUIZ_QUESTIONS_ENERGIE);
-        return;
-      } else if (code === "pollution") {
-        setAvailableQuestions(QUIZ_QUESTIONS_POLLUTION);
-        return;
-      }
-
-      const { data: simQuiz, error: simQuizError } = await supabase
-        .from("simulation_quiz")
-        .select("quiz_id")
-        .eq("simulation_id", selectedSimulation)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (simQuizError || !simQuiz) {
-        setAvailableQuestions([]);
-        return;
-      }
-
-      const quizId = simQuiz.quiz_id;
-
-      const { data: questions, error: qError } = await supabase
-        .from("question")
-        .select("*")
-        .eq("quiz_id", quizId);
-
-      if (qError) {
-        notifyError("Erreur chargement questions : " + qError.message);
-        return;
-      }
-
-      setAvailableQuestions(questions || []);
     };
 
     fetchQuestionsForSimulation();
-  }, [selectedSimulation]);
+  }, [selectedSimulation, simulations]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,10 +84,12 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
       notifyError("Veuillez sélectionner une classe et une simulation.");
       return;
     }
+
     if (!quizTitle.trim()) {
       notifyError("Veuillez saisir un titre pour le quiz.");
       return;
     }
+
     if (selectedQuestions.length === 0) {
       notifyError("Veuillez sélectionner au moins une question.");
       return;
@@ -150,31 +116,40 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
       quiz_id: quizCreated.id,
     }));
 
-    const { error: qError } = await supabase.from("question").insert(questionsWithQuizId);
+    const { error: qError } = await supabase
+      .from("question")
+      .insert(questionsWithQuizId);
+
     if (qError) {
       notifyError("Erreur lors de l'insertion des questions.");
       return;
     }
 
-    const { error: linkError } = await supabase.from("classe_quiz").insert({
-      classe_id: selectedClasse,
-      quiz_id: quizCreated.id,
-    });
+    const { error: linkError } = await supabase
+      .from("classe_quiz")
+      .insert({
+        classe_id: selectedClasse,
+        quiz_id: quizCreated.id,
+      });
+
     if (linkError) {
       notifyError("Erreur liaison quiz à la classe.");
       return;
     }
 
-    const { error: simLinkError } = await supabase.from("simulation_quiz").insert({
-      simulation_id: selectedSimulation,
-      quiz_id: quizCreated.id,
-    });
+    const { error: simLinkError } = await supabase
+      .from("simulation_quiz")
+      .insert({
+        simulation_id: selectedSimulation,
+        quiz_id: quizCreated.id,
+      });
+
     if (simLinkError) {
       notifyError("Erreur liaison quiz à la simulation.");
       return;
     }
 
-    notifySuccess("TP créé avec succès !");
+    notifySuccess("TP créé et associé avec succès !");
     await logActivity(user.id, "Création", "tp_quiz");
     resetForm();
   };
@@ -194,6 +169,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
     >
       <h3 className="text-2xl font-heading font-bold text-primary">Créer un TP Quiz pour une classe</h3>
 
+      {/* Classe */}
       <div>
         <label className="block mb-2 text-dark font-medium">Classe</label>
         <select
@@ -210,6 +186,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
         </select>
       </div>
 
+      {/* Simulation */}
       <div>
         <label className="block mb-2 text-dark font-medium">Simulation liée</label>
         <select
@@ -226,6 +203,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
         </select>
       </div>
 
+      {/* Titre */}
       <div>
         <label className="block mb-2 text-dark font-medium">Titre du quiz</label>
         <input
@@ -237,6 +215,7 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
         />
       </div>
 
+      {/* Questions */}
       <div>
         <label className="block mb-2 text-dark font-medium">Sélectionnez les questions</label>
         <div className="space-y-3 max-h-64 overflow-y-auto border border-dark/20 rounded-md p-4 bg-accent">
@@ -271,9 +250,10 @@ const CreateTPForm = ({ user }: { user: Profil }) => {
         </div>
       </div>
 
+      {/* Submit */}
       <button
         type="submit"
-        className="w-full bg-primary text-white py-3 rounded-md hover:bg-primary/90 transition-colors font-semibold"
+        className="w-full bg-primary text-white py-3 rounded-md hover:bg-secondary/90 transition-colors font-semibold"
       >
         Créer et associer le TP Quiz
       </button>

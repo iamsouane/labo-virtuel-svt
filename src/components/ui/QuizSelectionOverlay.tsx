@@ -21,9 +21,8 @@ import {
   Info,
   ArrowRight,
 } from "lucide-react"
-
-// Import des fonctions de service quiz
 import { saveQuizResult, transformLocalToQuizResult } from "../../lib/quizService"
+import { notifyError } from "../../lib/notifications"
 
 interface QuizSelectionOverlayProps {
   questions: QuizQuestion[]
@@ -300,7 +299,7 @@ export default function QuizSelectionOverlay({
         setQuizResult(quizResultToSave)
         setIsCompleted(true)
       } else {
-        alert("Erreur lors de la sauvegarde du résultat.")
+        notifyError("Erreur lors de la sauvegarde du résultat.")
       }
       setIsSaving(false)
     }

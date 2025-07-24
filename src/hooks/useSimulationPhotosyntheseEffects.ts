@@ -1,4 +1,4 @@
-//src/hooks/useSimulationPhotosyntheseEffects.ts
+// src/hooks/useSimulationPhotosyntheseEffects.ts
 import { useEffect } from "react"
 import { supabase } from "../lib/supabaseClient"
 import type { QuizQuestion, DataPoint, LabEnvironment } from "../types/simulationPhotosyntheseTypes"
@@ -14,9 +14,6 @@ type UseSimulationPhotosyntheseEffectsParams = {
   getEnvironmentStatus: () => { status: string }
 }
 
-/**
- * Hook personnalisé pour gérer les effets liés à la simulation Photosynthèse.
- */
 export function useSimulationPhotosyntheseEffects({
   simulationCode,
   isRunning,
@@ -34,7 +31,7 @@ export function useSimulationPhotosyntheseEffects({
     return () => clearTimeout(timer)
   }, [setIsLoaded])
 
-  // Intervalle pour mise à jour du temps et des données
+  // Intervalle mise à jour temps et données
   useEffect(() => {
     let interval: NodeJS.Timeout
 
@@ -74,51 +71,117 @@ export function useSimulationPhotosyntheseEffects({
     return () => clearInterval(interval)
   }, [isRunning, environment, getEnvironmentStatus, setTimeElapsed, setDataHistory])
 
-  // Chargement dynamique des questions du quiz
+  // Chargement dynamique des questions du quiz (vérification accès identique à SelectionNaturelle)
   useEffect(() => {
-    const fetchLatestQuizQuestions = async () => {
+    const fetchAuthorizedQuizQuestions = async () => {
       try {
+        // 1. Récupérer l'utilisateur courant
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const user = userData?.user;
+        if (userError || !user) {
+          console.error("Utilisateur non authentifié :", userError);
+          return;
+        }
+        const userId = user.id;
+
+        // 2. Récupérer les classes de l'utilisateur avec créateurs
+        const { data: userClassesData, error: ucError } = await supabase
+          .from("users_classe")
+          .select("classe:classe_id(id, created_by)")
+          .eq("users_id", userId);
+
+        const userClasses = userClassesData as { classe: { id: string; created_by: string } | null }[] | null;
+
+        if (ucError || !userClasses || userClasses.length === 0) {
+          console.warn("Aucune classe associée à cet utilisateur.");
+          return;
+        }
+
+        const classIds = userClasses.map((uc) => uc.classe?.id).filter((id): id is string => !!id);
+        const profIds = userClasses.map((uc) => uc.classe?.created_by).filter((id): id is string => !!id);
+
+        // 3. Récupérer la simulation par code et son id
         const { data: simulation, error: simError } = await supabase
           .from("simulation")
           .select("id")
           .eq("code", simulationCode)
-          .single()
+          .single();
 
         if (simError || !simulation) {
-          console.error("Erreur récupération simulation :", simError)
-          return
+          console.warn("Simulation introuvable.");
+          return;
         }
 
-        const simulationId = simulation.id
+        const simulationId = simulation.id;
 
-        const { data: latestQuiz, error: quizError } = await supabase
-          .rpc("get_latest_quiz_for_simulation", { simulation_uuid: simulationId })
+        // 4. Récupérer les quizzes liés à la simulation via simulation_quiz
+        const { data: simQuizData, error: simQuizError } = await supabase
+          .from("simulation_quiz")
+          .select("quiz_id")
+          .eq("simulation_id", simulationId);
 
-        if (quizError || !latestQuiz || latestQuiz.length === 0) {
-          console.warn("Aucun quiz trouvé pour cette simulation.", quizError)
-          return
+        if (simQuizError || !simQuizData || simQuizData.length === 0) {
+          console.warn("Aucun quiz associé à cette simulation.");
+          return;
         }
 
-        const quiz = latestQuiz[0]
+        // 5. Trouver un quiz assigné à une classe de l'élève
+        let authorizedQuizId: string | null = null;
 
+        for (const simQuiz of simQuizData) {
+          const quizIdCandidate = simQuiz.quiz_id;
+
+          const { data: classeQuiz, error: cqError } = await supabase
+            .from("classe_quiz")
+            .select("classe_id")
+            .eq("quiz_id", quizIdCandidate);
+
+          if (!cqError && classeQuiz?.some((cq) => classIds.includes(cq.classe_id))) {
+            authorizedQuizId = quizIdCandidate;
+            break;
+          }
+        }
+
+        if (!authorizedQuizId) {
+          console.warn("Aucun quiz assigné à votre classe.");
+          return;
+        }
+
+        // 6. Vérifier que le quiz a été créé par le professeur d'une des classes de l'élève
+        const { data: quiz, error: quizError } = await supabase
+          .from("quiz")
+          .select("id, created_by")
+          .eq("id", authorizedQuizId)
+          .single();
+
+        if (quizError || !quiz) {
+          console.warn("Quiz introuvable.");
+          return;
+        }
+
+        if (!profIds.includes(quiz.created_by)) {
+          console.warn("Ce quiz n’a pas été créé par un de vos professeurs.");
+          return;
+        }
+
+        // 7. Charger les questions du quiz
         const { data: questions, error: questionsError } = await supabase
           .from("question")
           .select("*")
-          .eq("quiz_id", quiz.quiz_id)
+          .eq("quiz_id", authorizedQuizId)
+          .order("created_at", { ascending: true });
 
-        if (questionsError) {
-          console.error("Erreur récupération questions :", questionsError)
-          return
+        if (questionsError || !questions) {
+          console.error("Erreur lors du chargement des questions :", questionsError);
+          return;
         }
 
-        if (questions) {
-          setQuizQuestions(questions as QuizQuestion[])
-        }
+        setQuizQuestions(questions as QuizQuestion[]);
       } catch (error) {
-        console.error("Erreur globale lors du chargement du quiz :", error)
+        console.error("Erreur dans useSimulationPhotosyntheseEffects :", error);
       }
-    }
+    };
 
-    fetchLatestQuizQuestions()
-  }, [simulationCode, setQuizQuestions])
+    fetchAuthorizedQuizQuestions();
+  }, [simulationCode, setQuizQuestions]);
 }

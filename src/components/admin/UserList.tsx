@@ -1,4 +1,3 @@
-//src/components/admin/UserList
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
@@ -14,6 +13,10 @@ const UserList = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userToDelete, setUserToDelete] = useState<Profil | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const pageSize = 8;
+
   const logActivity = useActivityLogger();
 
   useEffect(() => {
@@ -23,32 +26,39 @@ const UserList = () => {
       const userId = sessionData?.session?.user.id || null;
       setCurrentUserId(userId);
 
+      const from = (currentPage - 1) * pageSize;
+      const to = from + pageSize - 1;
+
       let query = supabase
         .from("users")
-        .select("*")
+        .select("*", { count: "exact" })
         .neq("role", "ADMIN")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       if (roleFilter) {
         query = query.eq("role", roleFilter);
       }
 
-      const { data, error } = await query;
+      const { data, count, error } = await query;
+
       if (error) {
         console.error("Erreur lors de la récupération des utilisateurs :", error.message);
         setUsers([]);
       } else {
         setUsers(data as Profil[]);
+        if (typeof count === "number") setTotalUsers(count);
       }
 
       setLoading(false);
     };
 
     fetchUsers();
-  }, [roleFilter]);
+  }, [roleFilter, currentPage]);
 
   const handleRoleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setRoleFilter(e.target.value === "all" ? null : e.target.value);
+    setCurrentPage(1);
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
@@ -130,54 +140,81 @@ const UserList = () => {
       {users.length === 0 ? (
         <p className="text-secondary">Aucun utilisateur trouvé.</p>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-xl shadow-md">
-          <table className="min-w-full table-auto text-left text-sm">
-            <thead className="bg-gray-100 text-dark font-semibold">
-              <tr>
-                <th className="px-4 py-3 border-b">Nom</th>
-                <th className="px-4 py-3 border-b">Prénom</th>
-                <th className="px-4 py-3 border-b">Email</th>
-                <th className="px-4 py-3 border-b">Rôle</th>
-                <th className="px-4 py-3 border-b">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-light border-b">
-                  <td className="px-4 py-2">{user.nom}</td>
-                  <td className="px-4 py-2">{user.prenom}</td>
-                  <td className="px-4 py-2">{user.email}</td>
-                  <td className="px-4 py-2">
-                    {user.id === currentUserId ? (
-                      <span className="text-gray-600">{user.role}</span>
-                    ) : (
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        className="rounded-md border border-gray-300 px-3 py-1 text-sm focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="ELEVE">Élève</option>
-                        <option value="PROFESSEUR">Professeur</option>
-                      </select>
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    {user.id === currentUserId ? (
-                      <span className="text-gray-400 italic">Vous</span>
-                    ) : (
-                      <button
-                        onClick={() => confirmDeleteUser(user)}
-                        className="text-red-600 hover:underline text-sm"
-                      >
-                        Supprimer
-                      </button>
-                    )}
-                  </td>
+        <>
+          <div className="overflow-x-auto bg-white rounded-xl shadow-md">
+            <table className="min-w-full table-auto text-left text-sm">
+              <thead className="bg-gray-100 text-dark font-semibold">
+                <tr>
+                  <th className="px-4 py-3 border-b">Nom</th>
+                  <th className="px-4 py-3 border-b">Prénom</th>
+                  <th className="px-4 py-3 border-b">Email</th>
+                  <th className="px-4 py-3 border-b">Rôle</th>
+                  <th className="px-4 py-3 border-b">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id} className="hover:bg-light border-b">
+                    <td className="px-4 py-2">{user.nom}</td>
+                    <td className="px-4 py-2">{user.prenom}</td>
+                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">
+                      {user.id === currentUserId ? (
+                        <span className="text-gray-600">{user.role}</span>
+                      ) : (
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          className="rounded-md border border-gray-300 px-3 py-1 text-sm focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="ELEVE">Élève</option>
+                          <option value="PROFESSEUR">Professeur</option>
+                        </select>
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      {user.id === currentUserId ? (
+                        <span className="text-gray-400 italic">Vous</span>
+                      ) : (
+                        <button
+                          onClick={() => confirmDeleteUser(user)}
+                          className="text-red-600 hover:underline text-sm"
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center items-center mt-6 gap-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-xl border text-sm bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+            >
+              Précédent
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} / {Math.ceil(totalUsers / pageSize)}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  prev < Math.ceil(totalUsers / pageSize) ? prev + 1 : prev
+                )
+              }
+              disabled={currentPage >= Math.ceil(totalUsers / pageSize)}
+              className="px-4 py-2 rounded-xl border text-sm bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+            >
+              Suivant
+            </button>
+          </div>
+        </>
       )}
 
       <ConfirmDialog
