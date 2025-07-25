@@ -173,7 +173,7 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
               {item.icon}
               <span className="flex-grow text-left">{item.label}</span>
               {item.badge && (
-                <span className="ml-auto bg-red-600 text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
+                <span className="ml-auto bg-danger text-light text-xs font-semibold px-3 py-0.5 rounded-full shadow-sm select-none">
                   {item.badge}
                 </span>
               )}
@@ -183,14 +183,14 @@ const DashboardAdmin = ({ user, onLogout }: DashboardAdminProps) => {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-4 px-6 py-3 mt-8 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-3xl shadow-md transition select-none"
+          className="flex items-center gap-4 px-6 py-3 mt-8 md:mt-auto bg-danger hover:bg-dangerHover text-light font-semibold rounded-3xl shadow-md transition select-none"
         >
           <LogOut size={20} /> Déconnexion
         </button>
       </aside>
 
       {/* Contenu principal */}
-      <main className="flex-1 p-6 bg-white overflow-y-auto">
+      <main className="flex-1 p-6 bg-light overflow-y-auto rounded-2xl shadow-sm">
         {renderContent()}
       </main>
     </div>

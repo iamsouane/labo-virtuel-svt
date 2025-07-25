@@ -73,7 +73,7 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-primary">
+      <h3 className="text-xl font-heading font-bold mb-4 flex items-center gap-2 text-primary">
         <ClipboardList className="w-5 h-5 text-secondary" />
         État de mes demandes d'accès
       </h3>
@@ -87,7 +87,7 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
           {demandes.map((d) => (
             <li
               key={d.id}
-              className="bg-light p-4 border rounded-2xl shadow flex justify-between items-start"
+              className="bg-light p-4 border border-dark/10 rounded-2xl shadow-sm flex justify-between items-start"
             >
               <div className="flex-1">
                 <p className="font-semibold text-primary">
@@ -115,7 +115,7 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
                     ? "bg-yellow-100 text-yellow-700"
                     : d.statut === "APPROUVE"
                     ? "bg-accent text-primary"
-                    : "bg-red-100 text-red-700"
+                    : "bg-danger text-dangerHover"
                 }`}
               >
                 {formatStatut(d.statut)}

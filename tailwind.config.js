@@ -12,8 +12,8 @@ export default {
         light: '#f7f7f7',
         dark: '#1a1a1a',
         accent: '#bce5bc',
-        danger: '#dc2626',       // 🔴 Rouge vif pour suppression, annulation, etc.
-        dangerHover: '#b91c1c',  // 🔴 Variante au survol
+        danger: '#dc2626',       
+        dangerHover: '#b91c1c',  
       },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],

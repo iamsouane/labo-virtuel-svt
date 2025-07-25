@@ -1,3 +1,4 @@
+//src/components/admin/UserList
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
@@ -128,7 +129,7 @@ const UserList = () => {
             id="roleFilter"
             onChange={handleRoleFilterChange}
             value={roleFilter || "all"}
-            className="rounded-xl border border-gray-300 px-4 py-2 text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+            className="rounded-xl border border-secondary px-4 py-2 text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Tous les rôles</option>
             <option value="PROFESSEUR">Professeur</option>
@@ -141,20 +142,20 @@ const UserList = () => {
         <p className="text-secondary">Aucun utilisateur trouvé.</p>
       ) : (
         <>
-          <div className="overflow-x-auto bg-white rounded-xl shadow-md">
+          <div className="overflow-x-auto bg-light rounded-xl shadow-md">
             <table className="min-w-full table-auto text-left text-sm">
-              <thead className="bg-gray-100 text-dark font-semibold">
+              <thead className="bg-secondary text-light font-semibold">
                 <tr>
-                  <th className="px-4 py-3 border-b">Nom</th>
-                  <th className="px-4 py-3 border-b">Prénom</th>
-                  <th className="px-4 py-3 border-b">Email</th>
-                  <th className="px-4 py-3 border-b">Rôle</th>
-                  <th className="px-4 py-3 border-b">Actions</th>
+                  <th className="px-4 py-3 border-b border-secondary">Nom</th>
+                  <th className="px-4 py-3 border-b border-secondary">Prénom</th>
+                  <th className="px-4 py-3 border-b border-secondary">Email</th>
+                  <th className="px-4 py-3 border-b border-secondary">Rôle</th>
+                  <th className="px-4 py-3 border-b border-secondary">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-light border-b">
+                  <tr key={user.id} className="hover:bg-accent border-b border-secondary">
                     <td className="px-4 py-2">{user.nom}</td>
                     <td className="px-4 py-2">{user.prenom}</td>
                     <td className="px-4 py-2">{user.email}</td>
@@ -165,7 +166,7 @@ const UserList = () => {
                         <select
                           value={user.role}
                           onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                          className="rounded-md border border-gray-300 px-3 py-1 text-sm focus:ring-2 focus:ring-primary"
+                          className="rounded-md border border-secondary px-3 py-1 text-sm text-dark focus:ring-2 focus:ring-primary"
                         >
                           <option value="ELEVE">Élève</option>
                           <option value="PROFESSEUR">Professeur</option>
@@ -178,7 +179,7 @@ const UserList = () => {
                       ) : (
                         <button
                           onClick={() => confirmDeleteUser(user)}
-                          className="text-red-600 hover:underline text-sm"
+                          className="text-danger hover:text-dangerHover text-sm"
                         >
                           Supprimer
                         </button>
@@ -195,7 +196,7 @@ const UserList = () => {
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 rounded-xl border text-sm bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+              className="px-4 py-2 rounded-xl border border-secondary text-sm bg-white shadow hover:bg-secondary hover:text-light disabled:opacity-50"
             >
               Précédent
             </button>
@@ -209,7 +210,7 @@ const UserList = () => {
                 )
               }
               disabled={currentPage >= Math.ceil(totalUsers / pageSize)}
-              className="px-4 py-2 rounded-xl border text-sm bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+              className="px-4 py-2 rounded-xl border border-secondary text-sm bg-white shadow hover:bg-secondary hover:text-light disabled:opacity-50"
             >
               Suivant
             </button>
