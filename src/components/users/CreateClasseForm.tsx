@@ -5,17 +5,20 @@ import type { Profil } from "../../types";
 import "react-toastify/dist/ReactToastify.css";
 import { notifyError, notifyInfo, notifySuccess } from "../../lib/notifications";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
+import { User, Loader2, CheckCircle } from "lucide-react";
 
 interface CreateClasseFormProps {
   user: Profil;
   onCreated?: () => void;
+  compact?: boolean;
 }
 
-const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
+const CreateClasseForm = ({ user, onCreated, compact = false }: CreateClasseFormProps) => {
   const [codeClasse, setCodeClasse] = useState("");
   const [loading, setLoading] = useState(false);
   const [eleves, setEleves] = useState<any[]>([]);
   const [selectedEleves, setSelectedEleves] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const logActivity = useActivityLogger();
 
   useEffect(() => {
@@ -23,13 +26,21 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
       const { data, error } = await supabase
         .from("users")
         .select("id, nom, prenom")
-        .eq("role", "ELEVE");
+        .eq("role", "ELEVE")
+        .order("nom", { ascending: true });
 
       if (!error && data) setEleves(data);
     };
 
     fetchEleves();
   }, []);
+
+  const filteredEleves = eleves.filter(
+    (eleve) =>
+      `${eleve.prenom} ${eleve.nom}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,8 +55,8 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
       return;
     }
 
-    if (selectedEleves.length <= 3) {
-      notifyError("Veuillez sélectionner au moins trois élève pour créer la classe.");
+    if (selectedEleves.length < 3) {
+      notifyError("Veuillez sélectionner au moins trois élèves pour créer la classe.");
       return;
     }
 
@@ -62,10 +73,11 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
         .single();
 
       if (error || !classeData) {
-        notifyError("Erreur : " + error?.message);
+        notifyError("Erreur lors de la création : " + error?.message);
         return;
       }
 
+      // Ajout du professeur à la classe
       const { error: profInsertError } = await supabase
         .from("users_classe")
         .insert([{ users_id: user.id, classe_id: classeData.id }]);
@@ -75,6 +87,7 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
         return;
       }
 
+      // Ajout des élèves
       const insertions = selectedEleves.map((eleveId) => ({
         users_id: eleveId,
         classe_id: classeData.id,
@@ -88,65 +101,113 @@ const CreateClasseForm = ({ user, onCreated }: CreateClasseFormProps) => {
         notifyInfo("Classe créée, mais erreur lors de l'ajout des élèves.");
         return;
       }
+
       await logActivity(user.id, "Création", "classe");
-      notifySuccess("Classe et élèves ajoutés avec succès !");
+      notifySuccess("Classe créée avec succès !");
       setCodeClasse("");
       setSelectedEleves([]);
       onCreated?.();
     } catch (err) {
       console.error("Erreur inattendue :", err);
-      notifyInfo("Une erreur inattendue est survenue.");
+      notifyError("Une erreur inattendue est survenue.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCheckboxChange = (id: string) => {
+  const toggleEleveSelection = (id: string) => {
     setSelectedEleves((prev) =>
       prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
     );
   };
 
   return (
-    <div className="bg-light p-6 rounded-2xl shadow-md max-w-xl mx-auto">
-      <h3 className="text-2xl font-bold mb-6 text-primary font-heading">Créer une nouvelle classe</h3>
+    <div className={`bg-white ${compact ? 'p-4' : 'p-6'} rounded-xl border border-gray-200 shadow-sm`}>
+      <h3 className={`font-heading font-semibold text-primary ${compact ? 'text-lg mb-3' : 'text-xl mb-4'}`}>
+        {compact ? 'Nouvelle classe' : 'Créer une nouvelle classe'}
+      </h3>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-dark">Code de la classe</label>
+          <label className="block text-sm font-medium text-dark mb-1">
+            Code de la classe *
+          </label>
           <input
             type="text"
             value={codeClasse}
             onChange={(e) => setCodeClasse(e.target.value)}
-            className="mt-2 block w-full px-4 py-2 border border-dark/20 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-            placeholder="Ex : 2ndeA"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Ex: 2ndeA"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-dark mb-2">Ajouter des élèves</label>
-          <div className="max-h-40 overflow-y-auto border border-dark/10 rounded-xl px-4 py-2 space-y-1 bg-accent">
-            {eleves.map((eleve) => (
-              <label key={eleve.id} className="block text-sm font-medium text-dark">
-                <input
-                  type="checkbox"
-                  value={eleve.id}
-                  checked={selectedEleves.includes(eleve.id)}
-                  onChange={() => handleCheckboxChange(eleve.id)}
-                  className="mr-2"
-                />
-                {eleve.prenom} {eleve.nom}
-              </label>
-            ))}
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-sm font-medium text-dark">
+              Élèves sélectionnés ({selectedEleves.length})
+            </label>
+            <span className="text-xs text-gray-500">Minimum 3</span>
+          </div>
+          
+          {/* Barre de recherche */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Rechercher un élève..."
+          />
+          
+          {/* Liste des élèves */}
+          <div className={`border border-gray-200 rounded-lg overflow-hidden ${compact ? 'max-h-40' : 'max-h-60'} overflow-y-auto`}>
+            {filteredEleves.length === 0 ? (
+              <div className="p-3 text-center text-gray-500 text-sm">
+                Aucun élève trouvé
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {filteredEleves.map((eleve) => (
+                  <li key={eleve.id} className="hover:bg-accent/50 transition-colors">
+                    <label className="flex items-center px-3 py-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedEleves.includes(eleve.id)}
+                        onChange={() => toggleEleveSelection(eleve.id)}
+                        className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+                      />
+                      <span className="ml-3 flex items-center">
+                        <User className="h-4 w-4 text-gray-500 mr-2" />
+                        <span className="text-sm font-medium text-dark">
+                          {eleve.prenom} {eleve.nom}
+                        </span>
+                        {selectedEleves.includes(eleve.id) && (
+                          <CheckCircle className="h-4 w-4 text-primary ml-auto" />
+                        )}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
         <button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 rounded-2xl shadow transition"
-          disabled={loading}
+          disabled={loading || selectedEleves.length < 3 || !codeClasse.trim()}
+          className={`w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-xl shadow-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition ${
+            (selectedEleves.length < 3 || !codeClasse.trim()) && "opacity-70 cursor-not-allowed"
+          }`}
         >
-          {loading ? "Création en cours..." : "Créer la classe"}
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Création...
+            </>
+          ) : (
+            "Créer la classe"
+          )}
         </button>
       </form>
     </div>

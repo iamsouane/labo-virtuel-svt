@@ -16,7 +16,6 @@ const ProfilEditor = ({ user, onUpdate }: ProfilEditorProps) => {
   const [photoProfil, setPhotoProfil] = useState<string | null>(user.photo_profil || null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -134,123 +133,169 @@ const ProfilEditor = ({ user, onUpdate }: ProfilEditorProps) => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-light rounded-2xl shadow-md space-y-6">
-      <h2 className="text-3xl font-heading font-bold text-primary">Modifier mon profil</h2>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-sm">
+      <div className="mb-8">
+        <h2 className="text-2xl font-heading font-bold text-primary">Modifier le profil</h2>
+        <p className="text-dark/80 mt-1 font-sans">Gérez vos informations personnelles et votre sécurité</p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Colonne gauche : édition du profil */}
-        <div>
-          {previewUrl ? (
-            <div className="relative inline-block mb-6">
-              <img
-                src={previewUrl}
-                alt="Photo profil"
-                className="w-40 h-40 rounded-full object-cover border-4 border-primary"
-              />
-              <button
-                type="button"
-                onClick={handleDeletePhoto}
-                disabled={loading}
-                className="absolute top-0 right-0 bg-danger text-white rounded-full p-2 hover:bg-dangerHover transition-shadow shadow-md focus:outline-none focus:ring-2 focus:ring-dangerHover"
-                title="Supprimer la photo"
-              >
-                ✕
-              </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Section photo de profil */}
+        <div className="lg:col-span-1">
+          <div className="space-y-4">
+            <h3 className="text-lg font-heading font-medium text-dark">Photo de profil</h3>
+            
+            <div className="flex flex-col items-center">
+              {previewUrl ? (
+                <div className="relative group">
+                  <img
+                    src={previewUrl}
+                    alt="Photo profil"
+                    className="w-32 h-32 rounded-full object-cover border-2 border-accent"
+                  />
+                  <button
+                    onClick={handleDeletePhoto}
+                    disabled={loading}
+                    className="absolute -top-2 -right-2 bg-danger text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-dangerHover"
+                    title="Supprimer la photo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-accent flex items-center justify-center text-primary border-2 border-dashed border-primary/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              )}
+
+              <label className="mt-4 cursor-pointer">
+                <span className="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors font-sans">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Changer la photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="sr-only"
+                    disabled={loading}
+                  />
+                </span>
+              </label>
             </div>
-          ) : (
-            <div className="w-40 h-40 rounded-full bg-gray-300 mb-6 flex items-center justify-center text-gray-600 text-lg font-semibold border-4 border-gray-400">
-              Aucune photo
-            </div>
-          )}
-
-          <label className="block mb-5 font-semibold text-dark">
-            Changer la photo de profil
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="mt-2 block w-full text-sm text-dark/80 file:rounded-xl file:border-0 file:bg-primary file:text-white file:font-semibold hover:file:bg-secondary transition"
-              disabled={loading}
-            />
-          </label>
-
-          <label className="block mb-4 font-semibold text-dark">
-            Prénom
-            <input
-              type="text"
-              value={prenom}
-              onChange={(e) => setPrenom(e.target.value)}
-              className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </label>
-
-          <label className="block mb-4 font-semibold text-dark">
-            Nom
-            <input
-              type="text"
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
-              className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </label>
-
-          <label className="block mb-6 font-semibold text-dark">
-            Email
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={loading}
-            />
-          </label>
-
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="w-full bg-primary text-white font-semibold py-3 rounded-2xl hover:bg-secondary transition disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-secondary"
-          >
-            {loading ? "Sauvegarde..." : "Enregistrer"}
-          </button>
+          </div>
         </div>
 
-        {/* Colonne droite : changement de mot de passe */}
-        <div>
-          <h3 className="text-xl font-heading font-semibold text-primary mb-4">Changer le mot de passe</h3>
-
-          <div className="space-y-5 mb-6">
-            <label className="block font-semibold text-dark">
-              Nouveau mot de passe
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        {/* Section informations personnelles */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-heading font-medium text-dark mb-4">Informations personnelles</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1 font-sans">Prénom</label>
+                <input
+                  type="text"
+                  value={prenom}
+                  onChange={(e) => setPrenom(e.target.value)}
+                  className="w-full px-3 py-2 border border-dark/20 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-sans"
+                  disabled={loading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1 font-sans">Nom</label>
+                <input
+                  type="text"
+                  value={nom}
+                  onChange={(e) => setNom(e.target.value)}
+                  className="w-full px-3 py-2 border border-dark/20 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-sans"
+                  disabled={loading}
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-dark mb-1 font-sans">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-dark/20 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-sans"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSave}
                 disabled={loading}
-              />
-            </label>
-
-            <label className="block font-semibold text-dark">
-              Confirmer le mot de passe
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border border-dark/30 rounded-xl px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                disabled={loading}
-              />
-            </label>
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50 font-sans"
+              >
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enregistrement...
+                  </span>
+                ) : 'Enregistrer les modifications'}
+              </button>
+            </div>
           </div>
 
-          <button
-            onClick={handleChangePassword}
-            disabled={loading}
-            className="w-full bg-primary text-white font-semibold py-3 rounded-2xl hover:bg-secondary transition disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            {loading ? "Mise à jour..." : "Changer le mot de passe"}
-          </button>
+          {/* Section changement de mot de passe */}
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-heading font-medium text-dark mb-4">Changer le mot de passe</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1 font-sans">Nouveau mot de passe</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-dark/20 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-sans"
+                  disabled={loading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1 font-sans">Confirmer le mot de passe</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-dark/20 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-sans"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleChangePassword}
+                disabled={loading}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50 font-sans"
+              >
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Mise à jour...
+                  </span>
+                ) : 'Changer le mot de passe'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
