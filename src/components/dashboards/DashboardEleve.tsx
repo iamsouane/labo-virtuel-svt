@@ -109,7 +109,7 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
         );
       case "profil":
         return (
-          <div className="mt-6">
+          <div className="mt-1">
             <h2 className="text-3xl font-heading font-bold text-primary mb-6">
               Mon profil
             </h2>

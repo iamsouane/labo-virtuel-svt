@@ -44,7 +44,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [currentSection, setCurrentSection] = useState<Section>("accueil");
-  const [nbDemandesEnAttente, setNbDemandesEnAttente] = useState<number>(0);
+  const [, setNbDemandesEnAttente] = useState<number>(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -107,7 +107,6 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
 
   useEffect(() => {
     fetchNbDemandes();
-
     const subscription = supabase
       .channel("public:simulation_access_requests")
       .on(
@@ -134,55 +133,53 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         return <AccueilProfesseur />;
       case "simulations":
         return (
-          <div className="space-y-4">
+          <section className="space-y-4">
             <h2 className="text-2xl font-heading font-bold text-primary">Mes simulations</h2>
             <Simulations user={localUser} />
-          </div>
+          </section>
         );
       case "visualisations":
         return (
-          <div className="space-y-4">
+          <section className="space-y-4">
             <h2 className="text-2xl font-heading font-bold text-primary">Visualisations interactives</h2>
             <Visualisations />
-          </div>
+          </section>
         );
       case "classes":
         return (
-          <div className="space-y-5">
+          <section className="space-y-5">
             <h2 className="text-2xl font-heading font-bold text-primary">Mes classes</h2>
             <CreateClasseForm user={localUser} onCreated={() => setCurrentSection("classes")} />
             <MesClasses user={localUser} />
-          </div>
+          </section>
         );
       case "demandes":
         return (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-2xl font-heading font-bold text-primary mb-2">Mes demandes d'accès</h2>
-              <EtatDemandesSimulation user={localUser} />
-            </section>
-          </div>
+          <section className="space-y-8">
+            <h2 className="text-2xl font-heading font-bold text-primary mb-2">Mes demandes d'accès</h2>
+            <EtatDemandesSimulation user={localUser} />
+          </section>
         );
       case "tps":
         return (
-          <div className="space-y-4">
+          <section className="space-y-4">
             <h2 className="text-2xl font-heading font-bold text-primary">Créer un TP</h2>
             <CreateTPForm user={localUser} />
-          </div>
+          </section>
         );
       case "resultats":
         return (
-          <div className="space-y-4">
+          <section className="space-y-4">
             <h2 className="text-2xl font-heading font-bold text-primary">Résultats des élèves</h2>
             <ResultatsEleves professeur={localUser} />
-          </div>
+          </section>
         );
       case "profil":
         return (
-          <div className="space-y-4">
+          <section className="space-y-4">
             <h2 className="text-2xl font-heading font-bold text-primary">Mon profil</h2>
             <ProfilEditor user={localUser} onUpdate={setLocalUser} />
-          </div>
+          </section>
         );
       default:
         return null;
@@ -190,10 +187,10 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-light">
+    <div className="flex flex-col md:flex-row h-screen bg-light font-sans">
       {/* Header mobile */}
       <header className="md:hidden flex items-center justify-between bg-primary text-white px-4 py-2 shadow-md">
-        <div className="flex items-center gap-2 font-bold text-base">
+        <div className="flex items-center gap-2 font-semibold">
           {photoUrl ? (
             <img
               src={photoUrl}
@@ -208,14 +205,16 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Ouvrir le menu"
-          className="p-1 hover:bg-primary-dark rounded-md transition"
+          className="p-1 hover:bg-accent rounded-md transition"
         >
           <Menu size={24} />
         </button>
       </header>
 
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? "block" : "hidden"} md:flex md:flex-col md:w-64 w-full bg-primary text-white p-4 md:h-screen h-auto z-30 shadow-lg`}>
+      <aside
+        className={`${sidebarOpen ? "block" : "hidden"} md:flex md:flex-col md:w-64 w-full bg-primary text-white p-4 md:h-screen z-30 shadow-lg`}
+      >
         <div className="flex flex-col items-center mb-10">
           {photoUrl ? (
             <img
@@ -226,12 +225,12 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
           ) : (
             <UserCircle className="w-16 h-16 text-white mb-2" />
           )}
-          <h1 className="text-xl font-heading font-bold text-center whitespace-normal">
+          <h1 className="text-lg font-heading font-bold text-center">
             {localUser.prenom} {localUser.nom}
           </h1>
         </div>
 
-        <nav className="flex flex-col space-y-3 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-transparent">
+        <nav className="flex flex-col space-y-3 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-transparent">
           {[
             { label: "Accueil", icon: <Home size={18} />, value: "accueil" },
             { label: "Simulations", icon: <Cpu size={18} />, value: "simulations" },
@@ -242,7 +241,6 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
               label: "Demandes",
               icon: <CheckCircle size={18} />,
               value: "demandes",
-              badge: nbDemandesEnAttente,
             },
             { label: "Résultats élèves", icon: <FileCheck size={18} />, value: "resultats" },
             { label: "Mon profil", icon: <UserCircle size={18} />, value: "profil" },
@@ -253,26 +251,21 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
                 setCurrentSection(item.value as Section);
                 setSidebarOpen(false);
               }}
-              className={`flex items-center gap-2 px-4 py-3 rounded-2xl transition text-sm font-semibold select-none ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-2xl transition text-sm font-semibold ${
                 currentSection === item.value
                   ? "bg-light text-primary shadow"
-                  : "hover:bg-primary-dark/80"
+                  : "hover:bg-white/20"
               }`}
             >
               {item.icon}
               <span className="flex-grow text-left">{item.label}</span>
-              {item.badge && (
-                <span className="ml-auto bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                  {item.badge}
-                </span>
-              )}
             </button>
           ))}
         </nav>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 mt-4 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl shadow transition"
+          className="flex items-center gap-2 px-4 py-2 mt-4 md:mt-auto bg-danger hover:bg-dangerHover text-white font-semibold rounded-2xl shadow transition"
         >
           <LogOut size={18} /> Déconnexion
         </button>
@@ -280,7 +273,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
 
       <main className="flex-1 p-6 overflow-y-auto bg-white">
         {isLoadingUser ? (
-          <p className="text-gray-600 font-medium">Chargement du profil...</p>
+          <p className="text-secondary font-medium">Chargement du profil...</p>
         ) : (
           renderContent()
         )}

@@ -1,8 +1,10 @@
+// src/components/dashboards/AccueilProfesseur.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { ActivityLogWithUser } from "../../types";
 import StatsChartEleves from "../users/StatsChartEleves";
 import UpcomingSimulations from "../admin/UpcomingSimulations";
+import { Loader2 } from "lucide-react";
 
 export const AccueilProfesseur = () => {
   const [professeurId, setProfesseurId] = useState<string | null>(null);
@@ -10,18 +12,25 @@ export const AccueilProfesseur = () => {
     eleves: 0,
     classes: 0,
     quizzes: 0,
-    demandesAcces: 0,
+    simulationsAutorisees: 0,
   });
-
   const [recentActivities, setRecentActivities] = useState<ActivityLogWithUser[]>([]);
   const [userStatsByDay, setUserStatsByDay] = useState<{ jour: string; eleves: number }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
+        error,
       } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Erreur récupération utilisateur:", error);
+        setLoading(false);
+        return;
+      }
       if (user) setProfesseurId(user.id);
+      else setLoading(false);
     };
     fetchUser();
   }, []);
@@ -30,128 +39,112 @@ export const AccueilProfesseur = () => {
     if (!professeurId) return;
 
     const fetchStatsAndActivities = async () => {
-      // 1. Récupérer les classes du prof
-      const { data: classesData, error: classesError } = await supabase
-        .from("classe")
-        .select("id")
-        .eq("created_by", professeurId);
+      setLoading(true);
+      try {
+        // Récupération des classes
+        const { data: classesData, error: classesError } = await supabase
+          .from("classe")
+          .select("id")
+          .eq("created_by", professeurId);
+        if (classesError) throw classesError;
+        const classeIds = classesData?.map((c) => c.id) || [];
+        const classesCount = classeIds.length;
 
-      if (classesError) {
-        console.error("Erreur récupération classes:", classesError);
-        return;
-      }
-      const classeIds = classesData?.map((c) => c.id) || [];
-      const classesCount = classeIds.length;
+        // Récupération du nombre d'élèves via RPC
+        const { data: elevesData, error: elevesError } = await supabase.rpc(
+          "get_nombre_eleves_professeur",
+          { prof_id: professeurId }
+        );
+        if (elevesError) throw elevesError;
+        let elevesCount = 0;
+        if (Array.isArray(elevesData)) elevesCount = elevesData[0]?.nombre_eleves ?? 0;
+        else if (typeof elevesData === "number") elevesCount = elevesData;
+        else if (elevesData?.nombre_eleves !== undefined) elevesCount = elevesData.nombre_eleves;
 
-      // 2. Nombre d'élèves via RPC ou requête
-      let elevesCount = 0;
-      const { data: elevesData, error: elevesError } = await supabase.rpc(
-        "get_nombre_eleves_professeur",
-        { prof_id: professeurId }
-      );
+        // Récupération du nombre de quizzes créés
+        const { count: quizzesCount, error: quizzesError } = await supabase
+          .from("quiz")
+          .select("id", { count: "exact", head: true })
+          .eq("created_by", professeurId);
+        if (quizzesError) throw quizzesError;
 
-      if (elevesError) {
-        console.error("Erreur RPC nombre élèves:", elevesError);
-      } else {
-        if (Array.isArray(elevesData)) {
-          elevesCount = elevesData[0]?.nombre_eleves ?? 0;
-        } else if (typeof elevesData === "number") {
-          elevesCount = elevesData;
-        } else if (elevesData?.nombre_eleves !== undefined) {
-          elevesCount = elevesData.nombre_eleves;
-        }
-      }
+        // Récupération du nombre de simulations autorisées via RPC
+        const { data: simAutoData, error: simAutoError } = await supabase.rpc(
+          "get_nombre_simulations_autorisees_admin",
+          { prof_id: professeurId }
+        );
+        if (simAutoError) throw simAutoError;
+        let simulationsAutorisees = 0;
+        if (Array.isArray(simAutoData)) simulationsAutorisees = simAutoData[0]?.count ?? 0;
+        else if (typeof simAutoData === "number") simulationsAutorisees = simAutoData;
+        else simulationsAutorisees = simAutoData?.count ?? 0;
 
-      // 3. Quiz créés par ce prof
-      const { count: quizzesCount = 0, error: quizError } = await supabase
-        .from("quiz")
-        .select("id", { count: "exact", head: true })
-        .eq("created_by", professeurId);
+        // Récupération des logs d'activités
+        const { data: logs, error: logsError } = await supabase
+          .from("activity_logs")
+          .select("*, user:user_id (nom, prenom, role)")
+          .eq("user_id", professeurId)
+          .order("created_at", { ascending: false })
+          .limit(8);
+        if (logsError) throw logsError;
 
-      if (quizError) {
-        console.error("Erreur récupération quizzes:", quizError);
-      }
+        // Statistiques journalières sur les ajouts d'élèves
+        const today = new Date();
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(today.getDate() - 6);
 
-      // 4. Demandes d'accès approuvées
-      let demandesCount = 0;
-      const { data: demandesData, error: demandesError } = await supabase.rpc(
-        "get_nombre_demandes_acces_professeur",
-        { prof_id: professeurId }
-      );
+        const { data: ajoutsRecents, error: ajoutsError } = await supabase
+          .from("users_classe")
+          .select("id, assigned_at")
+          .in("classe_id", classeIds)
+          .gte("assigned_at", sevenDaysAgo.toISOString())
+          .order("assigned_at", { ascending: true });
+        if (ajoutsError) throw ajoutsError;
 
-      if (demandesError) {
-        console.error("Erreur RPC demandes accès:", demandesError);
-      } else {
-        if (Array.isArray(demandesData)) {
-          demandesCount = demandesData[0]?.count ?? 0;
-        } else if (typeof demandesData === "number") {
-          demandesCount = demandesData;
-        } else if (demandesData?.count !== undefined) {
-          demandesCount = demandesData.count;
-        }
-      }
-
-      // 5. Activités récentes du prof (activity_logs)
-      const { data: logs, error: logsError } = await supabase
-        .from("activity_logs")
-        .select("*, user:user_id (nom, prenom, role)")
-        .eq("user_id", professeurId)
-        .order("created_at", { ascending: false })
-        .limit(8);
-
-      if (logsError) {
-        console.error("Erreur récupération logs d'activités :", logsError);
-      }
-
-      // 6. Élèves ajoutés aux classes du prof dans les 7 derniers jours
-      const today = new Date();
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(today.getDate() - 6);
-
-      const { data: ajoutsRecents, error: ajoutError } = await supabase
-        .from("users_classe")
-        .select("id, assigned_at")
-        .in("classe_id", classeIds)
-        .gte("assigned_at", sevenDaysAgo.toISOString())
-        .order("assigned_at", { ascending: true });
-
-      if (ajoutError) {
-        console.error("Erreur récupération ajouts users_classe:", ajoutError);
-      }
-
-      // Compter les ajouts par jour
-      const countsByDay: Record<string, number> = {};
-      ajoutsRecents?.forEach((ajout) => {
-        const key = ajout.assigned_at?.slice(0, 10);
-        if (key) countsByDay[key] = (countsByDay[key] || 0) + 1;
-      });
-
-      // Préparer les données pour le graphique
-      const chartData = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const key = date.toISOString().slice(0, 10);
-        chartData.push({
-          jour: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
-          eleves: countsByDay[key] || 0,
+        const countsByDay: Record<string, number> = {};
+        ajoutsRecents?.forEach((ajout) => {
+          const key = ajout.assigned_at?.slice(0, 10);
+          if (key) countsByDay[key] = (countsByDay[key] || 0) + 1;
         });
+
+        const chartData = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const key = date.toISOString().slice(0, 10);
+          chartData.push({
+            jour: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
+            eleves: countsByDay[key] || 0,
+          });
+        }
+
+        setUserStatsByDay(chartData);
+
+        setStats({
+          eleves: elevesCount,
+          classes: classesCount,
+          quizzes: quizzesCount ?? 0,
+          simulationsAutorisees,
+        });
+
+        setRecentActivities(logs || []);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des statistiques :", error);
+      } finally {
+        setLoading(false);
       }
-
-      setUserStatsByDay(chartData);
-
-      setStats({
-        eleves: elevesCount,
-        classes: classesCount,
-        quizzes: quizzesCount || 0,
-        demandesAcces: demandesCount || 0,
-      });
-
-      setRecentActivities(logs || []);
     };
 
     fetchStatsAndActivities();
   }, [professeurId]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center text-secondary">
+        <Loader2 className="animate-spin mr-2" /> Chargement des données du tableau de bord...
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto font-sans space-y-8">
@@ -162,7 +155,7 @@ export const AccueilProfesseur = () => {
           <StatCard label="Élèves" value={stats.eleves} />
           <StatCard label="Classes" value={stats.classes} />
           <StatCard label="Quiz créés" value={stats.quizzes} />
-          <StatCard label="Demandes accès validées" value={stats.demandesAcces} />
+          <StatCard label="Simulations autorisées" value={stats.simulationsAutorisees} />
         </div>
 
         <StatsChartEleves data={userStatsByDay} />

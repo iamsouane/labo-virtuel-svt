@@ -15,7 +15,7 @@ function convertToCSV(results: ResultatEleve[]): string {
     "Élève nom",
     "Classe",
     "Quiz",
-    "Note",
+    "Note sur 20",
     "Total questions",
     "Temps total (s)",
     "Terminé le",
@@ -29,12 +29,17 @@ function convertToCSV(results: ResultatEleve[]): string {
         : Object.values(res.reponses ?? {}).reduce((acc, val) => acc + (val.timeSpent ?? 0), 0);
     const completedDate = new Date(res.completed_at).toLocaleString();
 
+    // Calcul note sur 20
+    const score = res.note ?? 0;
+    const noteSur20 =
+      totalQuestions > 0 ? ((score / totalQuestions) * 20).toFixed(1) : "0";
+
     return [
       res.eleve_prenom,
       res.eleve_nom,
       res.eleve_classe,
       res.quiz_title,
-      res.note?.toString() ?? "",
+      noteSur20,
       totalQuestions.toString(),
       totalTime.toString(),
       completedDate,
@@ -101,9 +106,9 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
     }, {});
 
   return (
-    <div className="p-6 space-y-8 bg-light rounded-2xl shadow-md">
+    <div className="p-6 space-y-8 bg-light rounded-2xl shadow-md max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold font-heading text-primary mb-6 flex items-center gap-3">
-        <BookOpen className="w-6 h-6" />
+        <BookOpen className="w-6 h-6 text-primary" />
         Résultats des élèves
       </h2>
 
@@ -121,7 +126,7 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
               </h3>
               <button
                 onClick={handleDownload}
-                className="px-4 py-1 text-sm bg-primary text-white rounded-xl hover:bg-green-700 transition"
+                className="px-4 py-1 text-sm bg-primary text-white rounded-xl hover:bg-secondary transition focus:outline-none focus:ring-2 focus:ring-secondary"
                 type="button"
               >
                 Télécharger CSV
@@ -136,7 +141,7 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
 
                 let totalTime = typeof res.time_spent === "number" ? res.time_spent : 0;
 
-                if (!totalTime && Object.keys(reponses).length > 0) {
+                if (!totalTime && totalQuestions > 0) {
                   totalTime = Object.values(reponses).reduce(
                     (acc, val) => acc + (val.timeSpent ?? 0),
                     0
@@ -147,10 +152,13 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
                 const seconds = totalTime % 60;
                 const averageTime = totalQuestions > 0 ? Math.round(totalTime / totalQuestions) : 0;
 
+                // Calcul note sur 20
+                const noteSur20 = totalQuestions > 0 ? ((score / totalQuestions) * 20).toFixed(1) : "0";
+
                 return (
                   <div
                     key={res.id}
-                    className="border border-dark/20 rounded-2xl p-5 shadow-sm bg-white"
+                    className="border border-primary/30 rounded-2xl p-5 shadow-sm bg-white"
                   >
                     <h4 className="text-lg font-semibold font-heading text-primary mb-2">
                       {res.quiz_title}
@@ -159,14 +167,14 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
                       Élève : <strong>{res.eleve_prenom} {res.eleve_nom}</strong>
                     </p>
                     <p className="text-dark/80">
-                      Note : <strong>{score} / {totalQuestions}</strong>
+                      Note : <strong>{noteSur20} / 20</strong>
                     </p>
                     <p className="text-dark/60 text-sm flex items-center gap-1 mt-1">
-                      <Timer className="w-4 h-4" />
+                      <Timer className="w-4 h-4 text-primary" />
                       Temps total : {minutes}m {seconds}s | Moyenne : {averageTime}s / question
                     </p>
                     <p className="text-dark/60 text-sm flex items-center gap-1">
-                      <CalendarCheck className="w-4 h-4" />
+                      <CalendarCheck className="w-4 h-4 text-primary" />
                       Terminé le : {new Date(res.completed_at).toLocaleString()}
                     </p>
                   </div>

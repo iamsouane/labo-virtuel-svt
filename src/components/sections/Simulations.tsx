@@ -1,3 +1,4 @@
+//src/components/sections/Simulations
 import { useEffect, useState, type JSX } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import {

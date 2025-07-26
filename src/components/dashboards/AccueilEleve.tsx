@@ -9,13 +9,15 @@ export const AccueilEleve = () => {
   const [eleveId, setEleveId] = useState<string | null>(null);
   const [stats, setStats] = useState({
     quizTotal: 0,
-    simulationsAutorisees: 0,
+    simulationsProf: 0,
     quizTermines: 0,
-    demandesEnAttente: 0,
+    classesAssociees: 0,
   });
 
   const [recentActivities, setRecentActivities] = useState<ActivityLogWithUser[]>([]);
-  const [quizTerminesByDay, setQuizTerminesByDay] = useState<{ jour: string; quizCount: number }[]>([]);
+  const [quizTerminesByDay, setQuizTerminesByDay] = useState<
+    { jour: string; quizCount: number }[]
+  >([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -41,6 +43,7 @@ export const AccueilEleve = () => {
         console.error("Erreur récupération classes élève:", classesError);
         return;
       }
+
       const classeIds = classesData?.map((c) => c.classe_id) || [];
 
       // 2. Nombre total de quiz liés aux classes de l'élève
@@ -53,18 +56,31 @@ export const AccueilEleve = () => {
         console.error("Erreur récupération quiz total:", quizError);
       }
 
-      // 3. Nombre de simulations autorisées à l'élève
-      const { count: simuCount, error: simuError } = await supabase
-        .from("simulations_eleves")
-        .select("simulation_id", { count: "exact", head: true })
-        .eq("eleve_id", eleveId)
+      // 3. Nombre de simulations autorisées à l'élève via profs de ses classes
+      const { data: profs, error: profsError } = await supabase
+        .from("classe")
+        .select("created_by")
+        .in("id", classeIds);
+
+      if (profsError) {
+        console.error("Erreur récupération professeurs des classes:", profsError);
+      }
+
+      const profIds = profs?.map((p) => p.created_by).filter(Boolean) || [];
+
+      const { data: simulationsAut, error: simuError } = await supabase
+        .from("simulations_professeurs")
+        .select("simulation_id")
+        .in("professeur_id", profIds)
         .eq("est_autorisee", true);
 
       if (simuError) {
         console.error("Erreur récupération simulations autorisées:", simuError);
       }
 
-      // ✅ 4. Nombre de quiz terminés par l'élève (correction ici)
+      const simuCount = simulationsAut?.length || 0;
+
+      // 4. Nombre de quiz terminés
       const { count: quizTerminesCount, error: quizTerminesError } = await supabase
         .from("quiz_result")
         .select("id", { count: "exact", head: true })
@@ -74,18 +90,10 @@ export const AccueilEleve = () => {
         console.error("Erreur récupération quiz terminés:", quizTerminesError);
       }
 
-      // 5. Nombre de demandes d'accès en attente
-      const { count: demandesCount, error: demandesError } = await supabase
-        .from("simulation_access_requests")
-        .select("id", { count: "exact", head: true })
-        .eq("demandeur_id", eleveId)
-        .eq("statut", "REJETE");
+      // 5. Nombre de classes associées
+      const classesCount = classeIds.length;
 
-      if (demandesError) {
-        console.error("Erreur récupération demandes en attente:", demandesError);
-      }
-
-      // ✅ 6. Quiz terminés sur les 7 derniers jours (correction ici)
+      // 6. Quiz terminés sur les 7 derniers jours
       const today = new Date();
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(today.getDate() - 6);
@@ -98,14 +106,13 @@ export const AccueilEleve = () => {
         .order("completed_at", { ascending: true });
 
       if (quizTerminesRecentsError) {
-        console.error("Erreur récupération quiz terminés récents:", quizTerminesRecentsError);
+        console.error("Erreur récupération quiz récents:", quizTerminesRecentsError);
       }
 
-      // Compter quiz terminés par jour
       const countsByDay: Record<string, number> = {};
       quizTerminesRecents?.forEach((quiz) => {
         if (quiz.completed_at) {
-          const key = quiz.completed_at.slice(0, 10);
+          const key = new Date(quiz.completed_at).toDateString();
           countsByDay[key] = (countsByDay[key] || 0) + 1;
         }
       });
@@ -114,7 +121,7 @@ export const AccueilEleve = () => {
       for (let i = 6; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(today.getDate() - i);
-        const key = date.toISOString().slice(0, 10);
+        const key = date.toDateString();
         chartData.push({
           jour: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
           quizCount: countsByDay[key] || 0,
@@ -135,9 +142,9 @@ export const AccueilEleve = () => {
 
       setStats({
         quizTotal: quizCount || 0,
-        simulationsAutorisees: simuCount || 0,
+        simulationsProf: simuCount || 0,
         quizTermines: quizTerminesCount || 0,
-        demandesEnAttente: demandesCount || 0,
+        classesAssociees: classesCount || 0,
       });
 
       setQuizTerminesByDay(chartData);
@@ -154,9 +161,9 @@ export const AccueilEleve = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="grid grid-cols-2 gap-6">
           <StatCard label="Quiz disponibles" value={stats.quizTotal} />
-          <StatCard label="Simulations autorisées" value={stats.simulationsAutorisees} />
+          <StatCard label="Simulations disponibles" value={stats.simulationsProf} />
           <StatCard label="Quiz terminés" value={stats.quizTermines} />
-          <StatCard label="Demandes rejetees" value={stats.demandesEnAttente} />
+          <StatCard label="Classes associées" value={stats.classesAssociees} />
         </div>
 
         <StatsChartQuiz data={quizTerminesByDay} />
