@@ -13,7 +13,7 @@ const simulationsAVenir: SimulationPreview[] = [
     id: "facteurs-edaphiques",
     titre: "Facteurs édaphiques",
     date: "2025-08-12",
-    imageUrl: "/edaphique.jpg", // corrigé : enlever "public"
+    imageUrl: "/edaphique.jpg",
   },
   {
     id: "ecosysteme-equilibre",

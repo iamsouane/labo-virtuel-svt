@@ -1,5 +1,8 @@
+//src/components/users/ModalEleve.tsx
+import { useState } from "react";
 import { Loader2, Trash2, User, X, Mail, BookOpen } from "lucide-react";
 import type { ClasseWithEleves, Eleve } from "../../lib/fetchClassesAndEleves";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 interface ModalEleveProps {
   eleve: Eleve;
@@ -20,13 +23,22 @@ const ModalEleve = ({
   selectedClasseId,
   classes,
 }: ModalEleveProps) => {
+  const [showConfirm, setShowConfirm] = useState(false);
   const classe = classes.find((c) => c.id === selectedClasseId);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col border border-gray-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Overlay avec floutage */}
+      <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      
+      {/* Contenu de la modal */}
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col border border-gray-100 z-10">
         {/* Header */}
-        <div className="flex justify-between items-center bg-primary/5 p-5 border-b border-gray-100 sticky top-0 z-10">
+        <div className="flex justify-between items-center bg-primary/5 p-5 border-b border-gray-100 sticky top-0">
           <div className="flex items-center gap-3">
             <BookOpen className="w-5 h-5 text-primary" />
             <h3 className="text-xl font-heading font-semibold text-dark">
@@ -99,7 +111,7 @@ const ModalEleve = ({
         {/* Footer - Bouton fixe en bas */}
         <div className="p-5 border-t border-gray-100 sticky bottom-0 bg-white">
           <button
-            onClick={onDelete}
+            onClick={() => setShowConfirm(true)}
             disabled={isDeleting}
             className={`w-full flex items-center justify-center gap-3 py-3 px-6 rounded-xl font-medium transition-all ${
               isDeleting
@@ -121,6 +133,20 @@ const ModalEleve = ({
           </button>
         </div>
       </div>
+
+      {/* ConfirmDialog */}
+      {showConfirm && (
+        <ConfirmDialog
+          isOpen={showConfirm}
+          title="Confirmation"
+          message={`Voulez-vous vraiment retirer ${eleve.prenom} ${eleve.nom} de la classe ?`}
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={() => {
+            setShowConfirm(false);
+            onDelete();
+          }}
+        />
+      )}
     </div>
   );
 };

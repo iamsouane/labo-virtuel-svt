@@ -4,13 +4,11 @@ import { useNavigate } from "react-router-dom";
 import type { Profil } from "../../types";
 import { supabase } from "../../lib/supabaseClient";
 import { notifySuccess, notifyError } from "../../lib/notifications";
-import { Eye, EyeOff } from "lucide-react";
-
+import { Eye, EyeOff, Lock } from "lucide-react";
 import DashboardAdmin from "../dashboards/DashboardAdmin";
 import DashboardProfesseur from "../dashboards/DashboardProfesseur";
 import DashboardEleve from "../dashboards/DashboardEleve";
 
-// Formulaire de changement de mot de passe stylé avec ta charte
 const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,84 +16,91 @@ const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     if (newPassword.trim().length < 6) {
       notifyError("Le mot de passe doit contenir au moins 6 caractères.");
-      setLoading(false);
       return;
     }
 
-    const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
-    if (authError) {
-      notifyError("Erreur : " + authError.message);
-      setLoading(false);
+    // Exemples de mots de passe à éviter
+    const forbiddenPasswords = ["123456", "password", "motdepasse", "azerty", "000000"];
+    if (forbiddenPasswords.includes(newPassword.trim().toLowerCase())) {
+      notifyError("Le mot de passe est trop simple. Veuillez en choisir un plus sécurisé.");
       return;
     }
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      notifyError("Erreur lors de la récupération de l'utilisateur.");
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
+    try {
+      const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
+      if (authError) throw new Error(authError.message);
 
-    const { error: dbError } = await supabase
-      .from("users")
-      .update({ must_change_password: false })
-      .eq("id", user.id);
-    if (dbError) {
-      notifyError("Erreur lors de la mise à jour du statut : " + dbError.message);
-      setLoading(false);
-      return;
-    }
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error("Erreur lors de la récupération de l'utilisateur.");
 
-    setLoading(false);
-    onSuccess();
+      const { error: dbError } = await supabase
+        .from("users")
+        .update({ must_change_password: false })
+        .eq("id", user.id);
+      if (dbError) throw new Error(dbError.message);
+
+      notifySuccess("Mot de passe mis à jour avec succès !");
+      onSuccess();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        notifyError(error.message);
+      } else {
+        notifyError("Une erreur inconnue est survenue lors de la mise à jour du mot de passe.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 font-sans">
-      <div>
-        <label htmlFor="password" className="block font-semibold text-primary mb-1">
-          Nouveau mot de passe
-        </label>
-        <div className="relative">
-          <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="******"
-            minLength={6}
-            required
-            disabled={loading}
-            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary transition"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute top-2.5 right-3 text-primary hover:text-primary transition"
-            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-        </div>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Lock className="w-6 h-6 text-primary" />
+        <h2 className="text-xl font-heading font-semibold text-dark">Changement de mot de passe</h2>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className={`w-full py-3 rounded-2xl text-white font-semibold transition ${
-          loading ? "bg-secondary/50 cursor-not-allowed" : "bg-primary hover:bg-secondary"
-        }`}
-      >
-        {loading ? "Mise à jour..." : "Mettre à jour"}
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-dark mb-1">
+            Nouveau mot de passe
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Saisissez votre nouveau mot de passe"
+              disabled={loading}
+              className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-primary transition"
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full flex justify-center items-center py-3 px-6 rounded-xl font-medium transition-all ${
+            loading ? "bg-primary/80 cursor-wait" : "bg-primary hover:bg-primary/90 shadow-sm hover:shadow-md"
+          } text-white`}
+        >
+          {loading ? "Enregistrement..." : "Mettre à jour"}
+        </button>
+      </form>
+    </div>
   );
 };
 
@@ -116,15 +121,8 @@ const AccueilUtilisateur = ({ user, onLogout }: AccueilUtilisateurProps) => {
 
   const handlePasswordChanged = async () => {
     try {
-      const {
-        data: { user: authUser },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError || !authUser) {
-        notifyError("Impossible de récupérer l'utilisateur mis à jour.");
-        return;
-      }
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      if (authError || !authUser) throw new Error(authError?.message || "Utilisateur non trouvé");
 
       const { data: profil, error: dbError } = await supabase
         .from("users")
@@ -132,40 +130,38 @@ const AccueilUtilisateur = ({ user, onLogout }: AccueilUtilisateurProps) => {
         .eq("id", authUser.id)
         .single();
 
-      if (dbError || !profil) {
-        notifyError("Erreur lors de la récupération du profil mis à jour.");
-        return;
-      }
+      if (dbError || !profil) throw new Error(dbError?.message || "Profil non trouvé");
 
       setLocalUser(profil);
-      notifySuccess("Votre mot de passe a été mis à jour avec succès !");
-    } catch {
-      notifyError("Erreur inattendue.");
+      notifySuccess("Mot de passe mis à jour avec succès !");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        notifyError(error.message);
+      } else {
+        notifyError("Erreur inconnue lors de la mise à jour du profil");
+      }
+    }
+  };
+
+  const renderDashboard = () => {
+    switch (localUser.role) {
+      case "ADMIN":
+        return <DashboardAdmin user={localUser} onLogout={handleLogout} />;
+      case "PROFESSEUR":
+        return <DashboardProfesseur user={localUser} onLogout={handleLogout} />;
+      case "ELEVE":
+        return <DashboardEleve user={localUser} onLogout={handleLogout} />;
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-auto bg-light font-sans">
-      <div
-        className={`transition-all duration-300 ${
-          localUser.must_change_password
-            ? "blur-sm opacity-60 pointer-events-none h-full"
-            : "h-full"
-        }`}
-      >
-        {localUser.role === "ADMIN" && <DashboardAdmin user={localUser} onLogout={handleLogout} />}
-        {localUser.role === "PROFESSEUR" && (
-          <DashboardProfesseur user={localUser} onLogout={handleLogout} />
-        )}
-        {localUser.role === "ELEVE" && <DashboardEleve user={localUser} onLogout={handleLogout} />}
-      </div>
-
+    <div className="relative w-full min-h-screen bg-light">
+      {renderDashboard()}
       {localUser.must_change_password && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-auto">
-            <p className="mb-4 text-red-600 font-semibold text-center">
-              Vous devez changer votre mot de passe avant de continuer.
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md">
             <ChangePasswordForm onSuccess={handlePasswordChanged} />
           </div>
         </div>

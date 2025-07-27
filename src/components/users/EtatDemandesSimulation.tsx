@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 interface Demande {
   id: string;
@@ -16,10 +16,12 @@ interface Demande {
 const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
   const [demandes, setDemandes] = useState<Demande[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = async () => {
+    const fetchDemandes = async () => {
       setLoading(true);
+      setError(null);
       try {
         const { data, error } = await supabase
           .from("simulation_access_requests")
@@ -50,79 +52,126 @@ const EtatDemandesSimulation = ({ user }: { user: Profil }) => {
         setDemandes(mapped);
       } catch (err) {
         console.error("Erreur lors du chargement des demandes :", err);
+        setError("Impossible de charger les demandes. Veuillez réessayer.");
       } finally {
         setLoading(false);
       }
     };
 
-    load();
+    fetchDemandes();
   }, [user.id]);
 
-  const formatStatut = (statut: string) => {
+  const getStatusConfig = (statut: string) => {
     switch (statut) {
       case "EN_ATTENTE":
-        return "En attente";
+        return {
+          text: "En attente",
+          icon: <Clock className="w-4 h-4" />,
+          bg: "bg-yellow-50",
+          textColor: "text-yellow-700",
+          border: "border-yellow-100",
+        };
       case "APPROUVE":
-        return "Approuvée";
+        return {
+          text: "Approuvée",
+          icon: <CheckCircle className="w-4 h-4" />,
+          bg: "bg-green-50",
+          textColor: "text-green-700",
+          border: "border-green-100",
+        };
       case "REJETE":
-        return "Rejetée";
+        return {
+          text: "Rejetée",
+          icon: <XCircle className="w-4 h-4" />,
+          bg: "bg-red-50",
+          textColor: "text-red-700",
+          border: "border-red-100",
+        };
       default:
-        return statut;
+        return {
+          text: statut,
+          icon: null,
+          bg: "bg-gray-50",
+          textColor: "text-gray-700",
+          border: "border-gray-100",
+        };
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
-    <div className="mt-8">
-      <h3 className="text-xl font-heading font-bold mb-4 flex items-center gap-2 text-primary">
-        <ClipboardList className="w-5 h-5 text-secondary" />
-        État de mes demandes d'accès
-      </h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <ClipboardList className="w-6 h-6 text-primary" />
+        <h2 className="text-2xl font-heading font-bold text-primary">
+          Mes demandes d'accès
+        </h2>
+      </div>
 
       {loading ? (
-        <p className="text-dark/60">Chargement...</p>
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-100 rounded-lg p-4 text-red-700">
+          {error}
+        </div>
       ) : demandes.length === 0 ? (
-        <p className="text-dark/60">Aucune demande envoyée.</p>
+        <div className="bg-gray-50 border border-gray-100 rounded-lg p-8 text-center">
+          <p className="text-gray-500">Aucune demande d'accès enregistrée</p>
+        </div>
       ) : (
-        <ul className="space-y-4">
-          {demandes.map((d) => (
-            <li
-              key={d.id}
-              className="bg-light p-4 border border-dark/10 rounded-2xl shadow-sm flex justify-between items-start"
-            >
-              <div className="flex-1">
-                <p className="font-semibold text-primary">
-                  Simulation : {d.simulation_titre}
-                </p>
-
-                {d.message && (
-                  <p className="text-sm text-dark mt-1">{d.message}</p>
-                )}
-
-                {d.destinataire_nom && (
-                  <p className="text-xs italic text-dark/60 mt-1">
-                    Destinataire : {d.destinataire_nom}
-                  </p>
-                )}
-
-                <p className="text-xs text-dark/40 mt-1">
-                  Envoyée le : {new Date(d.created_at).toLocaleString()}
-                </p>
-              </div>
-
-              <span
-                className={`ml-4 px-3 py-1 rounded-full text-sm font-medium self-center ${
-                  d.statut === "EN_ATTENTE"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : d.statut === "APPROUVE"
-                    ? "bg-accent text-primary"
-                    : "bg-danger text-dangerHover"
-                }`}
+        <div className="space-y-4">
+          {demandes.map((d) => {
+            const status = getStatusConfig(d.statut);
+            return (
+              <div
+                key={d.id}
+                className={`border rounded-xl p-5 ${status.border} ${status.bg} transition-all hover:shadow-sm`}
               >
-                {formatStatut(d.statut)}
-              </span>
-            </li>
-          ))}
-        </ul>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-dark">
+                      {d.simulation_titre}
+                    </h3>
+                    
+                    {d.message && (
+                      <p className="text-sm text-gray-600 mt-2">{d.message}</p>
+                    )}
+
+                    <div className="mt-3 flex flex-wrap gap-4">
+                      {d.destinataire_nom && (
+                        <div className="text-sm text-gray-500">
+                          <span className="font-medium">Destinataire :</span> {d.destinataire_nom}
+                        </div>
+                      )}
+                      <div className="text-sm text-gray-500">
+                        <span className="font-medium">Date :</span> {formatDate(d.created_at)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`ml-4 flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${status.textColor}`}
+                  >
+                    {status.icon}
+                    <span>{status.text}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

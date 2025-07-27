@@ -1,10 +1,7 @@
 // src/components/users/ListeDemandesAcces.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import {
-  Loader2,
-  MessagesSquare,
-} from "lucide-react";
+import { Loader2, MessagesSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { notifyError, notifySuccess, notifyInfo } from "../../lib/notifications";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
 import type { Profil } from "../../types";
@@ -150,115 +147,138 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center text-secondary mt-8">
-        <Loader2 className="animate-spin mr-2" /> Chargement des demandes...
+      <div className="flex justify-center items-center h-64">
+        <div className="flex items-center gap-2 text-secondary">
+          <Loader2 className="animate-spin h-5 w-5" />
+          <span className="font-medium">Chargement des demandes...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <section className="mt-10 px-4">
-      <h2 className="text-2xl font-heading font-bold text-primary mb-6">
-        Demandes d'accès aux simulations
-      </h2>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-primary mb-2">Demandes d'accès</h1>
+        <p className="text-dark/80">Gestion des demandes d'accès aux simulations</p>
+      </div>
 
       {demandes.length === 0 ? (
-        <p className="text-secondary">Aucune demande trouvée.</p>
+        <div className="bg-light rounded-lg p-8 text-center">
+          <p className="text-secondary">Aucune demande trouvée</p>
+        </div>
       ) : (
         <>
-          <div className="overflow-x-auto bg-light rounded-xl shadow-md">
-            <table className="min-w-full table-auto text-left text-sm">
-              <thead className="bg-secondary text-light font-semibold">
-                <tr>
-                  <th className="px-4 py-3 border-b border-secondary">Demandeur</th>
-                  <th className="px-4 py-3 border-b border-secondary">Simulation</th>
-                  <th className="px-4 py-3 border-b border-secondary">Message</th>
-                  <th className="px-4 py-3 border-b border-secondary">Statut</th>
-                  <th className="px-4 py-3 border-b border-secondary">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {demandes.map((demande) => {
-                  const getStatut = () => {
-                    switch (demande.statut) {
-                      case "EN_ATTENTE":
-                        return <span className="text-yellow-700 text-sm font-medium">En attente</span>;
-                      case "APPROUVE":
-                        return <span className="text-green-600 text-sm font-medium">Approuvée</span>;
-                      case "REJETE":
-                        return <span className="text-red-600 text-sm font-medium">Rejetée</span>;
-                    }
-                  };
-
-                  return (
-                    <tr key={demande.id} className="hover:bg-accent border-b border-secondary">
-                      <td className="px-4 py-2">{demande.nom_demandeur}</td>
-                      <td className="px-4 py-2 italic text-dark/80">{demande.simulation_titre}</td>
-                      <td className="px-4 py-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark uppercase tracking-wider">
+                      Demandeur
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark uppercase tracking-wider">
+                      Simulation
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark uppercase tracking-wider">
+                      Message
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-dark uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {demandes.map((demande) => (
+                    <tr key={demande.id} className="hover:bg-accent/10">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-dark">
+                        {demande.nom_demandeur}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm italic text-dark/80">
+                        {demande.simulation_titre}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-dark">
                         {demande.message ? (
-                          <span className="flex items-center gap-1 text-sm">
-                            <MessagesSquare className="w-4 h-4 text-dark/50" />
-                            {demande.message}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <MessagesSquare className="h-4 w-4 text-dark/40" />
+                            <span className="line-clamp-1">{demande.message}</span>
+                          </div>
                         ) : (
                           <span className="text-dark/40 italic">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-2">{getStatut()}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {demande.statut === "EN_ATTENTE" ? (
-                          <div className="flex gap-2">
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                            En attente
+                          </span>
+                        ) : demande.statut === "APPROUVE" ? (
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                            Approuvée
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                            Rejetée
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {demande.statut === "EN_ATTENTE" ? (
+                          <div className="flex justify-end gap-2">
                             <button
                               onClick={() => handleDecision(demande, "APPROUVE")}
-                              className="bg-primary hover:bg-primary/90 text-light px-3 py-1 rounded-xl text-xs font-semibold transition"
+                              className="px-3 py-1 text-xs font-medium rounded-lg bg-primary text-white hover:bg-green-700"
                             >
                               Approuver
                             </button>
                             <button
                               onClick={() => handleDecision(demande, "REJETE")}
-                              className="bg-danger hover:bg-dangerHover text-light px-3 py-1 rounded-xl text-xs font-semibold transition"
+                              className="px-3 py-1 text-xs font-medium rounded-lg bg-danger text-white hover:bg-red-700"
                             >
                               Rejeter
                             </button>
                           </div>
                         ) : (
-                          <span className="text-dark/40 italic text-xs">Aucune action</span>
+                          <span className="text-dark/40 text-xs">Terminée</span>
                         )}
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-center items-center mt-6 gap-4">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 rounded-xl border border-secondary text-sm bg-white shadow hover:bg-secondary hover:text-light disabled:opacity-50"
-            >
-              Précédent
-            </button>
-            <span className="text-sm text-gray-600">
-              Page {currentPage} / {Math.ceil(totalDemandes / pageSize)}
-            </span>
-            <button
-              onClick={() =>
-                setCurrentPage((prev) =>
-                  prev < Math.ceil(totalDemandes / pageSize) ? prev + 1 : prev
-                )
-              }
-              disabled={currentPage >= Math.ceil(totalDemandes / pageSize)}
-              className="px-4 py-2 rounded-xl border border-secondary text-sm bg-white shadow hover:bg-secondary hover:text-light disabled:opacity-50"
-            >
-              Suivant
-            </button>
+          <div className="flex items-center justify-between mt-6">
+            <div className="text-sm text-dark/70">
+              {totalDemandes} demande{demandes.length > 1 ? 's' : ''} au total
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Précédent
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => prev < Math.ceil(totalDemandes / pageSize) ? prev + 1 : prev)}
+                disabled={currentPage >= Math.ceil(totalDemandes / pageSize)}
+                className="flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50"
+              >
+                Suivant
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </button>
+            </div>
           </div>
         </>
       )}
-    </section>
+    </div>
   );
 };
 

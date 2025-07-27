@@ -1,3 +1,4 @@
+//src/components/users/MesClasses
 import { useEffect, useState } from "react";
 import type { Profil } from "../../types";
 import { fetchClassesAndEleves } from "../../lib/fetchClassesAndEleves";

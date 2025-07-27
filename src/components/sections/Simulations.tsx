@@ -41,12 +41,20 @@ const Simulations = ({ user }: SimulationsProps) => {
     const fetchSimulations = async () => {
       setIsLoadingSimulations(true);
       try {
-        await loadSimulationsForUser(user, setSimulations, setAuthorizedSimulations);
+        await loadSimulationsForUser(user, (sims: any[]) => {
+          const uniqueSimulationsMap = new Map();
+          sims.forEach((sim) => {
+            if (sim && !uniqueSimulationsMap.has(sim.id)) {
+              uniqueSimulationsMap.set(sim.id, sim);
+            }
+          });
+          setSimulations(Array.from(uniqueSimulationsMap.values()));
+        }, setAuthorizedSimulations);
       } finally {
         setIsLoadingSimulations(false);
       }
     };
-    
+
     fetchSimulations();
   }, [user]);
 
@@ -217,7 +225,7 @@ const Simulations = ({ user }: SimulationsProps) => {
               <ArrowLeft size={20} />
               Retour à la liste des simulations
             </button>
-            
+
             <div className="bg-white rounded-xl shadow-sm p-6">
               {renderActiveSimulation()}
             </div>

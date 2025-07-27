@@ -1,5 +1,5 @@
 // src/components/dashboards/DashboardEleve.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import type { Profil } from "../../types";
@@ -14,8 +14,11 @@ import {
   LogOut,
   UserCircle,
   Menu,
+  Home,
 } from "lucide-react";
 import AccueilEleve from "./AccueilEleve";
+import { useFullUserProfile } from "../../hooks/useFullUserProfile";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 type Section = "accueil" | "simulations" | "visualisations" | "tps" | "profil";
 
@@ -25,50 +28,11 @@ interface DashboardEleveProps {
 }
 
 const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
-  const [localUser, setLocalUser] = useState<Profil>(user);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const { localUser, setLocalUser, photoUrl, isLoadingUser } = useFullUserProfile(user);
   const [currentSection, setCurrentSection] = useState<Section>("accueil");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoadingUser(true);
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error || !data) {
-        console.error("Erreur récupération profil:", error?.message);
-        setLocalUser(user);
-      } else {
-        setLocalUser(data);
-      }
-
-      setIsLoadingUser(false);
-    };
-
-    fetchUser();
-  }, [user.id]);
-
-  useEffect(() => {
-    const updatePhotoUrl = () => {
-      if (!localUser.photo_profil) return setPhotoUrl(null);
-      if (!localUser.photo_profil.startsWith("http")) {
-        const { data } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(localUser.photo_profil);
-        setPhotoUrl(data?.publicUrl ?? null);
-      } else {
-        setPhotoUrl(localUser.photo_profil);
-      }
-    };
-
-    updatePhotoUrl();
-  }, [localUser.photo_profil]);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -82,39 +46,27 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
         return <AccueilEleve />;
       case "simulations":
         return (
-          <div className="mt-6">
-            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
-              Simulations
-            </h2>
+          <section className="space-y-1">
             <Simulations user={localUser} />
-          </div>
+          </section>
         );
       case "visualisations":
         return (
-          <div className="mt-6">
-            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
-              Visualisations interactives
-            </h2>
+          <section className="space-y-1">
             <Visualisations />
-          </div>
+          </section>
         );
       case "tps":
         return (
-          <div className="mt-6">
-            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
-              Mes Travaux Pratiques
-            </h2>
+          <section className="space-y-1">
             <MesTPs />
-          </div>
+          </section>
         );
       case "profil":
         return (
-          <div className="mt-1">
-            <h2 className="text-3xl font-heading font-bold text-primary mb-6">
-              Mon profil
-            </h2>
+          <section className="space-y-6">
             <ProfilEditor user={localUser} onUpdate={setLocalUser} />
-          </div>
+          </section>
         );
       default:
         return null;
@@ -122,62 +74,55 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-light">
+    <div className="flex flex-col md:flex-row h-screen bg-light font-sans">
       {/* Header mobile */}
-      <header className="md:hidden flex items-center justify-between bg-primary text-white px-5 py-3 shadow-md">
-        <div className="flex items-center gap-3 font-bold text-lg">
+      <header className="md:hidden flex items-center justify-between bg-primary text-white px-4 py-3 shadow-md">
+        <div className="flex items-center gap-2 font-semibold">
           {photoUrl ? (
             <img
               src={photoUrl}
-              alt="Photo de profil"
-              className="w-9 h-9 rounded-full object-cover border-2 border-white"
+              alt="Profil"
+              className="w-8 h-8 rounded-full object-cover border-2 border-white"
             />
           ) : (
-            <UserCircle size={28} />
+            <UserCircle size={24} />
           )}
-          <span>
-            {localUser.prenom} {localUser.nom}
-          </span>
+          <span>{localUser.prenom} {localUser.nom}</span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Ouvrir le menu"
-          className="p-1 hover:bg-primary-dark rounded-md transition"
+          className="p-1 hover:bg-primary/80 rounded-md transition"
         >
-          <Menu size={28} />
+          <Menu size={24} />
         </button>
       </header>
 
       {/* Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? "block" : "hidden"
-        } md:flex md:flex-col md:w-72 w-full bg-primary text-white p-6 md:h-screen h-auto z-30 shadow-lg`}
+        className={`${sidebarOpen ? "block" : "hidden"} md:flex md:flex-col md:w-64 w-full bg-primary text-white p-4 md:h-screen z-30 shadow-lg`}
       >
-        <div className="flex flex-col items-center mb-10">
+        <div className="flex flex-col items-center mb-8 pt-4">
           {photoUrl ? (
             <img
               src={photoUrl}
               alt="Profil"
-              className="w-20 h-20 rounded-full object-cover border-2 border-white mb-3"
+              className="w-20 h-20 rounded-full object-cover border-4 border-white mb-3"
             />
           ) : (
-            <UserCircle className="w-20 h-20 text-white mb-3" />
+            <UserCircle className="w-20 h-20 text-white mb-3" strokeWidth={1.5} />
           )}
-          <h1 className="text-2xl font-heading font-bold text-center whitespace-normal">
+          <h1 className="text-xl font-heading font-bold text-center text-white">
             {localUser.prenom} {localUser.nom}
           </h1>
+          <p className="text-white/80 text-sm mt-1">Élève</p>
         </div>
 
-        <nav className="flex flex-col space-y-4 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-primary-light scrollbar-track-primary-dark">
+        <nav className="flex flex-col space-y-2 flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-transparent">
           {[
-            { label: "Accueil", icon: <Cpu size={20} />, value: "accueil" },
+            { label: "Accueil", icon: <Home size={20} />, value: "accueil" },
             { label: "Simulations", icon: <Cpu size={20} />, value: "simulations" },
-            {
-              label: "Visualisations",
-              icon: <MonitorPlay size={20} />,
-              value: "visualisations",
-            },
+            { label: "Visualisations", icon: <MonitorPlay size={20} />, value: "visualisations" },
             { label: "Mes TPs", icon: <BookOpenCheck size={20} />, value: "tps" },
             { label: "Mon profil", icon: <UserCircle size={20} />, value: "profil" },
           ].map((item) => (
@@ -187,35 +132,53 @@ const DashboardEleve = ({ user, onLogout }: DashboardEleveProps) => {
                 setCurrentSection(item.value as Section);
                 setSidebarOpen(false);
               }}
-              className={`flex items-center gap-4 px-6 py-3 rounded-3xl transition text-base font-semibold select-none
-                ${
-                  currentSection === item.value
-                    ? "bg-light text-primary shadow-md"
-                    : "hover:bg-primary-dark/80"
-                }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${
+                currentSection === item.value
+                  ? "bg-white text-primary shadow-md"
+                  : "text-white/90 hover:bg-white/10 hover:text-white"
+              }`}
             >
-              {item.icon}
+              <span className={`${currentSection === item.value ? "text-primary" : "text-white/90"}`}>
+                {item.icon}
+              </span>
               <span className="flex-grow text-left">{item.label}</span>
             </button>
           ))}
         </nav>
 
         <button
-          onClick={handleLogout}
-          className="flex items-center gap-4 px-6 py-3 mt-8 md:mt-auto bg-red-600 hover:bg-red-700 text-white font-semibold rounded-3xl shadow-md transition select-none"
+          onClick={() => setShowLogoutConfirm(true)}
+          className="flex items-center justify-center gap-2 px-4 py-3 mt-4 md:mt-auto bg-danger hover:bg-dangerHover text-white font-medium rounded-xl shadow transition w-full"
         >
-          <LogOut size={20} /> Déconnexion
+          <LogOut size={20} />
+          <span>Déconnexion</span>
         </button>
       </aside>
 
-      {/* Contenu principal */}
-      <main className="flex-1 p-6 bg-white overflow-y-auto">
+      {/* Main content */}
+      <main className="flex-1 p-6 md:p-8 overflow-y-auto bg-white">
         {isLoadingUser ? (
-          <p className="text-gray-600">Chargement du profil...</p>
+          <div className="flex justify-center items-center h-full">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
         ) : (
-          renderContent()
+          <div className="max-w-7xl mx-auto">
+            {renderContent()}
+          </div>
         )}
       </main>
+      
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        title="Confirmer la déconnexion"
+        message="Voulez-vous vraiment vous déconnecter ?"
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await handleLogout();
+        }}
+        confirmLabel="Se déconnecter"
+      />
     </div>
   );
 };

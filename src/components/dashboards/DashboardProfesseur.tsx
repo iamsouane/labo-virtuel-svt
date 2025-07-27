@@ -26,6 +26,7 @@ import ResultatsEleves from "../users/ResultatsEleves";
 import ProfilEditor from "../users/ProfilEditor";
 import AccueilProfesseur from "./AccueilProfesseur";
 import { useFullUserProfile } from "../../hooks/useFullUserProfile";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 interface DashboardProfesseurProps {
   user: Profil;
@@ -49,6 +50,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [classes, setClasses] = useState<any[]>([]);
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Charger les classes
   useEffect(() => {
@@ -59,7 +61,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
           .select("*")
           .eq("created_by", user.id)
           .order("created_at", { ascending: false });
-        
+
         if (!error && data) {
           setClasses(data);
         }
@@ -88,12 +90,12 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
           <h3 className="text-xl font-heading font-semibold text-primary mb-4">
             Création de classe
           </h3>
-          <CreateClasseForm 
-            user={localUser} 
+          <CreateClasseForm
+            user={localUser}
             onCreated={() => {
               setCurrentSection("classes");
               setCurrentPage(0);
-            }} 
+            }}
           />
         </div>
 
@@ -150,13 +152,13 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         return <AccueilProfesseur />;
       case "simulations":
         return (
-          <section className="space-y-6">
+          <section className="space-y-1">
             <Simulations user={localUser} />
           </section>
         );
       case "visualisations":
         return (
-          <section className="space-y-6">
+          <section className="space-y-1">
             <Visualisations />
           </section>
         );
@@ -164,22 +166,19 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         return renderClassesView();
       case "demandes":
         return (
-          <section className="space-y-6">
-            <h2 className="text-2xl font-heading font-bold text-dark mb-4">Demandes de simulation</h2>
+          <section className="space-y-1">
             <EtatDemandesSimulation user={localUser} />
           </section>
         );
       case "tps":
         return (
-          <section className="space-y-6">
-            <h2 className="text-2xl font-heading font-bold text-dark mb-4">Création de TP</h2>
+          <section className="space-y-1">
             <CreateTPForm user={localUser} />
           </section>
         );
       case "resultats":
         return (
-          <section className="space-y-6">
-            <h2 className="text-2xl font-heading font-bold text-dark mb-4">Résultats des élèves</h2>
+          <section className="space-y-1">
             <ResultatsEleves professeur={localUser} />
           </section>
         );
@@ -192,6 +191,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
       default:
         return null;
     }
+
   };
 
   return (
@@ -257,11 +257,10 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
                 setSidebarOpen(false);
                 setCurrentPage(0);
               }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${
-                currentSection === item.value
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${currentSection === item.value
                   ? "bg-white text-primary shadow-md"
                   : "text-white/90 hover:bg-white/10 hover:text-white"
-              }`}
+                }`}
             >
               <span className={`${currentSection === item.value ? "text-primary" : "text-white/90"}`}>
                 {item.icon}
@@ -272,7 +271,7 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
         </nav>
 
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutConfirm(true)}
           className="flex items-center justify-center gap-2 px-4 py-3 mt-4 md:mt-auto bg-danger hover:bg-dangerHover text-white font-medium rounded-xl shadow transition w-full"
         >
           <LogOut size={20} />
@@ -298,6 +297,17 @@ const DashboardProfesseur = ({ user, onLogout }: DashboardProfesseurProps) => {
           </div>
         )}
       </main>
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        title="Confirmer la déconnexion"
+        message="Voulez-vous vraiment vous déconnecter ?"
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await handleLogout();
+        }}
+        confirmLabel="Se déconnecter"
+      />
     </div>
   );
 };

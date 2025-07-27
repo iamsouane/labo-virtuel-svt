@@ -7,6 +7,8 @@ interface ConfirmDialogProps {
   isOpen: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;  
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -15,6 +17,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   onCancel,
   onConfirm,
+  confirmLabel = "Supprimer", // valeur par défaut
+  cancelLabel = "Annuler",
 }) => {
   if (!isOpen) return null;
 
@@ -28,13 +32,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium rounded-xl bg-danger text-white hover:bg-dangerHover transition"
           >
-            Annuler
+            {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 text-sm font-medium rounded-xl bg-danger text-white hover:bg-dangerHover transition"
           >
-            Supprimer
+            {confirmLabel}
           </button>
         </div>
       </div>

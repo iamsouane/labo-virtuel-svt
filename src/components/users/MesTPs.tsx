@@ -1,7 +1,7 @@
 // src/components/users/MesTPs.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { BookOpen, Timer, FileCheck } from "lucide-react";
+import { BookOpen, Timer, FileCheck, Loader2 } from "lucide-react";
 
 interface ResultWithQuizTitle {
   id: string;
@@ -29,24 +29,20 @@ export default function MesTPs() {
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData.user) {
-        setLoading(false);
-        return;
-      }
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
 
-      const { data, error } = await supabase.rpc("get_resultats_quiz_eleve", {
-        eleve_id: userData.user.id,
-      });
+        const { data } = await supabase.rpc("get_resultats_quiz_eleve", {
+          eleve_id: userData.user.id,
+        });
 
-      if (error) {
+        setResults(data || []);
+      } catch (error) {
         console.error("Erreur lors du chargement des résultats:", error);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setResults(data || []);
-      setLoading(false);
     };
 
     fetchResults();
@@ -54,16 +50,22 @@ export default function MesTPs() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-secondary text-lg font-semibold animate-pulse">
-        Chargement des résultats...
+      <div className="flex justify-center items-center h-64">
+        <div className="flex items-center gap-2 text-secondary">
+          <Loader2 className="animate-spin h-5 w-5" />
+          <span className="font-medium">Chargement des résultats...</span>
+        </div>
       </div>
     );
   }
 
   if (results.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-400 font-medium">
-        Aucun TP terminé pour le moment.
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center text-gray-500">
+          <BookOpen className="mx-auto h-10 w-10 mb-3 text-gray-400" />
+          <p className="font-medium">Aucun TP terminé pour le moment</p>
+        </div>
       </div>
     );
   }
@@ -79,17 +81,20 @@ export default function MesTPs() {
   );
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-heading font-bold text-primary mb-8 flex items-center gap-3">
-        <FileCheck className="w-7 h-7 text-primary" />
-        Mes Résultats aux TPs (Quiz)
-      </h2>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-primary mb-2 flex items-center gap-3">
+          <FileCheck className="w-6 h-6" />
+          Mes résultats aux TPs
+        </h1>
+        <p className="text-dark/80">Historique de vos travaux pratiques</p>
+      </div>
 
       {Object.entries(resultatsParClasse).map(([classe, resultatsClasse]) => (
-        <section key={classe} className="mb-12">
-          <h3 className="text-2xl font-semibold text-primary mb-6">
+        <div key={classe} className="mb-12">
+          <h2 className="text-xl font-semibold text-dark mb-6 pb-2 border-b border-gray-200">
             Classe : {classe}
-          </h3>
+          </h2>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {resultatsClasse.map((res) => {
@@ -105,42 +110,64 @@ export default function MesTPs() {
                 totalQuestions > 0 ? Math.round(timeSpent / totalQuestions) : 0;
 
               return (
-                <article
+                <div
                   key={res.id}
-                  className="border border-primary/40 rounded-2xl p-6 bg-light shadow-md hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
                 >
-                  <h4 className="font-semibold text-xl text-primary mb-4">
+                  <h3 className="font-medium text-primary text-lg mb-3">
                     {res.quiz_title}
-                  </h4>
+                  </h3>
 
-                  <p className="text-sm text-dark flex items-center gap-2 mb-1">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    Note :{" "}
-                    <strong className="text-green-700">{noteSur20.toFixed(1)}/20</strong>
-                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-dark/70">Note</p>
+                        <p className="font-medium text-dark">
+                          {noteSur20.toFixed(1)}/20 ({percentage}%)
+                        </p>
+                      </div>
+                    </div>
 
-                  <p className="text-sm text-dark flex items-center gap-2 mb-1">
-                    <Timer className="w-5 h-5 text-primary" />
-                    Temps passé : {minutes}m {seconds}s
-                  </p>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Timer className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-dark/70">Temps passé</p>
+                        <p className="font-medium text-dark">
+                          {minutes}m {seconds}s
+                        </p>
+                      </div>
+                    </div>
 
-                  <p className="text-sm text-dark flex items-center gap-2 mb-2">
-                    <Timer className="w-5 h-5 text-primary" />
-                    Temps moyen / question : {averageTimePerQuestion}s
-                  </p>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Timer className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-dark/70">Temps moyen/question</p>
+                        <p className="font-medium text-dark">
+                          {averageTimePerQuestion}s
+                        </p>
+                      </div>
+                    </div>
 
-                  <p className="text-sm text-dark/70">
-                    Terminé le :{" "}
-                    {new Date(res.completed_at).toLocaleString("fr-FR", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
-                  </p>
-                </article>
+                    <div className="pt-2 border-t border-gray-100 text-xs text-dark/50">
+                      Terminé le{" "}
+                      {new Date(res.completed_at).toLocaleString("fr-FR", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
-        </section>
+        </div>
       ))}
     </div>
   );
