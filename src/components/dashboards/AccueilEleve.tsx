@@ -1,11 +1,12 @@
 // src/components/users/AccueilEleve.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Loader2, BookOpen, BarChart2, FileText, Users, Activity, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { BookOpen, BarChart2, FileText, Users, Activity, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { useEleveStats } from "../../hooks/useEleveStats";
 import StatsChartQuiz from "../users/StatsChartQuiz";
 import UpcomingSimulations from "../admin/UpcomingSimulations";
 import type { ActivityLogWithUser } from "../../types";
+import { PrimaryLoader } from "../ui/Loader";
 
 export const AccueilEleve = () => {
   const [eleveId, setEleveId] = useState<string | null>(null);
@@ -21,11 +22,13 @@ export const AccueilEleve = () => {
 
   if (loading || !eleveId) {
     return (
-      <div className="flex justify-center items-center h-64 text-secondary">
-        <Loader2 className="animate-spin mr-2 h-6 w-6" />
-        <span className="font-medium">Chargement du tableau de bord...</span>
-      </div>
-    );
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <PrimaryLoader size="lg" />
+          <span className="text-dark font-medium text-lg">
+            Chargement du tableau de bord...
+          </span>
+        </div>
+      );
   }
 
   return (

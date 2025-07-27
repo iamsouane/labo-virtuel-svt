@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil, ResultatEleve } from "../../types";
-import { BookOpen, CalendarCheck, Timer, Download, Loader2, Award } from "lucide-react";
+import { BookOpen, CalendarCheck, Timer, Download, Award } from "lucide-react";
+import { PrimaryLoader } from "../ui/Loader";
 
 interface ResultatsElevesProps {
   professeur: Profil;
@@ -108,9 +109,12 @@ export default function ResultatsEleves({ professeur }: ResultatsElevesProps) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        </div>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                  <PrimaryLoader size="lg" />
+                  <span className="text-dark font-medium text-lg">
+                    Chargement des demandes...
+                  </span>
+                </div>
       ) : error ? (
         <div className="bg-red-50 border border-red-100 rounded-lg p-4 text-red-700">
           {error}

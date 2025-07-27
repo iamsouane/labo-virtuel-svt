@@ -1,7 +1,7 @@
 // src/components/sections/Simulations.tsx
 import { useEffect, useState, type JSX } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Rabbit, Zap, Factory, ArrowLeft, Trees, Lock, Loader2 } from "lucide-react";
+import { Rabbit, Zap, Factory, ArrowLeft, Trees, Lock } from "lucide-react";
 import type { Profil } from "../../types";
 import SimulationSelectionNaturelle from "../views/SimulationSelectionNaturelle";
 import SimulationPhotosynthese from "../views/SimulationPhotosynthese";
@@ -11,6 +11,7 @@ import { notifyError, notifySuccess } from "../../lib/notifications";
 import "react-toastify/dist/ReactToastify.css";
 import { loadSimulationsForUser } from "../../lib/loadSimulations";
 import { reloadAuthorizedSimulationsForUser } from "../../lib/reloadAuthorizedSimulations";
+import { PrimaryLoader } from "../ui/Loader";
 
 interface SimulationsProps {
   user: Profil | null;
@@ -113,11 +114,13 @@ const Simulations = ({ user }: SimulationsProps) => {
   const renderSimulationList = () => {
     if (isLoadingSimulations) {
       return (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 text-secondary animate-spin mb-4" />
-          <p className="text-dark/80">Chargement des simulations...</p>
-        </div>
-      );
+                  <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                    <PrimaryLoader size="lg" />
+                    <span className="text-dark font-medium text-lg">
+                      Chargement des simulations...
+                    </span>
+                  </div>
+                );
     }
 
     if (simulations.length === 0) {

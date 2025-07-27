@@ -1,3 +1,4 @@
+//src/App
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import type { Profil } from "./types";
@@ -7,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import ChangePassword from "./pages/ChangePassword";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { PrimaryLoader } from "../src/components/ui/Loader";
 
 const App = () => {
   const [user, setUser] = useState<Profil | null>(null);
@@ -51,8 +53,21 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-xl font-semibold text-secondary">
-        Chargement...
+      <div className="min-h-screen flex flex-col items-center justify-center bg-light p-6">
+        <div className="flex flex-col items-center max-w-md text-center space-y-6">
+          <div className="w-24 h-24 flex items-center justify-center">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <PrimaryLoader size="lg" className="mb-2" /> {/* Usage simplifié */}
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold text-dark">Chargement en cours</h2>
+            <p className="text-gray-600 text-sm">Initialisation...</p>
+          </div>
+        </div>
       </div>
     );
   }

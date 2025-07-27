@@ -5,8 +5,9 @@ import { fetchClassesAndEleves } from "../../lib/fetchClassesAndEleves";
 import type { ClasseWithEleves, Eleve } from "../../lib/fetchClassesAndEleves";
 import { usePhotoUrl } from "../../lib/usePhotoUrl";
 import { supprimerEleveDeClasse } from "../../lib/supprimerEleve";
-import { Loader2, User } from "lucide-react";
+import { User } from "lucide-react";
 import ModalEleve from "./ModalEleve";
+import { PrimaryLoader } from "../ui/Loader";
 
 interface MesClassesProps {
   user: Profil;
@@ -26,7 +27,7 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
       setLoading(true);
       try {
         await fetchClassesAndEleves(
-          user.id, 
+          user.id,
           (data) => {
             if (singleClasseId) {
               // Filtrer pour n'afficher que la classe spécifiée
@@ -35,7 +36,7 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
             } else {
               setClasses(data);
             }
-          }, 
+          },
           setLoading
         );
       } catch (error) {
@@ -51,7 +52,7 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
 
   const handleDeleteEleve = async () => {
     if (!selectedEleve || !selectedClasseId) return;
-    
+
     setIsDeleting(true);
     try {
       await supprimerEleveDeClasse(
@@ -69,9 +70,11 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
-        <p className="text-dark/80 font-medium">Chargement des classes...</p>
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <PrimaryLoader size="lg" />
+        <span className="text-dark font-medium text-lg">
+          Chargement des classes...
+        </span>
       </div>
     );
   }
@@ -80,8 +83,8 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
     return (
       <div className="bg-white rounded-xl p-6 text-center shadow-sm">
         <p className="text-dark/70">
-          {singleClasseId 
-            ? "Aucun élève dans cette classe" 
+          {singleClasseId
+            ? "Aucun élève dans cette classe"
             : "Vous n'avez créé aucune classe pour le moment"}
         </p>
       </div>
@@ -95,20 +98,19 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
           Mes classes
         </h2>
       )}
-      
+
       <div className={`grid gap-4 ${singleClasseId ? '' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
         {classes.map((classe) => (
           <div
             key={classe.id}
-            className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${
-              singleClasseId ? '' : 'hover:shadow-md'
-            } transition-all`}
+            className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${singleClasseId ? '' : 'hover:shadow-md'
+              } transition-all`}
           >
             <div className="p-4">
               <h3 className="text-md font-heading font-semibold text-primary mb-2">
                 {classe.code_classe}
               </h3>
-              
+
               {classe.eleves.length === 0 ? (
                 <div className="flex items-center gap-2 text-dark/60 text-sm p-2">
                   <User className="w-4 h-4" />
@@ -145,19 +147,19 @@ const MesClasses = ({ user, singleClasseId }: MesClassesProps) => {
 
       {/* Modal d'information élève */}
       {selectedEleve && (
-  <ModalEleve
-    eleve={selectedEleve}
-    photoUrl={photoUrl}
-    isDeleting={isDeleting}
-    onClose={() => {
-      setSelectedEleve(null);
-      setSelectedClasseId(null);
-    }}
-    onDelete={handleDeleteEleve}
-    selectedClasseId={selectedClasseId}
-    classes={classes}
-  />
-)}
+        <ModalEleve
+          eleve={selectedEleve}
+          photoUrl={photoUrl}
+          isDeleting={isDeleting}
+          onClose={() => {
+            setSelectedEleve(null);
+            setSelectedClasseId(null);
+          }}
+          onDelete={handleDeleteEleve}
+          selectedClasseId={selectedClasseId}
+          classes={classes}
+        />
+      )}
     </div>
   );
 };

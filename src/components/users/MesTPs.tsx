@@ -1,7 +1,8 @@
 // src/components/users/MesTPs.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { BookOpen, Timer, FileCheck, Loader2 } from "lucide-react";
+import { BookOpen, Timer, FileCheck } from "lucide-react";
+import { PrimaryLoader } from "../ui/Loader";
 
 interface ResultWithQuizTitle {
   id: string;
@@ -50,13 +51,13 @@ export default function MesTPs() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="flex items-center gap-2 text-secondary">
-          <Loader2 className="animate-spin h-5 w-5" />
-          <span className="font-medium">Chargement des résultats...</span>
-        </div>
-      </div>
-    );
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <PrimaryLoader size="lg" />
+            <span className="text-dark font-medium text-lg">
+              Chargement des resultats...
+            </span>
+          </div>
+        );
   }
 
   if (results.length === 0) {

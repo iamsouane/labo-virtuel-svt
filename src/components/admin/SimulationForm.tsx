@@ -6,6 +6,7 @@ import { notifySuccess, notifyError } from "../../lib/notifications";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { Trash, Loader2 } from "lucide-react";
+import { PrimaryLoader } from "../ui/Loader";
 
 interface SimulationFormProps {
   onSimulationAdded?: (simulation: Simulation) => void;
@@ -126,7 +127,7 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
         <div className="p-6 border-b border-gray-100">
           <h3 className="text-xl font-heading font-bold text-primary">Nouvelle simulation</h3>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-dark mb-1">Type de simulation</label>
@@ -176,16 +177,17 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2.5 rounded-lg font-medium text-white transition-colors ${
-              loading ? 'bg-primary/60' : 'bg-primary hover:bg-green-700'
-            }`}
+            className={`w-full py-2.5 rounded-lg font-medium text-white transition-colors ${loading ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 className="animate-spin h-4 w-4" />
+                <PrimaryLoader size="sm" />
                 Enregistrement...
               </span>
-            ) : 'Ajouter la simulation'}
+            ) : (
+              'Ajouter la simulation'
+            )}
           </button>
         </form>
       </div>
@@ -195,7 +197,7 @@ const SimulationForm = ({ onSimulationAdded, createdBy }: SimulationFormProps) =
         <div className="p-6 border-b border-gray-100">
           <h3 className="text-xl font-heading font-bold text-primary">Mes simulations</h3>
         </div>
-        
+
         <div className="p-6">
           {fetching ? (
             <div className="flex justify-center py-8">

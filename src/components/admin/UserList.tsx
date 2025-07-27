@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import type { Profil } from "../../types";
 import { notifyError, notifySuccess } from "../../lib/notifications";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import { PrimaryLoader } from "../ui/Loader";
 
 const UserList = () => {
   const [users, setUsers] = useState<Profil[]>([]);
@@ -119,13 +120,13 @@ const UserList = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="flex items-center gap-2 text-secondary">
-          <Loader2 className="animate-spin h-5 w-5" />
-          <span className="font-medium">Chargement des utilisateurs...</span>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <PrimaryLoader size="lg" />
+          <span className="text-dark font-medium text-lg">
+            Chargement des utilisateurs...
+          </span>
         </div>
-      </div>
-    );
+      );
   }
 
   return (

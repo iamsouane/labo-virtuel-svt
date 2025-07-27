@@ -1,10 +1,11 @@
 // src/components/users/ListeDemandesAcces.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { Loader2, MessagesSquare, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessagesSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { notifyError, notifySuccess, notifyInfo } from "../../lib/notifications";
 import { useActivityLogger } from "../../hooks/useActivityLogger";
 import type { Profil } from "../../types";
+import { PrimaryLoader } from "../ui/Loader";
 
 interface Demande {
   id: string;
@@ -147,11 +148,11 @@ const ListeDemandesAcces = ({ user }: { user: Profil }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="flex items-center gap-2 text-secondary">
-          <Loader2 className="animate-spin h-5 w-5" />
-          <span className="font-medium">Chargement des demandes...</span>
-        </div>
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <PrimaryLoader size="lg" />
+        <span className="text-dark font-medium text-lg">
+          Chargement des demandes...
+        </span>
       </div>
     );
   }

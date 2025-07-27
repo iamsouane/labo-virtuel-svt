@@ -2,8 +2,9 @@
 import type { ActivityLogWithUser } from "../../types";
 import StatsChartEleves from "../users/StatsChartEleves";
 import UpcomingSimulations from "../admin/UpcomingSimulations";
-import { Loader2, Users, Folder, FileText, BarChart2, Activity, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { Users, Folder, FileText, BarChart2, Activity, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { useProfesseurDashboardData } from "../../hooks/useProfesseurDashboardData";
+import { PrimaryLoader } from "../ui/Loader";
 
 export const AccueilProfesseur = () => {
   const {
@@ -15,11 +16,13 @@ export const AccueilProfesseur = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 text-secondary">
-        <Loader2 className="animate-spin mr-2 h-6 w-6" />
-        <span className="font-medium">Chargement du tableau de bord...</span>
-      </div>
-    );
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <PrimaryLoader size="lg" />
+          <span className="text-dark font-medium text-lg">
+            Chargement du tableau de bord...
+          </span>
+        </div>
+      );
   }
 
   return (
